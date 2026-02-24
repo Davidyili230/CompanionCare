@@ -1,5 +1,8 @@
+
+import PetAdoptionHomePage from "./petAdoption/PetAdoptionHomePage"
+
 export default function App(){
   return (
-    <div>This is frontend</div>
+    <PetAdoptionHomePage/>
   )
 }
