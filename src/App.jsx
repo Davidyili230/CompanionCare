@@ -1,5 +1,9 @@
-export default function App(){
+import HistoryTable from "./HistoryTable";
+
+export default function App() {
   return (
-    <div>This is frontend</div>
-  )
+    <div>
+      <HistoryTable />
+    </div>
+  );
 }
