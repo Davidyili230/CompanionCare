@@ -1,0 +1,94 @@
+
+/* ========== Search Bar ========== */
+.searchContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.searchInput {
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    padding: 5px 10px;
+    border: 1px solid black;
+}
+
+.searchInput input{
+    border: none;
+    font-size: 16px;
+    padding: 6px;
+    outline: none;
+    width: 450px;
+}
+
+.searchInput img {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* ========== Filter Button ========== */
+.filterButton {
+    display: flex;
+    border: none;
+    border-radius: 15px;
+    background-color: #FFB6B6;
+    padding: 5px 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.filterButton:hover {
+    background-color: #d28e8e;
+}
+
+/* Lost Pet HomePage Container */
+
+.adoptPetContainer {
+   background: #FFF9F0;
+   height: 100vh;
+}
+
+/* ========== Title ========== */
+
+.title {
+    text-align: center;
+}
+
+.titleContainer {
+    display: inline-block;      
+    background-color: lightgray; 
+    padding: 10px 30px;      
+    border-radius: 10px;          
+    font-weight: bold;
+}
+
+/* ========== Report Button ========== */
+
+.addPetButton {
+    display: flex;
+    color: white;
+    background-color: #FC1818;
+    border-radius: 15px;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+.addPetButton:hover {
+    background-color: #c71515;
+}
+
+/* ========== Card Container ========== */
+
+.cardContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
