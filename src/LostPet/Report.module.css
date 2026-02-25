@@ -1,0 +1,111 @@
+
+/* Pet Info and User Info */
+.petInfoContainer,
+.userInfoContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, 
+textarea {
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    border: 1px solid black;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ========== ImageUpload ========== */
+
+.imgContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 2px dashed rgb(151, 145, 145);
+    border-radius: 12px;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.imgContainer:hover {
+    border-color: black;
+}
+
+.img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+/* ========== LostPetReport ========== */
+
+.pageContainer {
+    margin: 30px;
+}
+
+.title {
+    text-align: center;
+}
+
+.subtext {
+    text-align: center;
+    font-family:'Lucida Sans', Geneva, sans-serif;
+    margin-bottom: 50px;
+}
+
+.reportContent {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    border-radius: 15px;
+    box-shadow: 2px 5px 10px black;
+    padding: 10px;
+    background: #f9f7f5;
+    gap: 50px;
+}
+
+.leftContent {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    flex: 1;
+}
+
+.rightContent {
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+    height: 500px;
+}
+
+/* ========= submit butotn ========= */
+.reportButton {
+    display: block;
+    margin: auto;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    background-color: #E63737;
+    padding: 15px 30px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    background-color: #b32c2c;
+    transform: scale(1.05);
+}

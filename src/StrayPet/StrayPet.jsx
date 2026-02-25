@@ -1,5 +1,4 @@
 
-
 import Card from "../components/card"
 import styles from "./StrayPet.module.css"
 
@@ -42,7 +41,7 @@ export default function StrayPet() {
             </h2>
 
             <SearchBar/>
-
+            
             <button className={styles.reportButton}>
                 Create Report
             </button>
