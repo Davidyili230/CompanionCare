@@ -5,6 +5,7 @@ import StrayPet from "./StrayPet/StrayPet"
 import AdoptPet from "./AdoptPet/AdoptPet"
 
 import LostPetReport from "./LostPet/Report"
+import PetDetails from "./LostPet/PetDetails"
 
 
 export default function App(){
@@ -12,6 +13,7 @@ export default function App(){
     // <LostPet/>
     // <StrayPet/>
     // <AdoptPet/>
-    <LostPetReport/>
+    // <LostPetReport/>
+    <PetDetails/>
   )
 }

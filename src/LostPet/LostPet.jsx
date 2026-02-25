@@ -1,6 +1,6 @@
 
 import Card from "../components/card"
-import styles from "./LostPet.module.css"
+import styles from "./modules/LostPet.module.css"
 
 import { useState } from "react"
 

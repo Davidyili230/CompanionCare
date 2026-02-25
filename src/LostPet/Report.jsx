@@ -1,5 +1,5 @@
 
-import styles from "./Report.module.css"
+import styles from "./modules/Report.module.css"
 
 function PetInformation() {
     return (
