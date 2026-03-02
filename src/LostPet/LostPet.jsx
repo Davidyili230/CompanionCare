@@ -40,6 +40,11 @@ export default function LostPet() {
         navigate("/LostPetReport");
     }
 
+    // to be replaced with actual data from database
+    const currentLostPets = [
+        "golden-retriever", "cat", "golden-retriever", "golden-retriever",
+        "golden-retriever", "golden-retriever", "cat", "cat"
+    ]
 
     return (
         <div className={styles.lostPetContainer}>
@@ -50,27 +55,24 @@ export default function LostPet() {
 
             <SearchBar/>
 
-                <button 
-                    className={styles.reportButton}
-                    onClick={handleNavigation}
-                >
-                    Create Report
-                </button>
+            <button 
+                className={styles.reportButton}
+                onClick={handleNavigation}
+            >
+                Create Report
+            </button>
             
             {/* Filler image cards. Replace when database is set up */}
             <div className={styles.cardContainer}>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
+                {
+                    currentLostPets.map((missingPet, idx) => (
+                        <Card
+                            key={idx}
+                            img={`./animalImgs/${missingPet}.webp`}
+                            alt={`${missingPet} image`}
+                        />
+                    ))
+                }
             </div>
         </div>
     )

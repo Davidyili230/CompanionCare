@@ -62,6 +62,7 @@ export default function PetDetails() {
             </h2>
 
             <div className={styles.detailContainer}>
+                {/* It is hard coded to show cat image. Update when database is available */}
                 <div className={styles.imgContainer}>
                     <img src="./animalImgs/cat.webp" alt="animal image"/>
                 </div>

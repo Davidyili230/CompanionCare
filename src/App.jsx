@@ -19,6 +19,7 @@ export default function App(){
         <Route path="/AdoptPet" element={<AdoptPet/>} />
         <Route path="/LostPet" element={<LostPet/>} /> 
         <Route path="/LostPetReport" element={<LostPetReport/>} />
+        <Route path="/PetDetails" element={<PetDetails/>} />
       </Routes>
     </BrowserRouter>
   )

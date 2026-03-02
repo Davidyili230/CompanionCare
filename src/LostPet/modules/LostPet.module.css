@@ -6,14 +6,20 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
 .searchInput {
     display: flex;
     align-items: center;
-    border-radius: 10px;
+    border-radius: 25px;
     padding: 5px 10px;
     border: 1px solid black;
+    background-color: white;
+}
+
+.searchInput:hover {
+    box-shadow: 0 2px 6px rgb(113, 111, 111);
 }
 
 .searchInput input{
@@ -28,17 +34,18 @@
     width: 25px;
     height: 25px;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 /* ========== Filter Button ========== */
 .filterButton {
-    display: flex;
     border: none;
-    border-radius: 15px;
+    border-radius: 25px;
     background-color: #FFB6B6;
-    padding: 5px 30px;
+    padding: 10px 30px;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .filterButton:hover {
@@ -49,18 +56,20 @@
 
 .lostPetContainer {
    background: #FFF9F0;
-   height: 100vh;
+   min-height: 100vh;
 }
 
 /* ========== Title ========== */
 
 .title {
     text-align: center;
+    font-size: 2rem;
+    margin-bottom: 30px;
 }
 
 .titleContainer {
     display: inline-block;      
-    background-color: lightgray; 
+    background-color: rgb(238, 235, 235); 
     padding: 10px 30px;      
     border-radius: 10px;          
     font-weight: bold;
@@ -69,15 +78,15 @@
 /* ========== Report Button ========== */
 
 .reportButton {
-    display: flex;
     color: white;
     background-color: #FC1818;
-    border-radius: 15px;
+    border-radius: 25px;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-weight: bold;
     cursor: pointer;
     margin-left: 20px;
+    transition: all 0.3s ease;
 }
 
 .reportButton:hover {
@@ -93,3 +102,5 @@
     gap: 20px;
     padding: 20px;
 }
+
+
