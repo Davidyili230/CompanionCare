@@ -1,78 +1,56 @@
-import React from "react";
-
 export default function RecommendedDosagePanel({ pet = null, dosageItems = [] }) {
   const hasPet = !!pet;
   const hasDosageItems = Array.isArray(dosageItems) && dosageItems.length > 0;
 
-  const petSummary = hasPet
-    ? [
-        pet.weight != null ? `${pet.weight}${pet.weightUnit ?? ""}` : null,
-        pet.ageYears != null ? `${pet.ageYears} years` : null,
-        pet.breed || null,
-      ]
-        .filter(Boolean)
-        .join(", ")
-    : "";
-
   return (
-    <section className="dosage-panel">
-      <h3>Recommended Dosage</h3>
+    <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
+      <h3 className="text-[15px] font-bold text-[#1f1f1f]">
+        Recommended Dosage
+      </h3>
 
       {!hasPet ? (
-        <div className="empty-panel-message">
-          Select a pet to view recommended dosage guidance.
-        </div>
-      ) : (
-        <>
-          <p className="dosage-subtitle">
-            For {pet.name}
-            {petSummary ? ` (${petSummary})` : ""}
+        <div className="mt-4 rounded-2xl border border-[#f1c9b8] bg-[#fffdfb] p-4">
+          <p className="text-[#2b2b2b]">
+            Select a pet to view recommended dosage guidance.
           </p>
 
-          <div className="dosage-list">
-            {!hasDosageItems ? (
-              <div className="empty-panel-message">
-                No dosage data yet. (Mockup / pending formula implementation)
-              </div>
-            ) : (
-              dosageItems.map((item, index) => {
-                const key =
-                  item.id ??
-                  item.nutrient ??
-                  item.label ??
-                  `${item.value ?? "dose"}-${index}`;
-
-                return (
-                  <div key={key} className="dosage-item">
-                    <div className="dosage-item-title">
-                      {item.nutrient || item.label || "Nutrient"}
-                    </div>
-
-                    <div className="dosage-item-value">
-                      {item.value ?? "-"}
-                    </div>
-
-                    {item.description ? (
-                      <div className="dosage-item-desc">{item.description}</div>
-                    ) : null}
-
-                    {item.maxValue ? (
-                      <div className="dosage-item-desc">
-                        Max: {item.maxValue}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
-            )}
+          <div className="mt-4 rounded-xl border border-[#f1c9b8] bg-white px-3 py-3 text-sm text-[#d87c5a]">
+            These are general guidelines based on veterinary recommendations.
+            Consult your vet for personalized advice.
           </div>
-        </>
-      )}
+        </div>
+      ) : (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-[#5f5a55]">
+            For {pet.name}
+          </p>
 
-      <div className="dosage-note">
-        These are general guidelines based on veterinary recommendations.
-        Consult your vet for personalized advice.
-      </div>
+          {!hasDosageItems ? (
+            <div className="rounded-2xl border border-dashed border-[#d8d1c7] bg-[#fffdfb] p-4 text-sm text-[#6f675d]">
+              No dosage data yet.
+            </div>
+          ) : (
+            dosageItems.map((item, index) => (
+              <div
+                key={item.id ?? item.nutrient ?? index}
+                className="rounded-2xl border border-[#f1c9b8] bg-[#fffdfb] p-4"
+              >
+                <div className="text-sm font-semibold text-[#1f1f1f]">
+                  {item.nutrient}
+                </div>
+                <div className="mt-1 text-lg font-bold text-[#1f1f1f]">
+                  {item.value}
+                </div>
+                {item.description ? (
+                  <div className="mt-2 text-sm text-[#6f675d]">
+                    {item.description}
+                  </div>
+                ) : null}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </section>
   );
 }
