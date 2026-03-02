@@ -8,10 +8,15 @@
     border-radius: 20px;
     object-fit: fill;
     transition: transform 0.5s ease-in-out;
-    width: 420px;
-    height: 500px;
+    width: 455px;
+    height: 550px;
     overflow: hidden;
     box-shadow: 0 3px 5px black;
+    transition: transform 0.5s ease;
+}
+
+.imageContainer:hover {
+    transform: scale(1.02);
 }
 
 .carouselImage {
@@ -24,14 +29,14 @@
 
 .buttonContainer {
     display: flex;
-    flex-direction: row;
+    justify-content: space-around;
     align-items: center;
-    justify-content: space-evenly;
     padding: 25px 30px;
     border-radius: 12px;
-    background-color: #B9F497;
-    gap: 20px;
-    width: 380px;
+    background: white;
+    gap: 25px;
+    width: 420px;
+    transition: all 0.3s ease;
 }
 
 .buttonContainer:hover {
@@ -39,17 +44,15 @@
     box-shadow: 0 5px 10px rgb(111, 110, 110);
 }
 
-
 .buttonImageContainer {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 15px;
-    background-color:#9ea4a1
+    background: linear-gradient(rgb(178, 243, 178), rgb(138, 241, 138));
 }
-
 
 .buttonImage {
     width: 100%;
@@ -60,28 +63,30 @@
 .textAndButton {
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .textAndButton h2 {
-    margin: 0 0 10px 0;
-    font-size: 1.4rem;
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    text-align: center;
 }
 
 .button {
     border: none;
     border-radius: 25px;
-    background-color: #FD0A0A;
+    /* background-color: #FD0A0A; */
+    background: linear-gradient(rgb(255, 89, 89), red);
     color: white;
     font-weight: bold;
+    font-size: 1rem;
     padding: 10px;
-    width: 200px;
+    width: 220px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .button:hover {
-    background-color: #dd0808;
+    box-shadow: 0px 3px 9px black;
     transform: scale(1.05);
 }
 
@@ -91,8 +96,8 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 60px;
-    padding: 60px 40px;
+    gap: 80px;
+    padding: 80px 60px;
     background: #FFF0F0;
     min-height: 100vh;
 }

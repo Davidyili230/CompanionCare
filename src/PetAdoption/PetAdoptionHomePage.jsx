@@ -63,15 +63,15 @@ export default function PetAdoptionHomePage() {
                 />
 
                 <ReportButtonCard
-                    img="./buttonImgs/strayOutline.png"
-                    title="Found a Stray?"
-                    buttonText="Report Stray Animal"
-                />
-
-                <ReportButtonCard
                     img="./buttonImgs/adoptOutline.png"
                     title="Looking to Adopt?"
                     buttonText="Browse Adoptable Pets"
+                />
+
+                <ReportButtonCard
+                    img="./buttonImgs/strayOutline.png"
+                    title="Found a Stray?"
+                    buttonText="Report Stray Animal"
                 />
             </div>
         </div>
