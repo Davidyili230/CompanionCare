@@ -1,5 +1,32 @@
 import { useState } from "react";
 
+const speciesOptions = ["Dog", "Cat"];
+
+const breedOptionsBySpecies = {
+  Dog: [
+    "Golden Retriever",
+    "Labrador Retriever",
+    "German Shepherd",
+    "Bulldog",
+    "Poodle",
+    "Beagle",
+    "Cavapoo",
+    "Mixed Breed",
+  ],
+  Cat: [
+    "Domestic Shorthair",
+    "Orange Tabby",
+    "Persian",
+    "Maine Coon",
+    "Ragdoll",
+    "Siamese",
+    "British Shorthair",
+    "Mixed Breed",
+  ],
+};
+
+const weightUnitOptions = ["lb", "kg"];
+
 const initialForm = {
   petName: "",
   species: "",
@@ -16,7 +43,21 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => {
+      if (name === "species") {
+        return {
+          ...prev,
+          species: value,
+          breed: "",
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   }
 
   function handleSubmit(e) {
@@ -47,6 +88,12 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
     setForm(initialForm);
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10";
+
+  const disabledSelectClass =
+    "w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10 disabled:cursor-not-allowed disabled:bg-[#f5f1ec]";
+
   const content = (
     <div className="space-y-4">
       <div>
@@ -54,6 +101,7 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-x-3 gap-y-3">
+        {/* Pet name */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Pet name</label>
           <input
@@ -61,32 +109,50 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
             value={form.petName}
             onChange={handleChange}
             placeholder="e.g. Max"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Species */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Species</label>
-          <input
+          <select
             name="species"
             value={form.species}
             onChange={handleChange}
-            placeholder="e.g. Dog"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
-          />
+            className={inputClass}
+          >
+            <option value="">Select species</option>
+            {speciesOptions.map((species) => (
+              <option key={species} value={species}>
+                {species}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Breed */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Breed</label>
-          <input
+          <select
             name="breed"
             value={form.breed}
             onChange={handleChange}
-            placeholder="e.g. Golden Retriever"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
-          />
+            disabled={!form.species}
+            className={disabledSelectClass}
+          >
+            <option value="">
+              {form.species ? "Select breed" : "Select species first"}
+            </option>
+            {(breedOptionsBySpecies[form.species] || []).map((breed) => (
+              <option key={breed} value={breed}>
+                {breed}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Weight */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Weight</label>
           <input
@@ -94,21 +160,28 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
             value={form.weight}
             onChange={handleChange}
             placeholder="e.g. 70"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Unit */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Unit</label>
-          <input
+          <select
             name="unit"
             value={form.unit}
             onChange={handleChange}
-            placeholder="e.g. lb"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
-          />
+            className={inputClass}
+          >
+            {weightUnitOptions.map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Age */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Age</label>
           <input
@@ -116,10 +189,11 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
             value={form.age}
             onChange={handleChange}
             placeholder="e.g. 5"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Birth date */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Birth date</label>
           <input
@@ -127,10 +201,11 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
             value={form.birthDate}
             onChange={handleChange}
             placeholder="e.g. 2/10/2021"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Health Conditions */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">
             Health Conditions And Activity Level
@@ -141,10 +216,11 @@ export default function AddPetForm({ onSavePet, embedded = false }) {
             onChange={handleChange}
             placeholder="e.g. Hip dysplasia, food allergies, arthritis..."
             rows={3}
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           className="col-span-2 justify-self-center rounded-full bg-[#d87c5a] px-6 py-2 font-semibold text-[#1f1f1f] transition hover:opacity-95"

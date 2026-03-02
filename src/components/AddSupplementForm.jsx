@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+const supplementUnitOptions = ["mg", "g", "IU"];
+const frequencyOptions = ["daily", "twice daily", "weekly", "monthly", "as needed"];
+
 function createInitialForm(selectedPet) {
   return {
     selectedPetId: selectedPet?.id ?? "",
@@ -33,7 +36,11 @@ export default function AddSupplementForm({
   function handleChange(e) {
     const { name, value } = e.target;
     setError("");
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   function handleSubmit(e) {
@@ -46,6 +53,11 @@ export default function AddSupplementForm({
 
     if (!form.supplementName.trim()) {
       setError("Please enter a supplement name.");
+      return;
+    }
+
+    if (form.dosage && Number.isNaN(Number(form.dosage))) {
+      setError("Dosage must be a number.");
       return;
     }
 
@@ -80,6 +92,9 @@ export default function AddSupplementForm({
     }));
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10";
+
   const content = (
     <div className="space-y-4">
       <div>
@@ -100,6 +115,7 @@ export default function AddSupplementForm({
       ) : null}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-x-3 gap-y-3">
+        {/* Select Pet */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Select Pet</label>
           <input
@@ -107,11 +123,12 @@ export default function AddSupplementForm({
             value={form.selectedPetName}
             onChange={handleChange}
             readOnly={!!selectedPet}
-            placeholder="e.g. Max - Golden Retriever (70lb, 5 years)"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            placeholder="e.g. Max - Golden Retriever"
+            className={inputClass}
           />
         </div>
 
+        {/* Supplement name */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">
             Supplement name
@@ -121,10 +138,11 @@ export default function AddSupplementForm({
             value={form.supplementName}
             onChange={handleChange}
             placeholder="e.g. Omega-3 Fish Oil"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Dosage */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Dosage</label>
           <input
@@ -132,32 +150,46 @@ export default function AddSupplementForm({
             value={form.dosage}
             onChange={handleChange}
             placeholder="e.g. 1000"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Unit */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Unit</label>
-          <input
+          <select
             name="unit"
             value={form.unit}
             onChange={handleChange}
-            placeholder="e.g. mg"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
-          />
+            className={inputClass}
+          >
+            {supplementUnitOptions.map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Frequency */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Frequency</label>
-          <input
+          <select
             name="frequency"
             value={form.frequency}
             onChange={handleChange}
-            placeholder="e.g. daily, weekly, monthly"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
-          />
+            className={inputClass}
+          >
+            <option value="">Select frequency</option>
+            {frequencyOptions.map((frequency) => (
+              <option key={frequency} value={frequency}>
+                {frequency}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Time of day */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Time of day</label>
           <input
@@ -165,10 +197,11 @@ export default function AddSupplementForm({
             value={form.timeOfDay}
             onChange={handleChange}
             placeholder="e.g. 8:00 AM"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Start Date */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Start Date</label>
           <input
@@ -176,10 +209,11 @@ export default function AddSupplementForm({
             value={form.startDate}
             onChange={handleChange}
             placeholder="e.g. Today, or choose a date"
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Notes */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Notes (optional)</label>
           <textarea
@@ -188,10 +222,11 @@ export default function AddSupplementForm({
             onChange={handleChange}
             rows={3}
             placeholder="e.g. Give with food, supports joint health..."
-            className="w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10"
+            className={inputClass}
           />
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={!selectedPet}
