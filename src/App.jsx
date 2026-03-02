@@ -10,10 +10,11 @@ import PetDetails from "./LostPet/PetDetails"
 
 export default function App(){
   return (
+    // <PetAdoptionHomePage/>
     // <LostPet/>
     // <StrayPet/>
     // <AdoptPet/>
-    // <LostPetReport/>
-    <PetDetails/>
+    <LostPetReport/>
+    // <PetDetails/>
   )
 }

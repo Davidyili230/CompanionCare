@@ -40,6 +40,10 @@ textarea {
     border-color: black;
 }
 
+.imageInput {
+    display: none
+}
+
 .img {
     width: 80px;
     height: 80px;

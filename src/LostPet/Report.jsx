@@ -1,6 +1,8 @@
 
 import styles from "./modules/Report.module.css"
 
+import { useState } from "react"
+
 function PetInformation() {
     return (
         <div className={styles.petInfoContainer}>
@@ -39,15 +41,38 @@ function OwnerInformation() {
 }
 
 function ImageUpload() {
+    const [uploadedImage, setUploadedImage] = useState(null)
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0]
+        if (file) {
+            setUploadedImage(URL.createObjectURL(file))
+        }
+    }
+
+
     return (
-        <div className={styles.imgContainer}>
-            <h2>Upload Image</h2>
-            <img 
-                src="./cameraIcon.png" 
-                alt="camera"
-                className={styles.img}
-            />
-        </div>
+        <label className={styles.imgContainer} htmlFor="imageUpload">
+            <div>
+                <h2>Upload Image</h2>
+
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    id="imageUpload"
+                    className={styles.imageInput}
+                />
+
+        
+                <img 
+                    src={uploadedImage || "./cameraIcon.png" }
+                    alt="camera"
+                    className={styles.img}
+                />
+            </div>
+        
+        </label>
     )
 }
 
