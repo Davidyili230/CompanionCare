@@ -5,15 +5,86 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 function PetInformation() {
+
+    const [petType, setPetType] = useState("")
+    const [breed, setBreed] = useState("")
+    const [customBreed, setCustomBreed] = useState("")
+
+    const breeds = {
+        dog: ["Golden-Retriever", "German Shepherd", "Pomeranian", "Husky", "Poodle", "Other"],
+        cat: ["Maine Coon", "Ragdoll", "British ShortHair", "Siamese", "Bengal", "Other"]
+    }
+
+    const selectedBreeds = breeds[petType] || []
+
+    function handlePetTypeChange(e) {
+        setPetType(e.target.value)
+        setBreed("")
+        setCustomBreed("")
+    }
+
+    function handleBreedChange(e) {
+        setBreed(e.target.value)
+        setCustomBreed("")
+    }
+
+    function handleCustomBreedChange(e) {
+        setCustomBreed(e.target.value)
+    }
+
     return (
         <div className={styles.petInfoContainer}>
             <h2> Pet Information </h2>
 
             <label>Pet's Name</label>
-            <input type="text" placeholder="Enter your pet's name"/>
+            <input type="text" placeHolder="Enter your pet's name"/>
 
-            <label>Species</label>
-            <input type="text" placeholder="Enter your pet's species"/>
+            <label htmlFor="species">Species</label>
+            <select
+                id="species"
+                value={petType}
+                onChange={handlePetTypeChange}
+            >
+                <option value="" disabled>Select the type of pet you have</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+            </select>
+
+            {petType && (
+                <>
+                    <label htmlFor="breed">Breed</label>
+                    <select
+                        id="breed"
+                        value={breed}
+                        onChange={handleBreedChange}
+                    >
+                        <option value="" disabled>Select Your Pet's Breed</option>
+                        {
+                            selectedBreeds.map((petBreed, idx) => (
+                                <option
+                                    key={idx}
+                                    value={petBreed}
+                                >
+                                    {petBreed}
+                                </option>
+                            ))
+                        }
+                    </select>
+                </>
+            )}
+
+            {breed == "Other" && (
+                <>
+                    <label>Custom Breed</label>
+                    <input
+                        type="text"
+                        placeHolder="Enter you pet's breed"
+                        value={customBreed}
+                        onChange={handleCustomBreedChange}
+                    />
+                    
+                </>
+            )}
 
             <label>Date Last Seen</label>
             <input type="date"/>
@@ -54,25 +125,21 @@ function ImageUpload() {
 
     return (
         <label className={styles.imgContainer} htmlFor="imageUpload">
-            <div>
-                <h2>Upload Image</h2>
+            {uploadedImage == null && <h2>Upload Image</h2>}
 
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    id="imageUpload"
-                    className={styles.imageInput}
-                />
+            <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                id="imageUpload"
+                className={styles.imageInput}
+            />
 
-        
-                <img 
-                    src={uploadedImage || "./cameraIcon.png" }
-                    alt="camera"
-                    className={styles.img}
-                />
-            </div>
-        
+            <img 
+                src={uploadedImage || "./cameraIcon.png" }
+                alt="camera"
+                className={uploadedImage == null ? styles.imgIcon : styles.userImg}
+            />
         </label>
     )
 }

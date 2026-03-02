@@ -5,10 +5,26 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background-color: white;
+    padding: 12px;
+    border-radius: 12px;
+
+}
+
+.petInfoContainer label,
+.userInfoContainer label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.petInfoContainer h2,
+.userInfoContainer h2 {
+    text-align: center;
 }
 
 input, 
-textarea {
+textarea,
+select {
     padding: 10px;
     border-radius: 5px;
     font-size: 12px;
@@ -44,10 +60,16 @@ textarea {
     display: none
 }
 
-.img {
+.imgIcon {
     width: 80px;
     height: 80px;
     object-fit: contain;
+}
+
+.userImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* ========== LostPetReport ========== */

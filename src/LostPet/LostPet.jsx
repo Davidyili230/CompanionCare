@@ -42,8 +42,8 @@ export default function LostPet() {
 
     // to be replaced with actual data from database
     const currentLostPets = [
-        "golden-retriever", "cat", "golden-retriever", "golden-retriever",
-        "golden-retriever", "golden-retriever", "cat", "cat"
+        "golden-retriever", "cat", "golden-retriever", "kitten",
+        "golden-retriever", "golden-retriever", "kitten", "cat"
     ]
 
     return (
