@@ -3,6 +3,7 @@ import Card from "../components/card"
 import styles from "./modules/LostPet.module.css"
 
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
     const [userInput, setUserInput] = useState('');
@@ -33,6 +34,13 @@ function SearchBar() {
 }
 
 export default function LostPet() {
+    const navigate = useNavigate();
+
+    const handleNavigation = () => {
+        navigate("/LostPetReport");
+    }
+
+
     return (
         <div className={styles.lostPetContainer}>
 
@@ -42,9 +50,12 @@ export default function LostPet() {
 
             <SearchBar/>
 
-            <button className={styles.reportButton}>
-                Create Report
-            </button>
+                <button 
+                    className={styles.reportButton}
+                    onClick={handleNavigation}
+                >
+                    Create Report
+                </button>
             
             {/* Filler image cards. Replace when database is set up */}
             <div className={styles.cardContainer}>

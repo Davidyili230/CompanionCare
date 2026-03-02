@@ -2,6 +2,7 @@
 import styles from "./modules/Report.module.css"
 
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function PetInformation() {
     return (
@@ -78,6 +79,12 @@ function ImageUpload() {
 
 
 export default function LostPetReport() {
+    const navigate = useNavigate();
+
+    const handleNavigation = () => {
+        navigate("/LostPet")
+    }
+
     return (
         <div className={styles.pageContainer}>
             <h1 className={styles.title}>
@@ -98,9 +105,12 @@ export default function LostPetReport() {
                 </div>
             </div>
             
-            <button className={styles.reportButton}>
+            <button 
+                className={styles.reportButton}
+                onClick={handleNavigation}
+            >
                 Create Report
-            </button>
+            </button>   
         </div>
     )
 }

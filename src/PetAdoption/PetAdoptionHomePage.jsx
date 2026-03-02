@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 
 import animalImgs from "./animalImgPath.json"
 import styles from "./modules/PetAdoptionHomePage.module.css"
@@ -28,7 +29,7 @@ function ImageCarousel() {
     )
 }
 
-function ReportButtonCard({ img, title, buttonText }) {
+function ReportButtonCard({ img, title, buttonText, nextPage }) {
     return (
         <div className={styles.buttonContainer}>
             <div className={styles.buttonImageContainer}>
@@ -41,7 +42,12 @@ function ReportButtonCard({ img, title, buttonText }) {
 
             <div className={styles.textAndButton}>
                 <h2>{title}</h2>
-                <button className={styles.button}>{buttonText}</button>
+
+                <Link to={nextPage}>
+                    <button className={styles.button}>
+                        {buttonText}
+                    </button>
+                </Link>
             </div>
         </div>
     )
@@ -60,18 +66,21 @@ export default function PetAdoptionHomePage() {
                     img="./buttonImgs/lostOutline.png"
                     title="Lost a Pet?"
                     buttonText="Report Missing Pet"
+                    nextPage="/LostPet"
                 />
 
                 <ReportButtonCard
                     img="./buttonImgs/adoptOutline.png"
                     title="Looking to Adopt?"
                     buttonText="Browse Adoptable Pets"
+                    nextPage="/AdoptPet"
                 />
 
                 <ReportButtonCard
                     img="./buttonImgs/strayOutline.png"
                     title="Found a Stray?"
                     buttonText="Report Stray Animal"
+                    nextPage="/AdoptPet"    // filler link, this button may be removed
                 />
             </div>
         </div>
