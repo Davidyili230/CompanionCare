@@ -131,7 +131,15 @@ textarea {
     transition: 0.3s ease;
 }
 
-button:hover {
+.reportButtonEnabled {
+    background-color: #E63737;
+}
+
+.reportButtonDisabled {
+    background-color: #e28c8c;
+}
+
+.reportButtonEnabled:hover {
     background-color: #b32c2c;
     transform: scale(1.05);
 }
