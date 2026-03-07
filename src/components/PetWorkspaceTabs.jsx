@@ -12,6 +12,7 @@ export default function PetWorkspaceTabs({
   selectedPet,
   draftPet,
   onDraftPetChange,
+  onStartAddPet,
   onSavePet,
   onAddSupplement,
   suggestions = [],
@@ -23,6 +24,11 @@ export default function PetWorkspaceTabs({
     const normalized = (index + TABS.length) % TABS.length;
     const next = TABS[normalized];
     setActiveTab(next.id);
+
+    if (next.id === "add-pet") {
+      onStartAddPet?.();
+    }
+
     tabRefs.current[normalized]?.focus();
   }
 
@@ -48,6 +54,9 @@ export default function PetWorkspaceTabs({
       case " ":
         event.preventDefault();
         setActiveTab(TABS[index].id);
+        if (TABS[index].id === "add-pet") {
+          onStartAddPet?.();
+        }
         break;
       default:
         break;
@@ -77,7 +86,12 @@ export default function PetWorkspaceTabs({
                 aria-selected={selected}
                 aria-controls={`panel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === "add-pet") {
+                    onStartAddPet?.();
+                  }
+                }}
                 onKeyDown={(event) => handleKeyDown(event, index)}
                 className={[
                   "rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200",

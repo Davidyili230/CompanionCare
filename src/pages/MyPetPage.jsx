@@ -16,6 +16,7 @@ const EMPTY_PET = {
   age: "",
   birthDate: "",
   healthConditions: "",
+  image: "",
 };
 
 function formatDateToInput(date) {
@@ -27,11 +28,12 @@ function formatDateToInput(date) {
 
 function getBirthDateFromAge(age) {
   const years = Number(age);
+
   if (!Number.isFinite(years) || years < 0) return "";
 
   const today = new Date();
   const birthDate = new Date(today);
-  birthDate.setFullYear(today.getFullYear() - years);
+  birthDate.setFullYear(today.getFullYear() - Math.floor(years));
 
   return formatDateToInput(birthDate);
 }
@@ -39,17 +41,17 @@ function getBirthDateFromAge(age) {
 function getAgeFromBirthDate(birthDate) {
   if (!birthDate) return "";
 
-  const today = new Date();
-  const dob = new Date(birthDate);
-
+  const dob = new Date(`${birthDate}T12:00:00`);
   if (Number.isNaN(dob.getTime())) return "";
 
+  const today = new Date();
   let age = today.getFullYear() - dob.getFullYear();
+
   const monthDiff = today.getMonth() - dob.getMonth();
   const dayDiff = today.getDate() - dob.getDate();
 
   if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
+    age -= 1;
   }
 
   return age < 0 ? "" : String(age);
@@ -59,6 +61,7 @@ export default function MyPetPage() {
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [draftPet, setDraftPet] = useState(EMPTY_PET);
+  const [formMode, setFormMode] = useState("add");
 
   const addPetSectionRef = useRef(null);
 
@@ -68,6 +71,8 @@ export default function MyPetPage() {
   );
 
   useEffect(() => {
+    if (formMode !== "edit") return;
+
     if (selectedPet) {
       setDraftPet({
         ...EMPTY_PET,
@@ -76,7 +81,7 @@ export default function MyPetPage() {
     } else {
       setDraftPet(EMPTY_PET);
     }
-  }, [selectedPet]);
+  }, [selectedPet, formMode]);
 
   function handleDraftPetChange(field, value) {
     setDraftPet((prev) => {
@@ -86,22 +91,37 @@ export default function MyPetPage() {
       };
 
       if (field === "age") {
-        next.birthDate = value ? getBirthDateFromAge(value) : "";
+        const nextBirthDate = value ? getBirthDateFromAge(value) : "";
+        if (prev.birthDate !== nextBirthDate) {
+          next.birthDate = nextBirthDate;
+        }
       }
 
       if (field === "birthDate") {
-        next.age = value ? getAgeFromBirthDate(value) : "";
+        const nextAge = value ? getAgeFromBirthDate(value) : "";
+        if (String(prev.age ?? "") !== nextAge) {
+          next.age = nextAge;
+        }
       }
 
       return next;
     });
   }
 
-  const { items: dosageItems } = useMemo(() => {
-    return calcDosageItems(draftPet);
-  }, [draftPet]);
+  function handleStartAddPet() {
+    setFormMode("add");
+    setDraftPet(EMPTY_PET);
 
-  const suggestions = [];
+    addPetSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function handleSelectPet(petId) {
+    setSelectedPetId(petId);
+    setFormMode("edit");
+  }
 
   function handleAddPet(newPet) {
     const petToSave = {
@@ -130,8 +150,28 @@ export default function MyPetPage() {
     });
 
     setSelectedPetId(petToSave.id);
-    setDraftPet(petToSave);
+    setFormMode("add");
+    setDraftPet(EMPTY_PET);
   }
+
+  const hasDraftInput = Boolean(
+    draftPet.name ||
+      draftPet.species ||
+      draftPet.breed ||
+      draftPet.weight ||
+      draftPet.age ||
+      draftPet.birthDate ||
+      draftPet.healthConditions ||
+      draftPet.image
+  );
+
+  const dosageSourcePet = hasDraftInput ? draftPet : selectedPet;
+
+  const { items: dosageItems } = useMemo(() => {
+    return calcDosageItems(dosageSourcePet);
+  }, [dosageSourcePet]);
+
+  const suggestions = [];
 
   function handleAddSupplement(newSupplement) {
     console.log("New supplement:", newSupplement);
@@ -149,21 +189,14 @@ export default function MyPetPage() {
 
           <div className="mt-4 flex flex-wrap gap-4">
             {pets.length === 0 ? (
-              <AddPetEmptyCard
-                onClick={() =>
-                  addPetSectionRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  })
-                }
-              />
+              <AddPetEmptyCard onClick={handleStartAddPet} />
             ) : (
               pets.map((pet) => (
                 <PetCard
                   key={pet.id}
                   pet={pet}
                   selected={selectedPetId === pet.id}
-                  onClick={setSelectedPetId}
+                  onClick={handleSelectPet}
                 />
               ))
             )}
@@ -178,6 +211,7 @@ export default function MyPetPage() {
             selectedPet={selectedPet}
             draftPet={draftPet}
             onDraftPetChange={handleDraftPetChange}
+            onStartAddPet={handleStartAddPet}
             onSavePet={handleAddPet}
             onAddSupplement={handleAddSupplement}
             suggestions={suggestions}
@@ -185,7 +219,7 @@ export default function MyPetPage() {
 
           <div className="self-start">
             <RecommendedDosagePanel
-              pet={draftPet}
+              pet={dosageSourcePet}
               dosageItems={dosageItems}
             />
           </div>
@@ -193,4 +227,4 @@ export default function MyPetPage() {
       </main>
     </div>
   );
-} 
+}
