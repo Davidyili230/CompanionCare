@@ -10,6 +10,8 @@ const TABS = [
 
 export default function PetWorkspaceTabs({
   selectedPet,
+  draftPet,
+  onDraftPetChange,
   onSavePet,
   onAddSupplement,
   suggestions = [],
@@ -53,7 +55,7 @@ export default function PetWorkspaceTabs({
   }
 
   return (
-    <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-[760px]">
+    <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
       <div className="mb-4 overflow-x-auto">
         <div
           role="tablist"
@@ -78,11 +80,11 @@ export default function PetWorkspaceTabs({
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(event) => handleKeyDown(event, index)}
                 className={[
-                  "rounded-full px-4 py-2 text-sm font-semibold transition",
+                  "rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200",
                   "focus:outline-none focus:ring-2 focus:ring-[#d87c5a]/30",
                   selected
-                    ? "bg-[#d87c5a] text-[#1f1f1f]"
-                    : "bg-[#fff7f2] text-[#7a6d63] hover:bg-[#f7e5da]",
+                    ? "bg-[#d87c5a] text-white"
+                    : "bg-[#fff7f2] text-[#7a6d63] hover:bg-[#f7e5da] hover:text-[#d87c5a]",
                 ].join(" ")}
               >
                 {tab.label}
@@ -99,7 +101,12 @@ export default function PetWorkspaceTabs({
         hidden={activeTab !== "add-pet"}
         className="pt-1"
       >
-        <AddPetForm embedded onSavePet={onSavePet} />
+        <AddPetForm
+          embedded
+          petData={draftPet}
+          onPetChange={onDraftPetChange}
+          onSavePet={onSavePet}
+        />
       </div>
 
       <div

@@ -233,7 +233,7 @@ export default function AddSupplementForm({
           className={[
             "col-span-2 justify-self-center rounded-full px-6 py-2 font-semibold transition",
             selectedPet
-              ? "bg-[#d87c5a] text-[#1f1f1f] hover:opacity-95"
+              ? "bg-[#d87c5a] text-white hover:opacity-95"
               : "cursor-not-allowed bg-[#efc4b1] text-[#7f7770]",
           ].join(" ")}
         >

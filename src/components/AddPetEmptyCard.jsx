@@ -2,14 +2,15 @@ export default function AddPetEmptyCard({ onClick }) {
   return (
     <button
       type="button"
-      className="pet-card pet-card-empty"
       onClick={onClick}
-      aria-label="Add Pet"
+      className="flex h-33 w-23 flex-col items-center justify-center rounded-2xl border border-[#de7e52] bg-white text-center transition-colors duration-200 hover:bg-[#fcf5ef]"
     >
-      <div className="pet-avatar-wrap pet-avatar-empty">
-        <span className="pet-plus">+</span>
+      <div className="flex h-13 w-13 items-center justify-center rounded-full border border-[#9a9a9a] bg-[#f2f2f2] text-xl text-[#d87c5a]">
+        +
       </div>
-      <div className="pet-name">ADD Pet</div>
+      <span className="mt-3 text-[16px] font-semibold text-[#1f1f1f]">
+        Add Pet
+      </span>
     </button>
   );
 }
