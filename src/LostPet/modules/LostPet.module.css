@@ -1,4 +1,188 @@
 
+/* ========== Pet Card ========== */
+
+.displayedCard {
+    perspective: 1000px;
+    width: 600px;
+    height: 300px;
+}
+
+.innerCard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flipped {
+    transform: rotateY(180deg);
+}
+
+.frontCard,
+.backCard {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+.backCard {
+    transform: rotateY(180deg);
+}
+
+.backCard {
+    transform: rotateY(180deg);
+}
+
+.cardFrontContainer,
+.cardBackContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0px 2px 4px black;
+    padding: 10px;
+    width: 600px;
+    height: 300px;
+}
+
+.cardFrontImgContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    height: 100%;
+}
+
+.cardFrontImgContainer img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.cardFrontInfo {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 10px;
+    border-left: 1px solid black;
+    width: 60%;
+    height: 80%;
+}
+
+.petName {
+    font-family: sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    margin: 4px 0px;
+}
+
+.divider {
+    border: 1px solid rgb(239, 117, 117);
+    margin-bottom: 15px;
+}
+
+.petInfo {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.petInfo label{
+    font-weight: bold;
+}
+
+.petNoteContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.petNotes {
+    font-weight: bold;
+}
+
+.petNoteContainer span{
+    background-color: rgb(224, 250, 224);
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-top: 5px;
+    height: 60px;
+    overflow: scroll;
+}
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.buttonContainer button {
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    background-color:#f16b6b;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 80%;
+}
+
+.buttonContainer button:hover {
+    background-color:#f61c1c;
+    scale: 1.05;
+}
+
+.cardBackContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardBackInfo h2 {
+    text-align: center;
+    border-bottom: 1px solid rgb(251, 88, 88);
+}
+
+.ownerInfo {
+    gap: 5px;
+    margin-bottom: 10px;;
+}
+
+.ownerInfo label {
+    font-weight: bold;
+}
+
+.cardBackButtonContainer {
+    display: flex;
+    justify-content: center;
+    width: 50%;
+}
+
+.cardBackButtonContainer button {
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    background-color:#f16b6b;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.cardBackButtonContainer button:hover {
+    background-color:#f61c1c;
+    scale: 1.05;
+}
+
 /* ========== Search Bar ========== */
 .searchContainer {
     display: flex;
@@ -98,8 +282,8 @@
 
 .cardContainer {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
     padding: 20px;
 }
 
