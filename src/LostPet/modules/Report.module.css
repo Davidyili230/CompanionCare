@@ -72,6 +72,13 @@ textarea {
     object-fit: cover;
 }
 
+
+/* ========== Incorrect Format ========== */
+.incorrectFormat {
+    color: red;
+    font-weight: bold;
+    font-size: 12px;
+}
 /* ========== LostPetReport ========== */
 
 .pageContainer {

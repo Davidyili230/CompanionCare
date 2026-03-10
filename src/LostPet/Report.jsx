@@ -4,6 +4,8 @@ import styles from "./modules/Report.module.css"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { isValidEmail, isValidPhoneNumber } from "./ReportValidation"
+
 function PetInformation({ formData, setFormData }) {
 
 
@@ -121,7 +123,7 @@ function PetInformation({ formData, setFormData }) {
     )
 }
 
-function OwnerInformation({ formData, setFormData }) {
+function OwnerInformation({ formData, setFormData, checkUserInfo }) {
 
     const handleOwnerInfoChange = (field, value) => {
         setFormData(prevFormData => ({
@@ -150,6 +152,10 @@ function OwnerInformation({ formData, setFormData }) {
                 onChange={(e) => handleOwnerInfoChange("email", e.target.value)}
             />
 
+            {checkUserInfo.isValidEmailFormat === false && 
+                <span className={styles.incorrectFormat}>Please Enter a valid email</span>
+            }
+
             <label>Phone Number</label>
             <input 
                 type="tel" 
@@ -157,6 +163,10 @@ function OwnerInformation({ formData, setFormData }) {
                 value={formData.phone}
                 onChange={(e) => handleOwnerInfoChange("phone", e.target.value)}
             />
+
+            {checkUserInfo.isValidPhoneFormat === false && 
+                <span className={styles.incorrectFormat}>Please Enter a valid phone number</span>
+            }
         </div>
     )
 }
@@ -209,7 +219,7 @@ export default function LostPetReport() {
         breed: "",
         customBreed: "",
         dateLastSeen: "",
-        addtionalInfo: "",
+        additionalInfo: "",
         ownerName: "",
         email: "",
         phone: "",
@@ -226,6 +236,30 @@ export default function LostPetReport() {
         (formData.email || formData.phone) &&
         (formData.breed !== "Other" || formData.customBreed)
 
+    const [checkUserInfo, setCheckUserInfo] = useState({
+        isValidEmailFormat: null,
+        isValidNumberFormat: null
+    })
+
+    const isUserInfoValid = () => {
+        
+        const emailValid = formData.email ? isValidEmail(formData.email) : null;
+        const phoneValid = formData.phone ? isValidPhoneNumber(formData.phone) : null;
+
+        setCheckUserInfo({
+            isValidEmailFormat: emailValid,
+            isValidPhoneFormat: phoneValid
+        })
+        
+        if(emailValid === false && phoneValid === null) return false;
+        else if(emailValid === null && phoneValid === false) return false;
+        else if(emailValid === false && phoneValid === false) return false;
+        else if(emailValid && phoneValid === false) return false;
+        else if(emailValid === false && phoneValid) return false;
+
+        return true;
+    }
+
     return (
         <div className={styles.pageContainer}>
             <h1 className={styles.title}>
@@ -239,7 +273,11 @@ export default function LostPetReport() {
             <div className={styles.reportContent}>
                 <div className={styles.leftContent}>   
                     <PetInformation formData={formData} setFormData={setFormData}/>
-                    <OwnerInformation formData={formData} setFormData={setFormData}/>
+                    <OwnerInformation 
+                        formData={formData} 
+                        setFormData={setFormData}
+                        checkUserInfo={checkUserInfo}
+                    />
                 </div>
                 <div className={styles.rightContent}>
                     <ImageUpload formData={formData} setFormData={setFormData}/>
@@ -251,7 +289,12 @@ export default function LostPetReport() {
                     `${styles.reportButton}
                     ${isFormFilled ? styles.reportButtonEnabled : styles.reportButtonDisabled}`
                 }
-                onClick={handleNavigation}
+                onClick={() => {
+                    if(isUserInfoValid()) {
+                        handleNavigation()
+                    }
+                }}
+      
                 disabled={!isFormFilled}
             >
                 Create Report
