@@ -1,4 +1,76 @@
 
+/* ========== Card ========== */
+.animalCard {
+    border: 1px solid rgb(225, 207, 207);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 1s ease;
+    cursor: pointer;
+}
+
+.animalCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 10px black;
+}
+
+.imageContainer {
+    height: 210px;
+    overflow: hidden;
+}
+
+.imageContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.animalCardBody {
+    padding: 10px 15px;
+}
+
+.petNameAgeContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.petNameText {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.petAgeText {
+    color: rgb(239, 13, 13);
+    font-weight: bold;
+}
+
+.petTypeInfoContainer {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.petSpeciesText {
+    color: rgb(158, 113, 41);
+}
+
+.petBreedText {
+    font-size: 14px;
+}
+
+.petLocationContainer {
+    margin-bottom: 10px;
+}
+
+.petLocationContainer span {
+    font-weight: bold;
+}
+
+.petNotesContainer {
+    border-top: 1px solid rgb(186, 146, 146);
+    padding-top: 5px;
+    font-size: 14px;
+}
 /* ========== Search Bar ========== */
 .searchContainer {
     display: flex;
@@ -6,14 +78,21 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 15px;
 }
 
 .searchInput {
     display: flex;
     align-items: center;
-    border-radius: 10px;
+    border-radius: 25px;
     padding: 5px 10px;
     border: 1px solid black;
+    background-color: white;
+}
+
+.searchInput:hover {
+    box-shadow: 0 2px 6px rgb(113, 111, 111);
 }
 
 .searchInput input{
@@ -28,6 +107,7 @@
     width: 25px;
     height: 25px;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 /* ========== Filter Button ========== */
@@ -48,8 +128,9 @@
 /* Lost Pet HomePage Container */
 
 .adoptPetContainer {
-   background: #FFF9F0;
-   height: 100vh;
+    background: #FFF9F0;
+    min-height: 100vh;
+    padding-top: 50px;
 }
 
 /* ========== Title ========== */
@@ -66,23 +147,6 @@
     font-weight: bold;
 }
 
-/* ========== Report Button ========== */
-
-.addPetButton {
-    display: flex;
-    color: white;
-    background-color: #FC1818;
-    border-radius: 15px;
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 20px;
-}
-
-.addPetButton:hover {
-    background-color: #c71515;
-}
 
 /* ========== Card Container ========== */
 

@@ -1,8 +1,39 @@
 
-import Card from "../components/card"
 import styles from "./AdoptPet.module.css"
 
 import { useState } from "react"
+
+
+function Card({ img }) {
+    return (
+        <div className={styles.animalCard}>
+            <div className={styles.imageContainer}>
+                <img src={img} alt="pet image"/>
+            </div>
+            <div className={styles.animalCardBody}>
+                <div className={styles.petNameAgeContainer}>
+                    <span className={styles.petNameText}>Fluffy</span>
+                    <span className={styles.petAgeText}>1 years old</span>
+                </div>
+                <div className={styles.petTypeInfoContainer}>
+                    <span className={styles.petSpeciesText}>Golden Retriever</span>
+                    <span className={styles.petBreedText}>Dog</span>
+                </div>
+                <div className={styles.petLocationContainer}>
+                    <span>Location</span>
+                </div>
+                <div className={styles.petNotesContainer}>
+                    <span>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                        Aut dolore necessitatibus odio labore sed iusto dolor in tempore quibusdam,
+                        magni saepe quod voluptatibus maiores, aliquam commodi ducimus blanditiis, 
+                        architecto distinctio?
+                    </span>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 function SearchBar() {
     const [userInput, setUserInput] = useState('');
@@ -41,10 +72,6 @@ export default function AdoptPet() {
             </h2>
 
             <SearchBar/>
-
-            <button className={styles.addPetButton}>
-                Add Pet
-            </button>
             
             {/* Filler image cards. Replace when database is set up */}
             <div className={styles.cardContainer}>
