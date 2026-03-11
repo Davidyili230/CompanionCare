@@ -1,0 +1,8 @@
+git add .
+git commit -m ""
+git push
+
+去push branch, github, compare and pull request 
+review - main
+
+don't do git push origin main
