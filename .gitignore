@@ -22,3 +22,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# dependencies
+node_modules/
+server/node_modules/
+
+# env files
+.env
+server/.env
+
+# firebase admin key
+server/serviceAccountKey.json
+
+# build output
+dist/
+server/dist/
+build/
+
+# misc
+.DS_Store
