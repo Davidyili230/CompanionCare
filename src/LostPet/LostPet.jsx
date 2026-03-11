@@ -163,12 +163,6 @@ export default function LostPet() {
             <div className={styles.cardContainer}>
                 {
                     currentLostPets.map((missingPet, idx) => (
-                        // <Card
-                        //     key={idx}
-                        //     img={`./animalImgs/${missingPet}.webp`}
-                        //     alt={`${missingPet} image`}
-                        // />
-
                         <MissingPetCard
                             key={idx}
                             img={`./animalImgs/${missingPet}.webp`}
