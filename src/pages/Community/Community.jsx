@@ -29,7 +29,8 @@ export default function Community() {
          .finally(() => setLoading(false));
    }, []);
 
-   const allLabels = useMemo(() => {    // get all the label
+   const allLabels = useMemo(() => {
+      // get all the label
       const unique = new Set(
          posts
             .map((p) => p.label)
@@ -66,9 +67,7 @@ export default function Community() {
             boxSizing: "border-box",
          }}
       >
-         <div style={{ padding: "16px 24px 0" }}>
-            <Navbar />
-         </div>
+         <Navbar />
 
          <div style={{ padding: "24px" }}>
             <div
