@@ -31,7 +31,7 @@ export default function App() {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          />  
         </Routes>
       </AuthProvider>
     </BrowserRouter>

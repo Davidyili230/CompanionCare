@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { useNavigate, Link } from "react-router-dom";
-import { NavBar } from "../components/NavBar";
+import NavBar from "../components/Navbar/Navbar";
 
 export const Register = () => {
   const [username, setUsername] = useState("");

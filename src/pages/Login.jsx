@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useNavigate, Link } from "react-router-dom";
-import { NavBar } from "../components/NavBar";
+import NavBar from "../components/Navbar/Navbar";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -96,13 +96,13 @@ export const Login = () => {
           </div>
 
           {error && (
-            <p className="w-full text-[13px] text-[#c0392b] bg-[#fdecea] border border-[#f5c6cb] rounded-[8px] px-[12px] py-[10px]">
+            <p className="w-full text-[13px] text-[#c0392b] bg-white border border-[#f5c6cb] rounded-[8px] px-[12px] py-[10px]">
               {error}
             </p>
           )}
 
           {resetMessage && (
-            <p className="w-full text-[13px] text-[#27ae60] bg-[#eafaf1] border border-[#a9dfbf] rounded-[8px] px-[12px] py-[10px]">
+            <p className="w-full text-[13px] text-[#27ae60] bg-white border border-[#a9dfbf] rounded-[8px] px-[12px] py-[10px]">
               {resetMessage}
             </p>
           )}
