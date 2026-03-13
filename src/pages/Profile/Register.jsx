@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { auth, db } from "../../firebase";
 import { useNavigate, Link } from "react-router-dom";
-import NavBar from "../components/Navbar/Navbar";
 
 export const Register = () => {
   const [username, setUsername] = useState("");
@@ -51,9 +50,7 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FFF9F0] flex flex-col font-['Segoe_UI',_sans-serif]">
-
-      <NavBar />
+    <div className="w-full flex flex-col font-['Segoe_UI',_sans-serif]">
 
       <div className="flex flex-col items-center p-[20px] gap-[28px] box-border">
 
