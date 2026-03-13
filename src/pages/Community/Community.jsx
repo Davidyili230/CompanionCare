@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import { fetchCommunityPosts } from "../../api/community.api";
 import PostCard from "../../components/PostCard/PostCard";
 import PostModal from "../../components/PostModal/PostModal";
-import Navbar from "../../components/Navbar/Navbar";
 
 const TIME_FILTERS = [
    { label: "All time", days: null },
@@ -67,8 +66,6 @@ export default function Community() {
             boxSizing: "border-box",
          }}
       >
-         <Navbar />
-
          <div style={{ padding: "24px" }}>
             <div
                style={{
