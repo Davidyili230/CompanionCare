@@ -1,30 +1,23 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import MyPetPage from "./pages/MyPetPage";
-import PlaceholderPage from "./pages/PlaceholderPage";
+import Community from "./pages/Community/Community";
+import HistoryTable from "./HistoryTable";
+import SupplementForm from "./SupplementForm";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/my-pet" replace />} />
-        <Route
-          path="/dashboard"
-          element={<PlaceholderPage title="Dashboard" />}
-        />
-        <Route path="/my-pet" element={<MyPetPage />} />
-        <Route
-          path="/history"
-          element={<PlaceholderPage title="History" />}
-        />
-        <Route
-          path="/community"
-          element={<PlaceholderPage title="Community" />}
-        />
-        <Route
-          path="/profile"
-          element={<PlaceholderPage title="Profile" />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Navigate to="/my-pet" replace />} />
+      <Route path="/my-pet" element={<MyPetPage />} />
+      {/* <Route path ="/" element={<Dashboard />} /> */}
+      <Route path="/community" element={<Community />} />
+      {/* <Route path="/profile" element={<Profile />} /> */}
+      <Route path="/history" element={
+        <div>
+          <SupplementForm />
+          <HistoryTable />
+        </div>
+      } />
+    </Routes>
   );
 }
