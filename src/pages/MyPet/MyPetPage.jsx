@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Navbar from "../components/Navbar/Navbar";
-import PetCard from "../components/PetCard";
-import AddPetEmptyCard from "../components/AddPetEmptyCard";
-import PetWorkspaceTabs from "../components/PetWorkspaceTabs";
-import RecommendedDosagePanel from "../components/RecommendedDosagePanel";
-import { calcDosageItems } from "../utils/dosageCalculator";
+import PetCard from "../../components/PetCard";
+import AddPetEmptyCard from "../../components/AddPetEmptyCard";
+import PetWorkspaceTabs from "../../components/PetWorkspaceTabs";
+import RecommendedDosagePanel from "../../components/RecommendedDosagePanel";
+import { calcDosageItems } from "../../utils/dosageCalculator";
 
 const EMPTY_PET = {
   id: null,
@@ -179,8 +178,6 @@ export default function MyPetPage() {
 
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
-      <Navbar />
-
       <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
         <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
