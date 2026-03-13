@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard" },
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/my-pet", label: "My Pet" },
   { to: "/history", label: "History" },
   { to: "/community", label: "Community" },
+  { to: "/adopt", label: "Adopt" },
+  { to: "/missing", label: "Missing" },
   { to: "/profile", label: "Profile" },
 ];
 
