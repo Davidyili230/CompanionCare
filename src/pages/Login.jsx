@@ -60,7 +60,7 @@ export const Login = () => {
       </div>
 
       {/* LOGIN CARD: Auto Layout | Vertical | Spacing 20px | Padding 40px | Fixed Width 480px */}
-      <main className="flex flex-col items-center gap-[20px] w-full max-w-[480px] bg-white border-[2px] border-solid border-[#f0dece] rounded-[20px] p-[40px] shrink-0 box-border shadow-sm">
+      <main className="flex flex-col items-center gap-[20px] w-full max-w-[480px] border-[2px] border-solid border-[#f0dece] rounded-[20px] p-[40px] shrink-0 box-border shadow-sm" style={{ backgroundColor: '#ffffff' }}>
         <h2 className="text-[20px] font-[700] text-[#2d3e50] text-center leading-none shrink-0">
           Welcome Back
         </h2>

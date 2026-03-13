@@ -12,7 +12,7 @@ export const NavBar = () => {
   const location = useLocation();
 
   return (
-    <header className="flex flex-col w-full bg-white border-[2px] border-solid border-[#f0dece] rounded-[16px] px-[20px] py-[10px] shrink-0 box-border shadow-sm">
+    <header className="flex flex-col w-full border-[2px] border-solid border-[#f0dece] rounded-[16px] px-[20px] py-[10px] shrink-0 box-border shadow-sm" style={{ backgroundColor: '#ffffff' }}>
       <div className="flex flex-row items-center justify-between w-full">
         <Link to="/" className="flex flex-row items-center gap-[12px] no-underline shrink-0">
           <img

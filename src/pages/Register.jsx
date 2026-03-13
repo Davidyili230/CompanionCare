@@ -28,8 +28,16 @@ export const Register = () => {
         return;
       }
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
       await updateProfile(userCredential.user, { displayName: username });
-      await setDoc(usernameRef, { uid: userCredential.user.uid });
+      // Reserve the username (for uniqueness checks)
+      await setDoc(usernameRef, { uid });
+      // Store full user profile keyed by UID
+      await setDoc(doc(db, "users", uid), {
+        username,
+        email,
+        createdAt: new Date(),
+      });
       navigate("/dashboard");
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
@@ -63,7 +71,7 @@ export const Register = () => {
       </div>
 
       {/* REGISTER CARD: Auto Layout | Vertical | Spacing 20px | Padding 40px | Fixed Width 480px */}
-      <main className="flex flex-col items-center gap-[20px] w-full max-w-[480px] bg-white border-[2px] border-solid border-[#f0dece] rounded-[20px] p-[40px] shrink-0 box-border shadow-sm">
+      <main className="flex flex-col items-center gap-[20px] w-full max-w-[480px] border-[2px] border-solid border-[#f0dece] rounded-[20px] p-[40px] shrink-0 box-border shadow-sm" style={{ backgroundColor: '#ffffff' }}>
         <h2 className="text-[20px] font-[700] text-[#2d3e50] text-center leading-none shrink-0">
           Create Account
         </h2>

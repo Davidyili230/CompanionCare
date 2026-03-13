@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: #fdf6ec;
+}
+
 @layer base {
   input {
-    @apply bg-transparent border-0 outline-none;
+    @apply bg-[#ffffff] border-0 outline-none;
   }
 }
 
