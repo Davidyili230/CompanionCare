@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import Community from "./pages/Community/Community";
 import HistoryTable from "./HistoryTable";
 import SupplementForm from "./SupplementForm";
@@ -10,6 +10,7 @@ import Missing from "./pages/Missing/Missing";
 import Profile from "./pages/Profile/Profile";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MyPet from "./pages/MyPet/MyPet";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function Layout() {
   return (
@@ -24,19 +25,22 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/my-pet" element={<MyPet />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/adopt" element={<Adopt />} />
-        <Route path="/missing" element={<Missing />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/my-pet" element={<ProtectedRoute><MyPet /></ProtectedRoute>} />
+        <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/adopt" element={<ProtectedRoute><Adopt /></ProtectedRoute>} />
+        <Route path="/missing" element={<ProtectedRoute><Missing /></ProtectedRoute>} />
         <Route path="/history" element={
-          <>
-            <SupplementForm />
-            <HistoryTable />
-          </>
+          <ProtectedRoute>
+            <>
+              <SupplementForm />
+              <HistoryTable />
+            </>
+          </ProtectedRoute>
         } />
       </Route>
     </Routes>
