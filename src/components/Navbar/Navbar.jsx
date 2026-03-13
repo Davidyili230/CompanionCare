@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Dashboard" },
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/my-pet", label: "My Pet" },
   { to: "/history", label: "History" },
   { to: "/community", label: "Community" },
+  { to: "/adopt", label: "Adopt" },
+  { to: "/missing", label: "Missing" },
   { to: "/profile", label: "Profile" },
 ];
 
@@ -15,7 +17,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center rounded-lg overflow-hidden shrink-0">
             <img
-              src="/Logo.PNG"
+              src="/Logo.png"
               alt="CompanionCare logo"
               className="h-8 w-8 object-contain"
             />
