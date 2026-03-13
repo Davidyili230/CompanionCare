@@ -1,48 +1,47 @@
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-const navItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "My Pet", path: "/my-pet" },
-  { label: "History", path: "/history" },
-  { label: "Community", path: "/community" },
-  { label: "Profile", path: "/profile" },
+const NAV_ITEMS = [
+  { to: "/", label: "Dashboard" },
+  { to: "/my-pet", label: "My Pet" },
+  { to: "/history", label: "History" },
+  { to: "/community", label: "Community" },
+  { to: "/profile", label: "Profile" },
 ];
 
-export const NavBar = () => {
-  const location = useLocation();
-
+export default function Navbar() {
   return (
-    <header className="flex flex-col w-full border-[2px] border-solid border-[#f0dece] rounded-[16px] px-[20px] py-[10px] shrink-0 box-border shadow-sm" style={{ backgroundColor: '#ffffff' }}>
-      <div className="flex flex-row items-center justify-between w-full">
-        <Link to="/" className="flex flex-row items-center gap-[12px] no-underline shrink-0">
-          <img
-            src="/Logo.png"
-            alt="Logo"
-            className="w-[44px] h-[44px] object-contain shrink-0"
-          />
-          <span className="text-[26px] font-[900] italic text-[#d87c5a] leading-none shrink-0">
+    <div style={{ padding: "16px 24px 0", position: "sticky", top: 0, zIndex: 100, background: "#FFF9F0" }}>
+      <header className="flex items-center justify-between rounded-3xl border border-[#ecdcc8] bg-white px-5 py-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center rounded-lg overflow-hidden shrink-0">
+            <img
+              src="/Logo.PNG"
+              alt="CompanionCare logo"
+              className="h-8 w-8 object-contain"
+            />
+          </div>
+          <span className="text-[18px] font-bold italic text-[#de7e52]">
             CompanionCare
           </span>
-        </Link>
-
-        <nav className="flex flex-row items-center gap-[4px] shrink-0">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={`px-[16px] py-[8px] text-[14px] font-[600] rounded-[20px] transition-all duration-150 shrink-0 no-underline ${
-                location.pathname === item.path
-                  ? "bg-[#d87c5a] text-white"
-                  : "text-[#111] hover:bg-[#f5f5f5]"
-              }`}
+        </div>
+        <nav className="flex items-center gap-1">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `rounded-full px-4 py-2 text-[14px] font-semibold transition-colors duration-200 ${
+                  isActive
+                    ? "bg-[#de7e52] text-white"
+                    : "text-[#1f1f1f] hover:bg-[#f7e9df] hover:text-[#de7e52]"
+                }`
+              }
             >
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
-      </div>
-    </header>
+      </header>
+    </div>
   );
-};
-
-export default NavBar;
+}
