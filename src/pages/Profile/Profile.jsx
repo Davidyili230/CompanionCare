@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { updateProfile, updateEmail, updatePassword } from "firebase/auth";
+import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, storage } from "../../firebase/firebase";
 
@@ -10,8 +10,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const [displayName, setDisplayName] = useState(user?.displayName || "");
-  const [newEmail, setNewEmail] = useState(user?.email || "");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [photoPreview, setPhotoPreview] = useState(user?.photoURL || null);
@@ -37,6 +36,11 @@ export default function Profile() {
       return;
     }
 
+    if (newPassword && !currentPassword) {
+      setError("Please enter your current password to set a new one.");
+      return;
+    }
+
     setSaving(true);
     try {
       const firebaseUser = auth.currentUser;
@@ -49,26 +53,33 @@ export default function Profile() {
       }
 
       const profileUpdates = {};
-      if (displayName !== user?.displayName) profileUpdates.displayName = displayName;
       if (photoURL !== user?.photoURL) profileUpdates.photoURL = photoURL;
       if (Object.keys(profileUpdates).length > 0) {
         await updateProfile(firebaseUser, profileUpdates);
       }
 
-      if (newEmail !== user?.email) {
-        await updateEmail(firebaseUser, newEmail);
-      }
-
       if (newPassword) {
+        const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword);
+        await reauthenticateWithCredential(firebaseUser, credential);
         await updatePassword(firebaseUser, newPassword);
       }
 
       setSuccessMsg("Profile updated successfully.");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setPhotoFile(null);
     } catch (err) {
-      setError(err.message);
+      const code = err.code;
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setError("Current password is incorrect.");
+      } else if (code === "auth/weak-password") {
+        setError("New password must be at least 6 characters.");
+      } else if (code === "auth/too-many-requests") {
+        setError("Too many failed attempts. Please try again later.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
@@ -120,12 +131,6 @@ export default function Profile() {
                 onChange={handlePhotoChange}
               />
             </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-[#1f1f1f]">
-                {user?.displayName || "No display name set"}
-              </p>
-              <p className="text-sm text-[#888]">{user?.email}</p>
-            </div>
           </div>
 
           {/* Edit form */}
@@ -133,22 +138,12 @@ export default function Profile() {
             <h2 className="text-lg font-bold text-[#1f1f1f] mb-6">Edit Profile</h2>
             <form onSubmit={handleSave} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-[#555]">Display Name</label>
+                <label className="text-sm font-semibold text-[#555]">Current Password</label>
                 <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your name"
-                  className="rounded-xl border border-[#ecdcc8] px-4 py-2 text-sm outline-none focus:border-[#de7e52]"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-[#555]">Email</label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Required to change password"
                   className="rounded-xl border border-[#ecdcc8] px-4 py-2 text-sm outline-none focus:border-[#de7e52]"
                 />
               </div>
