@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../../firebase";
 import { useNavigate, Link } from "react-router-dom";
-import NavBar from "../components/Navbar/Navbar";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -40,9 +39,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FFF9F0] flex flex-col font-['Segoe_UI',_sans-serif]">
-
-      <NavBar />
+    <div className="w-full flex flex-col font-['Segoe_UI',_sans-serif]">
 
       <div className="flex flex-col items-center p-[20px] gap-[28px] box-border">
 
