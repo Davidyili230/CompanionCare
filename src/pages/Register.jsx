@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase/firebase";
+import { auth, db } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
 import NavBar from "../components/Navbar/Navbar";
 
@@ -51,16 +51,17 @@ export const Register = () => {
   };
 
   return (
-    /* BODY FRAME: Auto Layout | Vertical | Spacing 28px | Padding 20px */
-    <div className="min-h-screen w-full bg-[#fdf6ec] flex flex-col items-center p-[20px] gap-[28px] font-['Segoe_UI',_sans-serif] box-border">
+    <div className="min-h-screen w-full bg-[#FFF9F0] flex flex-col font-['Segoe_UI',_sans-serif]">
 
       <NavBar />
+
+      <div className="flex flex-col items-center p-[20px] gap-[28px] box-border">
 
       {/* CENTER BRAND */}
       <div className="flex flex-col items-center gap-[12px] shrink-0">
         <div className="w-[96px] h-[96px] shrink-0 flex items-center justify-center">
           <img
-            src="/Logo.png"
+            src="public/Logo.PNG"
             alt="Main Logo"
             className="w-full h-full object-contain"
           />
@@ -149,6 +150,7 @@ export const Register = () => {
           </Link>
         </div>
       </main>
+      </div>
     </div>
   );
 };
