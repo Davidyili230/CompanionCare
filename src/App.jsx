@@ -9,7 +9,7 @@ import Adopt from "./pages/Adopt/Adopt";
 import Missing from "./pages/Missing/Missing";
 import Profile from "./pages/Profile/Profile";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import MyPet from "./pages/MyPet/MyPet";
+import MyPet from "./pages/MyPet/MyPetPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Layout() {
