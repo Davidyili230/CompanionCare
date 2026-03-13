@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar/Navbar";
 import PetCard from "../components/PetCard";
 import AddPetEmptyCard from "../components/AddPetEmptyCard";
 import PetWorkspaceTabs from "../components/PetWorkspaceTabs";
