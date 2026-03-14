@@ -1,3 +1,5 @@
+
+
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import Community from "./pages/Community/Community";
 import HistoryTable from "./HistoryTable";
@@ -11,6 +13,15 @@ import Profile from "./pages/Profile/Profile";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MyPet from "./pages/MyPet/MyPetPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Need a to re-add a way to go to the PetAdoptionHomePage
+import PetAdoptionHomePage from "./petAdoption/PetAdoptionHomePage"
+import LostPet from "./LostPet/LostPet"
+import AdoptPet from "./AdoptPet/AdoptPet"
+
+import LostPetReport from "./LostPet/Report"
+import PetDetails from "./LostPet/PetDetails"
+
 
 function Layout() {
   return (
@@ -34,6 +45,12 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/adopt" element={<ProtectedRoute><Adopt /></ProtectedRoute>} />
         <Route path="/missing" element={<ProtectedRoute><Missing /></ProtectedRoute>} />
+        {/* <Route path="/" element={<PetAdoptionHomePage />} />  */}
+        <Route path="/AdoptPet" element={<AdoptPet/>} />
+        <Route path="/LostPet" element={<LostPet/>} /> 
+        <Route path="/LostPetReport" element={<LostPetReport/>} />
+        <Route path="/PetDetails" element={<PetDetails/>} />
+
         <Route path="/history" element={
           <ProtectedRoute>
             <>
