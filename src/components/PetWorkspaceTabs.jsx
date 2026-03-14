@@ -12,10 +12,13 @@ export default function PetWorkspaceTabs({
   selectedPet,
   draftPet,
   onDraftPetChange,
+  onFieldBlur,
   onStartAddPet,
   onSavePet,
   onAddSupplement,
   suggestions = [],
+  errors = {},
+  touched = {},
 }) {
   const [activeTab, setActiveTab] = useState("add-pet");
   const tabRefs = useRef([]);
@@ -119,7 +122,10 @@ export default function PetWorkspaceTabs({
           embedded
           petData={draftPet}
           onPetChange={onDraftPetChange}
+          onFieldBlur={onFieldBlur}
           onSavePet={onSavePet}
+          errors={errors}
+          touched={touched}
         />
       </div>
 
