@@ -1,9 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
 import PetWorkspaceTabs from "../../components/PetWorkspaceTabs";
 import RecommendedDosagePanel from "../../components/RecommendedDosagePanel";
 import { calcDosageItems } from "../../utils/dosageCalculator";
+import {
+  savePet,
+  subscribeToPets,
+  deletePet,
+  subscribeToSupplements,
+  saveSupplement,
+  deleteSupplement,
+} from "../../services/petService";
+import { auth } from "../../firebase.js";
 
 const EMPTY_PET = {
   id: null,
@@ -58,11 +68,14 @@ function getAgeFromBirthDate(birthDate) {
 
 export default function MyPetPage() {
   const [pets, setPets] = useState([]);
+  const [supplements, setSupplements] = useState([]);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [draftPet, setDraftPet] = useState(EMPTY_PET);
   const [formMode, setFormMode] = useState("add");
+  const [authReady, setAuthReady] = useState(false);
+  const [currentUid, setCurrentUid] = useState(null);
 
   const addPetSectionRef = useRef(null);
 
@@ -87,6 +100,53 @@ export default function MyPetPage() {
     setTouched({});
   }, [selectedPet, formMode]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUid(user?.uid ?? null);
+      setAuthReady(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    if (!currentUid) {
+      setPets([]);
+      setSelectedPetId(null);
+      return;
+    }
+
+    const unsubscribe = subscribeToPets((list) => {
+      setPets(list);
+
+      setSelectedPetId((prevSelectedPetId) => {
+        if (!list.length) return null;
+
+        const stillExists = list.some((pet) => pet.id === prevSelectedPetId);
+        if (stillExists) return prevSelectedPetId;
+
+        return list[0].id;
+      });
+    });
+
+    return () => unsubscribe();
+  }, [authReady, currentUid]);
+
+  useEffect(() => {
+    if (!authReady || !currentUid || !selectedPetId) {
+      setSupplements([]);
+      return;
+    }
+
+    const unsubscribe = subscribeToSupplements(selectedPetId, (list) => {
+      setSupplements(list);
+    });
+
+    return () => unsubscribe();
+  }, [authReady, currentUid, selectedPetId]);
+
   function validatePetForm(pet) {
     const nextErrors = {};
 
@@ -94,14 +154,15 @@ export default function MyPetPage() {
     const ageValue = String(pet.age ?? "").trim();
     const birthDateValue = String(pet.birthDate ?? "").trim();
 
-    // weight is required
     if (!weightValue) {
       nextErrors.weight = "Weight is required.";
-    } else if (!Number.isFinite(Number(weightValue)) || Number(weightValue) <= 0) {
+    } else if (
+      !Number.isFinite(Number(weightValue)) ||
+      Number(weightValue) <= 0
+    ) {
       nextErrors.weight = "Please enter a valid weight.";
     }
 
-    // age / birthDate validation - at least one is required, and both must be valid if provided
     if (!ageValue && !birthDateValue) {
       nextErrors.age = "Please enter age or birth date.";
       nextErrors.birthDate = "Please enter age or birth date.";
@@ -152,12 +213,10 @@ export default function MyPetPage() {
       return next;
     });
 
-    // 用户一旦修改字段，就先清掉对应错误
     setErrors((prev) => {
       const nextErrors = { ...prev };
       delete nextErrors[field];
 
-      // age / birthDate 是联动字段，改一个时两个 warning 都清掉
       if (field === "age" || field === "birthDate") {
         delete nextErrors.age;
         delete nextErrors.birthDate;
@@ -203,7 +262,7 @@ export default function MyPetPage() {
     setFormMode("edit");
   }
 
-  function handleAddPet(newPet) {
+  async function handleAddPet(newPet) {
     const petToValidate = {
       ...EMPTY_PET,
       ...draftPet,
@@ -223,36 +282,65 @@ export default function MyPetPage() {
       return;
     }
 
-    const petToSave = {
-      ...EMPTY_PET,
-      ...draftPet,
-      ...newPet,
-      id: newPet?.id ?? draftPet?.id ?? crypto.randomUUID(),
-      weight:
-        petToValidate.weight === "" || petToValidate.weight === null
-          ? ""
-          : Number(petToValidate.weight),
-      age:
-        petToValidate.age === "" || petToValidate.age === null
-          ? ""
-          : Number(petToValidate.age),
-    };
+    try {
+      const petId = await savePet(petToValidate);
 
-    setPets((prev) => {
-      const exists = prev.some((pet) => pet.id === petToSave.id);
+      setSelectedPetId(petId);
+      setFormMode("add");
+      setDraftPet(EMPTY_PET);
+      setErrors({});
+      setTouched({});
+    } catch (error) {
+      console.error("Error saving pet:", error);
+      alert("Failed to save pet. Please try again.");
+    }
+  }
 
-      if (exists) {
-        return prev.map((pet) => (pet.id === petToSave.id ? petToSave : pet));
+  async function handleDeletePet(petId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this pet?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePet(petId);
+
+      if (selectedPetId === petId) {
+        setSelectedPetId(null);
       }
 
-      return [...prev, petToSave];
-    });
+      setDraftPet((prev) => (prev.id === petId ? EMPTY_PET : prev));
+      setFormMode("add");
+      setErrors({});
+      setTouched({});
+    } catch (error) {
+      console.error("Error deleting pet:", error);
+      alert("Failed to delete pet. Please try again.");
+    }
+  }
 
-    setSelectedPetId(petToSave.id);
-    setFormMode("add");
-    setDraftPet(EMPTY_PET);
-    setErrors({});
-    setTouched({});
+  async function handleAddSupplement(newSupplement) {
+    if (!selectedPetId) {
+      alert("Please select a pet first.");
+      return;
+    }
+
+    try {
+      await saveSupplement(selectedPetId, newSupplement);
+    } catch (error) {
+      console.error("Error saving supplement:", error);
+      alert("Failed to save supplement. Please try again.");
+    }
+  }
+
+  async function handleDeleteSupplement(supplementId) {
+    try {
+      await deleteSupplement(supplementId);
+    } catch (error) {
+      console.error("Error deleting supplement:", error);
+      alert("Failed to delete supplement. Please try again.");
+    }
   }
 
   const hasDraftInput = Boolean(
@@ -274,10 +362,6 @@ export default function MyPetPage() {
 
   const suggestions = [];
 
-  function handleAddSupplement(newSupplement) {
-    console.log("New supplement:", newSupplement);
-  }
-
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
       <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
@@ -290,14 +374,19 @@ export default function MyPetPage() {
             {pets.length === 0 ? (
               <AddPetEmptyCard onClick={handleStartAddPet} />
             ) : (
-              pets.map((pet) => (
-                <PetCard
-                  key={pet.id}
-                  pet={pet}
-                  selected={selectedPetId === pet.id}
-                  onClick={handleSelectPet}
-                />
-              ))
+              <>
+                {pets.map((pet) => (
+                  <PetCard
+                    key={pet.id}
+                    pet={pet}
+                    selected={selectedPetId === pet.id}
+                    onClick={handleSelectPet}
+                    onDelete={handleDeletePet}
+                  />
+                ))}
+
+                <AddPetEmptyCard onClick={handleStartAddPet} />
+              </>
             )}
           </div>
         </section>
@@ -309,11 +398,13 @@ export default function MyPetPage() {
           <PetWorkspaceTabs
             selectedPet={selectedPet}
             draftPet={draftPet}
+            supplements={supplements}
             onDraftPetChange={handleDraftPetChange}
             onFieldBlur={handleFieldBlur}
             onStartAddPet={handleStartAddPet}
             onSavePet={handleAddPet}
             onAddSupplement={handleAddSupplement}
+            onDeleteSupplement={handleDeleteSupplement}
             suggestions={suggestions}
             errors={errors}
             touched={touched}

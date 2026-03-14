@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 
 const supplementUnitOptions = ["mg", "g", "IU"];
-const frequencyOptions = ["daily", "twice daily", "weekly", "monthly", "as needed"];
+const frequencyOptions = [
+  "daily",
+  "twice daily",
+  "weekly",
+  "monthly",
+  "as needed",
+];
 
 function createInitialForm(selectedPet) {
   return {
     selectedPetId: selectedPet?.id ?? "",
     selectedPetName: selectedPet?.name ?? "",
-    supplementName: "",
+    name: "",
+    brand: "",
     dosage: "",
     unit: "mg",
     frequency: "",
@@ -24,6 +31,7 @@ export default function AddSupplementForm({
 }) {
   const [form, setForm] = useState(createInitialForm(selectedPet));
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -43,15 +51,15 @@ export default function AddSupplementForm({
     }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!form.selectedPetName.trim()) {
+    if (!form.selectedPetId || !form.selectedPetName.trim()) {
       setError("Please select a pet first.");
       return;
     }
 
-    if (!form.supplementName.trim()) {
+    if (!form.name.trim()) {
       setError("Please enter a supplement name.");
       return;
     }
@@ -66,30 +74,42 @@ export default function AddSupplementForm({
         typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : String(Date.now()),
-      petId: form.selectedPetId || null,
+      petId: form.selectedPetId,
       petName: form.selectedPetName.trim(),
-      supplementName: form.supplementName.trim(),
-      dosage: form.dosage === "" ? null : Number(form.dosage),
+      name: form.name.trim(),
+      brand: form.brand.trim(),
+      dosage:
+        form.dosage === ""
+          ? ""
+          : `${String(form.dosage).trim()} ${form.unit.trim() || "mg"}`,
       unit: form.unit.trim() || "mg",
       frequency: form.frequency.trim(),
       timeOfDay: form.timeOfDay.trim(),
       startDate: form.startDate.trim(),
       notes: form.notes.trim(),
-      createdAt: new Date().toISOString(),
     };
 
-    onAddSupplement?.(payload);
+    try {
+      setIsSaving(true);
+      await onAddSupplement?.(payload);
 
-    setForm((prev) => ({
-      ...prev,
-      supplementName: "",
-      dosage: "",
-      unit: "mg",
-      frequency: "",
-      timeOfDay: "",
-      startDate: "",
-      notes: "",
-    }));
+      setForm((prev) => ({
+        ...prev,
+        name: "",
+        brand: "",
+        dosage: "",
+        unit: "mg",
+        frequency: "",
+        timeOfDay: "",
+        startDate: "",
+        notes: "",
+      }));
+    } catch (err) {
+      console.error("Add supplement failed:", err);
+      setError("Failed to save supplement.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const inputClass =
@@ -114,10 +134,14 @@ export default function AddSupplementForm({
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-x-3 gap-y-3">
-        {/* Select Pet */}
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-2 gap-x-3 gap-y-3"
+      >
         <div className="col-span-2 flex flex-col gap-1">
-          <label className="text-xs font-semibold text-[#4f4b45]">Select Pet</label>
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Select Pet
+          </label>
           <input
             name="selectedPetName"
             value={form.selectedPetName}
@@ -128,21 +152,32 @@ export default function AddSupplementForm({
           />
         </div>
 
-        {/* Supplement name */}
         <div className="col-span-2 flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">
             Supplement name
           </label>
           <input
-            name="supplementName"
-            value={form.supplementName}
+            name="name"
+            value={form.name}
             onChange={handleChange}
             placeholder="e.g. Omega-3 Fish Oil"
             className={inputClass}
           />
         </div>
 
-        {/* Dosage */}
+        <div className="col-span-2 flex flex-col gap-1">
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Brand
+          </label>
+          <input
+            name="brand"
+            value={form.brand}
+            onChange={handleChange}
+            placeholder="e.g. Zesty Paws"
+            className={inputClass}
+          />
+        </div>
+
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Dosage</label>
           <input
@@ -154,7 +189,6 @@ export default function AddSupplementForm({
           />
         </div>
 
-        {/* Unit */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-[#4f4b45]">Unit</label>
           <select
@@ -171,9 +205,10 @@ export default function AddSupplementForm({
           </select>
         </div>
 
-        {/* Frequency */}
         <div className="col-span-2 flex flex-col gap-1">
-          <label className="text-xs font-semibold text-[#4f4b45]">Frequency</label>
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Frequency
+          </label>
           <select
             name="frequency"
             value={form.frequency}
@@ -189,9 +224,10 @@ export default function AddSupplementForm({
           </select>
         </div>
 
-        {/* Time of day */}
         <div className="col-span-2 flex flex-col gap-1">
-          <label className="text-xs font-semibold text-[#4f4b45]">Time of day</label>
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Time of day
+          </label>
           <input
             name="timeOfDay"
             value={form.timeOfDay}
@@ -201,21 +237,23 @@ export default function AddSupplementForm({
           />
         </div>
 
-        {/* Start Date */}
         <div className="col-span-2 flex flex-col gap-1">
-          <label className="text-xs font-semibold text-[#4f4b45]">Start Date</label>
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Start Date
+          </label>
           <input
+            type="date"
             name="startDate"
             value={form.startDate}
             onChange={handleChange}
-            placeholder="e.g. Today, or choose a date"
             className={inputClass}
           />
         </div>
 
-        {/* Notes */}
         <div className="col-span-2 flex flex-col gap-1">
-          <label className="text-xs font-semibold text-[#4f4b45]">Notes (optional)</label>
+          <label className="text-xs font-semibold text-[#4f4b45]">
+            Notes (optional)
+          </label>
           <textarea
             name="notes"
             value={form.notes}
@@ -226,18 +264,17 @@ export default function AddSupplementForm({
           />
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
-          disabled={!selectedPet}
+          disabled={!selectedPet || isSaving}
           className={[
             "col-span-2 justify-self-center rounded-full px-6 py-2 font-semibold transition",
-            selectedPet
-              ? "bg-[#d87c5a] text-white hover:opacity-95"
-              : "cursor-not-allowed bg-[#efc4b1] text-[#7f7770]",
+            !selectedPet || isSaving
+              ? "cursor-not-allowed bg-[#efc4b1] text-[#7f7770]"
+              : "bg-[#d87c5a] text-white hover:opacity-95",
           ].join(" ")}
         >
-          + Add this supplement
+          {isSaving ? "Saving..." : "+ Add this supplement"}
         </button>
       </form>
     </div>
