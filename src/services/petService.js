@@ -220,16 +220,19 @@ export async function saveSupplement(petId, supplement) {
       ? crypto.randomUUID()
       : String(Date.now()));
 
-  const payload = {
+    const payload = {
     petId,
     ownerUid: uid,
     name: supplement.name?.trim() || "",
     brand: supplement.brand?.trim() || "",
     dosage: supplement.dosage?.trim() || "",
+    unit: supplement.unit?.trim() || "",
     frequency: supplement.frequency?.trim() || "",
+    timeOfDay: supplement.timeOfDay?.trim() || "",
+    startDate: supplement.startDate?.trim() || "",
     notes: supplement.notes?.trim() || "",
     updatedAt: serverTimestamp(),
-  };
+    };
 
   if (!supplement.id) {
     payload.createdAt = serverTimestamp();
