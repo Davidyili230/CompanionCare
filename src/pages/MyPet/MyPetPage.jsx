@@ -58,6 +58,8 @@ function getAgeFromBirthDate(birthDate) {
 
 export default function MyPetPage() {
   const [pets, setPets] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [draftPet, setDraftPet] = useState(EMPTY_PET);
   const [formMode, setFormMode] = useState("add");
@@ -80,7 +82,51 @@ export default function MyPetPage() {
     } else {
       setDraftPet(EMPTY_PET);
     }
+
+    setErrors({});
+    setTouched({});
   }, [selectedPet, formMode]);
+
+  function validatePetForm(pet) {
+    const nextErrors = {};
+
+    const weightValue = String(pet.weight ?? "").trim();
+    const ageValue = String(pet.age ?? "").trim();
+    const birthDateValue = String(pet.birthDate ?? "").trim();
+
+    // weight is required
+    if (!weightValue) {
+      nextErrors.weight = "Weight is required.";
+    } else if (!Number.isFinite(Number(weightValue)) || Number(weightValue) <= 0) {
+      nextErrors.weight = "Please enter a valid weight.";
+    }
+
+    // age / birthDate validation - at least one is required, and both must be valid if provided
+    if (!ageValue && !birthDateValue) {
+      nextErrors.age = "Please enter age or birth date.";
+      nextErrors.birthDate = "Please enter age or birth date.";
+    } else {
+      if (ageValue) {
+        const ageNumber = Number(ageValue);
+        if (!Number.isFinite(ageNumber) || ageNumber < 0) {
+          nextErrors.age = "Please enter a valid age.";
+        }
+      }
+
+      if (birthDateValue) {
+        const dob = new Date(`${birthDateValue}T12:00:00`);
+        const today = new Date();
+
+        if (Number.isNaN(dob.getTime())) {
+          nextErrors.birthDate = "Please enter a valid birth date.";
+        } else if (dob > today) {
+          nextErrors.birthDate = "Birth date cannot be in the future.";
+        }
+      }
+    }
+
+    return nextErrors;
+  }
 
   function handleDraftPetChange(field, value) {
     setDraftPet((prev) => {
@@ -105,11 +151,46 @@ export default function MyPetPage() {
 
       return next;
     });
+
+    // 用户一旦修改字段，就先清掉对应错误
+    setErrors((prev) => {
+      const nextErrors = { ...prev };
+      delete nextErrors[field];
+
+      // age / birthDate 是联动字段，改一个时两个 warning 都清掉
+      if (field === "age" || field === "birthDate") {
+        delete nextErrors.age;
+        delete nextErrors.birthDate;
+      }
+
+      return nextErrors;
+    });
+  }
+
+  function handleFieldBlur(field) {
+    setTouched((prev) => {
+      if (field === "age" || field === "birthDate") {
+        return {
+          ...prev,
+          age: true,
+          birthDate: true,
+        };
+      }
+
+      return {
+        ...prev,
+        [field]: true,
+      };
+    });
+
+    setErrors(validatePetForm(draftPet));
   }
 
   function handleStartAddPet() {
     setFormMode("add");
     setDraftPet(EMPTY_PET);
+    setErrors({});
+    setTouched({});
 
     addPetSectionRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -123,19 +204,38 @@ export default function MyPetPage() {
   }
 
   function handleAddPet(newPet) {
+    const petToValidate = {
+      ...EMPTY_PET,
+      ...draftPet,
+      ...newPet,
+    };
+
+    const validationErrors = validatePetForm(petToValidate);
+
+    setErrors(validationErrors);
+    setTouched({
+      weight: true,
+      age: true,
+      birthDate: true,
+    });
+
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
     const petToSave = {
       ...EMPTY_PET,
       ...draftPet,
       ...newPet,
       id: newPet?.id ?? draftPet?.id ?? crypto.randomUUID(),
       weight:
-        draftPet.weight === "" || draftPet.weight === null
+        petToValidate.weight === "" || petToValidate.weight === null
           ? ""
-          : Number(draftPet.weight),
+          : Number(petToValidate.weight),
       age:
-        draftPet.age === "" || draftPet.age === null
+        petToValidate.age === "" || petToValidate.age === null
           ? ""
-          : Number(draftPet.age),
+          : Number(petToValidate.age),
     };
 
     setPets((prev) => {
@@ -151,6 +251,8 @@ export default function MyPetPage() {
     setSelectedPetId(petToSave.id);
     setFormMode("add");
     setDraftPet(EMPTY_PET);
+    setErrors({});
+    setTouched({});
   }
 
   const hasDraftInput = Boolean(
@@ -208,10 +310,13 @@ export default function MyPetPage() {
             selectedPet={selectedPet}
             draftPet={draftPet}
             onDraftPetChange={handleDraftPetChange}
+            onFieldBlur={handleFieldBlur}
             onStartAddPet={handleStartAddPet}
             onSavePet={handleAddPet}
             onAddSupplement={handleAddSupplement}
             suggestions={suggestions}
+            errors={errors}
+            touched={touched}
           />
 
           <div className="self-start">
