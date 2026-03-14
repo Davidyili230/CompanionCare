@@ -45,7 +45,7 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/adopt" element={<ProtectedRoute><Adopt /></ProtectedRoute>} />
         <Route path="/missing" element={<ProtectedRoute><Missing /></ProtectedRoute>} />
-        <Route path="/PetAdoptionPage" element={<PetAdoptionHomePage />} /> 
+        <Route path="/PetAdoptionHomePage" element={<PetAdoptionHomePage />} /> 
         <Route path="/AdoptPet" element={<AdoptPet/>} />
         <Route path="/LostPet" element={<LostPet/>} /> 
         <Route path="/LostPetReport" element={<LostPetReport/>} />
