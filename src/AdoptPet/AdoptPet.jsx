@@ -1,33 +1,33 @@
 
+
 import styles from "./AdoptPet.module.css"
+
+import AdoptablePets from "./AdoptablePets.json"
 
 import { useState } from "react"
 
 
-function Card({ img }) {
+function Card({ pet }) {
     return (
         <div className={styles.animalCard}>
             <div className={styles.imageContainer}>
-                <img src={img} alt="pet image"/>
+                <img src={pet.img} alt="pet image"/>
             </div>
             <div className={styles.animalCardBody}>
                 <div className={styles.petNameAgeContainer}>
-                    <span className={styles.petNameText}>Fluffy</span>
-                    <span className={styles.petAgeText}>1 years old</span>
+                    <span className={styles.petNameText}>{pet.name}</span>
+                    <span className={styles.petAgeText}>{pet.age}</span>
                 </div>
                 <div className={styles.petTypeInfoContainer}>
-                    <span className={styles.petSpeciesText}>Golden Retriever</span>
-                    <span className={styles.petBreedText}>Dog</span>
+                    <span className={styles.petSpeciesText}>{pet.breed}</span>
+                    <span className={styles.petBreedText}>{pet.species}</span>
                 </div>
                 <div className={styles.petLocationContainer}>
-                    <span>Location</span>
+                    <span>{pet.location}</span>
                 </div>
                 <div className={styles.petNotesContainer}>
                     <span>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                        Aut dolore necessitatibus odio labore sed iusto dolor in tempore quibusdam,
-                        magni saepe quod voluptatibus maiores, aliquam commodi ducimus blanditiis, 
-                        architecto distinctio?
+                        {pet.notes}
                     </span>
                 </div>
             </div>
@@ -75,18 +75,11 @@ export default function AdoptPet() {
             
             {/* Filler image cards. Replace when database is set up */}
             <div className={styles.cardContainer}>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/cat.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
-                <Card img="./animalImgs/golden-retriever.webp"/>
+                {
+                    AdoptablePets.map((adoptablePet) => (
+                        <Card key={adoptablePet.id} pet={adoptablePet}/>
+                    ))
+                }
             </div>
         </div>
     )
