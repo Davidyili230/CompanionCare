@@ -20,7 +20,6 @@ import LostPet from "./LostPet/LostPet"
 import AdoptPet from "./AdoptPet/AdoptPet"
 
 import LostPetReport from "./LostPet/Report"
-import PetDetails from "./LostPet/PetDetails"
 
 
 function Layout() {
@@ -49,7 +48,6 @@ export default function App() {
         <Route path="/AdoptPet" element={<AdoptPet/>} />
         <Route path="/LostPet" element={<LostPet/>} /> 
         <Route path="/LostPetReport" element={<LostPetReport/>} />
-        <Route path="/PetDetails" element={<PetDetails/>} />
 
         <Route path="/history" element={
           <ProtectedRoute>
