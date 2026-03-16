@@ -70,14 +70,20 @@
     border-top: 1px solid rgb(186, 146, 146);
     padding-top: 5px;
     font-size: 14px;
+    height: 80px;
+    overflow-y: scroll;
 }
+
 /* ========== Search Bar ========== */
-.searchContainer {
+
+.SearchAndFilter {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+}
+
+.searchContainer {
     margin-bottom: 20px;
     margin-top: 15px;
 }
@@ -111,6 +117,10 @@
 }
 
 /* ========== Filter Button ========== */
+.filterButtonContainer {
+    margin-bottom: 20px;
+}
+
 .filterButton {
     display: flex;
     border: none;
