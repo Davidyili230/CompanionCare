@@ -35,35 +35,98 @@ function Card({ pet }) {
     )
 }
 
-function SearchBar() {
-    const [userInput, setUserInput] = useState('');
+function SearchAndFilterUI({ setSearchQuery, setPetFilter }) {
+    return (
+        <div className={styles.SearchAndFilter}>
+            <SearchBar setSearchQuery={setSearchQuery}/>
+            <FilterUI setPetFilter={setPetFilter}/>
+        </div>
+    )
+}
 
-    const handleInputChange = (e) => {
-        setUserInput(e.target.value);
+function SearchBar({ setSearchQuery }) {
+
+    const [userSearch, setUserSearch] = useState("");
+
+    const handleUserSearchChange = (e) => {
+        setUserSearch(e.target.value);
+    }
+
+    const handleSearchQueryChange = (e) => {
+        e.preventDefault();
+        setSearchQuery(userSearch)
     }
 
     return (
         <div className={styles.searchContainer}>
             <div className={styles.searchInput}>
-                <input
-                    type="text"
-                    placeholder="Search"
-                    value={userInput}
-                    onChange={handleInputChange}
+                <form onSubmit={handleSearchQueryChange}>
+                    <input
+                        type="text"
+                        placeholder="Search by name or breed"
+                        value={userSearch}
+                        onChange={handleUserSearchChange}
+                    />
+                </form>
+
+                <img 
+                    src="./searchBarIcons/searchIcon.png" 
+                    alt="magnifying glass"
+                    onClick={handleSearchQueryChange}
                 />
-
-
-                <img src="./searchBarIcons/searchIcon.png" alt="magnifying glass"/>
             </div>
+        </div>
+    )
+}
 
-            <button className={styles.filterButton}>
+function FilterUI({ setPetFilter }) {
+    const [showFilters, setShowFilters] = useState(false);
+
+    const handlePetFilterChanger = (selectedFilter) => {
+        setPetFilter(selectedFilter);
+    }
+
+    return (
+        <div className={styles.filterButtonContainer}>
+            <button 
+                className={styles.filterButton}
+                onClick={() => setShowFilters(!showFilters)}
+            >
                 Filter
             </button>
+
+            {showFilters && (
+                <div className={styles.filterDisplayContainer}> 
+                    <button onClick={() => handlePetFilterChanger('none')}>Reset</button>
+                    <button onClick={() => handlePetFilterChanger('dog')}> Dogs</button>
+                    <button onClick={() => handlePetFilterChanger('cat')}>Cats</button>
+                </div>
+            )}
         </div>
     )
 }
 
 export default function AdoptPet() {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [petFilter, setPetFilter] = useState("none");
+    
+    const displayedAdoptablePets = AdoptablePets.filter((adoptablePet) => {
+        const query = searchQuery.toLowerCase();
+
+        const matchesSearch = (
+            searchQuery == "" || 
+            adoptablePet.name.toLowerCase().includes(query) || 
+            adoptablePet.breed.toLowerCase().includes(query)
+        );
+
+        const matchesFilter = (
+            petFilter == "none" ||
+            adoptablePet.species.toLowerCase() == petFilter
+        );
+
+        return matchesSearch && matchesFilter;
+    });
+
     return (
         <div className={styles.adoptPetContainer}>
 
@@ -71,14 +134,17 @@ export default function AdoptPet() {
                 <div className={styles.titleContainer}>Adopt Pet</div>
             </h2>
 
-            <SearchBar/>
+            <SearchAndFilterUI
+                setSearchQuery={setSearchQuery}
+                setPetFilter={setPetFilter}
+            />
             
             {/* Filler image cards. Replace when database is set up */}
             <div className={styles.cardContainer}>
                 {
-                    AdoptablePets.map((adoptablePet) => (
-                        <Card key={adoptablePet.id} pet={adoptablePet}/>
-                    ))
+                    displayedAdoptablePets.map((adoptablePet) => {
+                        return <Card key={adoptablePet.id} pet={adoptablePet}/> 
+                    })
                 }
             </div>
         </div>
