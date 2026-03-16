@@ -39,6 +39,16 @@ function HistoryTable() {
     URL.revokeObjectURL(url);
   };
 
+  const inputStyle = {
+    padding: "8px 12px",
+    borderRadius: 10,
+    border: "1.5px solid #F0E8DF",
+    background: "#fff",
+    fontSize: 13,
+    color: "#2C1810",
+    outline: "none",
+  };
+
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: "#f5f0e8" }}>
       <h2 className="text-2xl font-bold mb-6" style={{ color: "#5a3e2b" }}>Intake History</h2>

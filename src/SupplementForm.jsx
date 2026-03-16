@@ -10,6 +10,7 @@ function SupplementForm() {
     scheduled: "",
     status: "",
   });
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,11 +23,24 @@ function SupplementForm() {
         ...formData,
         dateTime: new Date().toLocaleString(),
       });
-      alert("Supplement logged!");
+      setSuccess(true);
       setFormData({ pet: "", supplement: "", dosage: "", scheduled: "", status: "" });
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error("Error adding document: ", error);
     }
+  };
+
+  const inputStyle = {
+    width: "100%",
+    padding: "10px 14px",
+    borderRadius: 10,
+    border: "1.5px solid #F0E8DF",
+    background: "#fff",
+    fontSize: 14,
+    color: "#2C1810",
+    outline: "none",
+    boxSizing: "border-box",
   };
 
   return (
