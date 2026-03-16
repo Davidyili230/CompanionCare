@@ -16,14 +16,15 @@ function Card({ pet }) {
             <div className={styles.animalCardBody}>
                 <div className={styles.petNameAgeContainer}>
                     <span className={styles.petNameText}>{pet.name}</span>
-                    <span className={styles.petAgeText}>{pet.age}</span>
+                    <span className={styles.petAgeText}>{pet.age} years old</span>
                 </div>
                 <div className={styles.petTypeInfoContainer}>
                     <span className={styles.petSpeciesText}>{pet.breed}</span>
                     <span className={styles.petBreedText}>{pet.species}</span>
                 </div>
                 <div className={styles.petLocationContainer}>
-                    <span>{pet.location}</span>
+                    <span>{`${pet.city}, ${pet.state}`}</span>
+                    <span>{`${pet.address}`}</span>
                 </div>
                 <div className={styles.petNotesContainer}>
                     <span>
@@ -35,11 +36,11 @@ function Card({ pet }) {
     )
 }
 
-function SearchAndFilterUI({ setSearchQuery, setPetFilter }) {
+function SearchAndFilterUI({ setSearchQuery, setPetFilter, setStateFilter }) {
     return (
         <div className={styles.SearchAndFilter}>
             <SearchBar setSearchQuery={setSearchQuery}/>
-            <FilterUI setPetFilter={setPetFilter}/>
+            <FilterUI setPetFilter={setPetFilter} setStateFilter={setStateFilter}/>
         </div>
     )
 }
@@ -79,11 +80,29 @@ function SearchBar({ setSearchQuery }) {
     )
 }
 
-function FilterUI({ setPetFilter }) {
+function FilterUI({ setPetFilter, setStateFilter }) {
     const [showFilters, setShowFilters] = useState(false);
+    const [selectedPetFilter, setSelectedPetFilter] = useState("all");
+    const [selectedStateFilter, setSelectedStateFilter] = useState("all");
+
 
     const handlePetFilterChanger = (selectedFilter) => {
-        setPetFilter(selectedFilter);
+        setSelectedPetFilter(selectedFilter);
+    }
+
+    const handlePetStateChanger = (selectedState) => {
+        setSelectedStateFilter(selectedState)
+    }
+
+    const handleResetFilters = () => {
+        setSelectedPetFilter("all");
+        setSelectedStateFilter("all");
+    }
+
+    const handleApplyFilters = () => {
+        setPetFilter(selectedPetFilter);
+        setStateFilter(selectedStateFilter);
+        setShowFilters(false)
     }
 
     return (
@@ -94,12 +113,81 @@ function FilterUI({ setPetFilter }) {
             >
                 Filter
             </button>
+    
 
             {showFilters && (
                 <div className={styles.filterDisplayContainer}> 
-                    <button onClick={() => handlePetFilterChanger('none')}>Reset</button>
-                    <button onClick={() => handlePetFilterChanger('dog')}> Dogs</button>
-                    <button onClick={() => handlePetFilterChanger('cat')}>Cats</button>
+
+                    <div className={styles.filterHeader}>
+                        <span>Filters</span>
+                        <button 
+                            className={styles.filterResetButton}
+                            onClick={handleResetFilters}
+                        >
+                            Reset all
+                        </button>
+                    </div>
+
+                    <div className={styles.filterSection}>
+                        <div className={styles.filterByTitle}>
+                            Animal Type
+                        </div>
+                        <div className={styles.filterButtonsContainer}>
+                            <button 
+                                onClick={() => handlePetFilterChanger('all')}
+                                className={`${selectedPetFilter == "all" ? styles.activeFilter : styles.inactiveFilter}`}
+                            >
+                                All
+                            </button>
+                            <button 
+                                onClick={() => handlePetFilterChanger('dog')}
+                                className={`${selectedPetFilter == "dog" ? styles.activeFilter : styles.inactiveFilter}`}
+                            > 
+                                Dogs
+                            </button>
+                            <button 
+                                onClick={() => handlePetFilterChanger('cat')}
+                                className={`${selectedPetFilter == "cat" ? styles.activeFilter : styles.inactiveFilter}`}
+                            >
+                                Cats
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className={styles.sectionDivider}/>
+
+                    <div className={styles.filterSection}>
+                        <div className={styles.filterByTitle}>
+                            State
+                        </div>
+                        <div className={styles.filterButtonsContainer}>
+                            <button 
+                                onClick={() => handlePetStateChanger('all')}
+                                className={`${selectedStateFilter == "all" ? styles.activeFilter : styles.inactiveFilter}`}
+                            >
+                                All
+                            </button>
+                            <button 
+                                onClick={() => handlePetStateChanger('NY')}
+                                className={`${selectedStateFilter == "NY" ? styles.activeFilter : styles.inactiveFilter}`}
+                            > 
+                                New York
+                            </button>
+                            <button 
+                                onClick={() => handlePetStateChanger('NJ')}
+                                className={`${selectedStateFilter == "NJ" ? styles.activeFilter : styles.inactiveFilter}`}
+                            >
+                                New Jersey
+                            </button>
+                        </div>
+                    </div>
+
+                    <button 
+                        className={styles.applyFilterButton}
+                        onClick={handleApplyFilters}
+                    >
+                        Apply Filters
+                    </button>
                 </div>
             )}
         </div>
@@ -107,8 +195,9 @@ function FilterUI({ setPetFilter }) {
 }
 
 export default function AdoptPet() {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [petFilter, setPetFilter] = useState("none");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [petFilter, setPetFilter] = useState("all");
+    const [stateFilter, setStateFilter] = useState("all")
     
     const displayedAdoptablePets = AdoptablePets.filter((adoptablePet) => {
         const query = searchQuery.toLowerCase();
@@ -119,12 +208,17 @@ export default function AdoptPet() {
             adoptablePet.breed.toLowerCase().includes(query)
         );
 
-        const matchesFilter = (
-            petFilter == "none" ||
+        const matchesPetFilter = (
+            petFilter == "all" ||
             adoptablePet.species.toLowerCase() == petFilter
         );
 
-        return matchesSearch && matchesFilter;
+        const matchesStateFilter = (
+            stateFilter === "all" ||
+            adoptablePet.state == stateFilter
+        )
+
+        return matchesSearch && matchesPetFilter && matchesStateFilter;
     });
 
     return (
@@ -137,6 +231,7 @@ export default function AdoptPet() {
             <SearchAndFilterUI
                 setSearchQuery={setSearchQuery}
                 setPetFilter={setPetFilter}
+                setStateFilter={setStateFilter}
             />
             
             {/* Filler image cards. Replace when database is set up */}
