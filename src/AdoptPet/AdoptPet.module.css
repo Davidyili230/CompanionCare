@@ -59,6 +59,8 @@
 }
 
 .petLocationContainer {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 10px;
 }
 
@@ -119,10 +121,13 @@
 /* ========== Filter Button ========== */
 .filterButtonContainer {
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .filterButton {
-    display: flex;
     border: none;
     border-radius: 15px;
     background-color: #FFB6B6;
@@ -141,6 +146,98 @@
     background: #FFF9F0;
     min-height: 100vh;
     padding-top: 50px;
+}
+
+/* ========== Filter Display ========== */
+
+.filterDisplayContainer {
+    border: 1px solid black;
+    border-radius: 12px;
+    margin-top: 10px;
+    background: white;
+    padding: 10px 20px;
+    width: 300px;
+}
+
+.filterHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.filterHeader span {
+    font-weight: bold;
+}
+
+.filterResetButton {
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 3px 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filterResetButton:hover {
+    transform: scale(1.03);
+}
+
+.filterSection div {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.filterButtonsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.filterButtonsContainer button {
+    border: 1px solid black;
+    border-radius: 12px;
+    /* background: transparent; */
+    padding: 5px 10px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filterButtonsContainer button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 3px 3px black;
+}
+
+.inactiveFilter {
+    background-color: white;
+}
+
+.activeFilter {
+    background-color:#efc3c3
+}
+
+.sectionDivider {
+    border: none;
+    border-top: 1px solid black;
+    margin: 12px 0px;
+}
+
+.applyFilterButton {
+    margin-top: 15px;
+    width: 100%;
+    padding: 5px 10px;
+    border: 1px solid black;
+    border-radius: 8px;
+    font-weight: bold;
+    background-color: white;
+    transition: all 0.3s ease; 
+    cursor: pointer;
+}
+
+.applyFilterButton:hover {
+    transform: scale(1.03);
+    box-shadow: 0 3px 5px black;
 }
 
 /* ========== Title ========== */
