@@ -14,6 +14,7 @@ import {
   deleteSupplement,
 } from "../../services/petService";
 import { auth } from "../../firebase.js";
+import { fetchEbayRecommendations } from "../../api/ebay.api";
 
 const EMPTY_PET = {
   id: null,
@@ -76,6 +77,10 @@ export default function MyPetPage() {
   const [formMode, setFormMode] = useState("add");
   const [authReady, setAuthReady] = useState(false);
   const [currentUid, setCurrentUid] = useState(null);
+
+  const [ebaySuggestions, setEbaySuggestions] = useState([]);
+  const [loadingEbaySuggestions, setLoadingEbaySuggestions] = useState(false);
+  const [ebaySuggestionError, setEbaySuggestionError] = useState("");
 
   const addPetSectionRef = useRef(null);
 
@@ -146,6 +151,78 @@ export default function MyPetPage() {
 
     return () => unsubscribe();
   }, [authReady, currentUid, selectedPetId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEbaySuggestions() {
+      if (!selectedPet?.species) {
+        setEbaySuggestions([]);
+        setEbaySuggestionError("");
+        return;
+      }
+
+      try {
+        setLoadingEbaySuggestions(true);
+        setEbaySuggestionError("");
+
+        const data = await fetchEbayRecommendations(selectedPet.species);
+
+        const normalized = (data.recommendations || []).map((entry) => {
+          const item = entry.item;
+
+          if (!item) {
+            return {
+              id: entry.bucket,
+              name: entry.label,
+              reason: "No matching item found.",
+              tag: entry.label,
+              note: "",
+              imageUrl: "",
+              link: "",
+            };
+          }
+
+          return {
+            id: entry.bucket,
+            name: item.title || entry.label,
+            reason: item.reason || "",
+            tag: entry.label,
+            note: [
+              item.price ? `Price: ${item.price}` : "",
+              item.seller ? `Seller: ${item.seller}` : "",
+              item.condition ? `Condition: ${item.condition}` : "",
+            ]
+              .filter(Boolean)
+              .join(" • "),
+            imageUrl: item.imageUrl || "",
+            link: item.detailPageUrl || "",
+          };
+        });
+
+        if (!cancelled) {
+          setEbaySuggestions(normalized);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setEbaySuggestions([]);
+          setEbaySuggestionError(
+            error.message || "Failed to load supplement suggestions."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingEbaySuggestions(false);
+        }
+      }
+    }
+
+    loadEbaySuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPet?.species]);
 
   function validatePetForm(pet) {
     const nextErrors = {};
@@ -360,12 +437,12 @@ export default function MyPetPage() {
     return calcDosageItems(dosageSourcePet);
   }, [dosageSourcePet]);
 
-  const suggestions = [];
+  const suggestions = ebaySuggestions;
 
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
       <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
-        <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
+        <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
@@ -406,6 +483,8 @@ export default function MyPetPage() {
             onAddSupplement={handleAddSupplement}
             onDeleteSupplement={handleDeleteSupplement}
             suggestions={suggestions}
+            suggestionLoading={loadingEbaySuggestions}
+            suggestionError={ebaySuggestionError}
             errors={errors}
             touched={touched}
           />

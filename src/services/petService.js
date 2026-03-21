@@ -10,13 +10,8 @@ import {
   writeBatch,
   deleteDoc,
 } from "firebase/firestore";
-import {
-  getDownloadURL,
-  ref,
-  uploadString,
-  deleteObject,
-} from "firebase/storage";
-import { auth, db, storage } from "../firebase.js";
+import { auth, db } from "../firebase.js";
+import { uploadPetAvatarToCloudinary } from "./PetCloudinary";
 
 function getCurrentUid() {
   const uid = auth.currentUser?.uid;
@@ -30,16 +25,6 @@ function getCurrentUid() {
 
 const petsCollection = collection(db, "pets");
 const supplementsCollection = collection(db, "supplements");
-
-async function uploadPetAvatar(uid, petId, imageDataUrl) {
-  if (!imageDataUrl || !imageDataUrl.startsWith("data:")) {
-    return "";
-  }
-
-  const avatarRef = ref(storage, `pets/${petId}/avatar`);
-  await uploadString(avatarRef, imageDataUrl, "data_url");
-  return await getDownloadURL(avatarRef);
-}
 
 /* ---------------- PET ---------------- */
 
@@ -66,12 +51,12 @@ export function subscribeToPets(callback) {
           healthConditions: data.healthConditions ?? "",
           image: data.imageUrl ?? "",
           imageUrl: data.imageUrl ?? "",
+          imagePublicId: data.imagePublicId ?? "",
           ownerUid: data.ownerUid ?? "",
           createdAt: data.createdAt ?? null,
         };
       });
 
-      // Perform sorting locally on the frontend to avoid Firestore composite index errors.
       pets.sort((a, b) => {
         const aTime = a.createdAt?.seconds ?? 0;
         const bTime = b.createdAt?.seconds ?? 0;
@@ -96,9 +81,12 @@ export async function savePet(pet) {
       : String(Date.now()));
 
   let imageUrl = pet.imageUrl || "";
+  let imagePublicId = pet.imagePublicId || "";
 
   if (pet.image?.startsWith("data:")) {
-    imageUrl = await uploadPetAvatar(uid, petId, pet.image);
+    const uploadResult = await uploadPetAvatarToCloudinary(uid, petId, pet.image);
+    imageUrl = uploadResult.url;
+    imagePublicId = uploadResult.publicId;
   }
 
   const payload = {
@@ -111,6 +99,7 @@ export async function savePet(pet) {
     birthDate: pet.birthDate || "",
     healthConditions: pet.healthConditions?.trim() || "",
     imageUrl,
+    imagePublicId,
     ownerUid: uid,
     updatedAt: serverTimestamp(),
   };
@@ -129,7 +118,6 @@ export async function savePet(pet) {
 export async function deletePet(petId) {
   const uid = getCurrentUid();
 
-  // 1. First, find the supplements corresponding to this pet.
   const supplementsQuery = query(
     supplementsCollection,
     where("ownerUid", "==", uid),
@@ -138,7 +126,6 @@ export async function deletePet(petId) {
 
   const supplementSnapshot = await getDocs(supplementsQuery);
 
-  // 2. Batch Delete: Supplements + Pets
   const batch = writeBatch(db);
 
   supplementSnapshot.forEach((docSnap) => {
@@ -148,14 +135,6 @@ export async function deletePet(petId) {
   batch.delete(doc(db, "pets", petId));
 
   await batch.commit();
-
-  // 3. Try deleting your avatar (it's fine if you don't have one).
-  try {
-    const avatarRef = ref(storage, `pets/${petId}/avatar`);
-    await deleteObject(avatarRef);
-  } catch (error) {
-    console.log("No avatar to delete or delete avatar failed:", error.message);
-  }
 }
 
 /* ---------------- SUPPLEMENT ---------------- */
@@ -220,7 +199,7 @@ export async function saveSupplement(petId, supplement) {
       ? crypto.randomUUID()
       : String(Date.now()));
 
-    const payload = {
+  const payload = {
     petId,
     ownerUid: uid,
     name: supplement.name?.trim() || "",
@@ -232,7 +211,7 @@ export async function saveSupplement(petId, supplement) {
     startDate: supplement.startDate?.trim() || "",
     notes: supplement.notes?.trim() || "",
     updatedAt: serverTimestamp(),
-    };
+  };
 
   if (!supplement.id) {
     payload.createdAt = serverTimestamp();
