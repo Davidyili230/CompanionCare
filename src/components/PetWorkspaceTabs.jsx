@@ -19,6 +19,8 @@ export default function PetWorkspaceTabs({
   onAddSupplement,
   onDeleteSupplement,
   suggestions = [],
+  suggestionLoading = false,
+  suggestionError = "",
   errors = {},
   touched = {},
 }) {
@@ -69,7 +71,7 @@ export default function PetWorkspaceTabs({
   }
 
   return (
-    <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
+    <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
       <div className="mb-4 overflow-x-auto">
         <div
           role="tablist"
@@ -160,45 +162,43 @@ export default function PetWorkspaceTabs({
                   No supplements added for this pet yet.
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                   {supplements.map((item) => (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-[#ecdcc8] bg-[#fffaf7] p-4"
+                      className="rounded-xl border border-[#ecdcc8] bg-[#fffaf7] p-3"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-[#1f1f1f]">
-                            {item.name || "Untitled Supplement"}
-                          </p>
-
-                          <div className="mt-2 space-y-1 text-sm text-[#5f5a55]">
-                            <p>
-                              <span className="font-medium">Brand:</span>{" "}
-                              {item.brand || "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium">Dosage:</span>{" "}
-                              {item.dosage || "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium">Frequency:</span>{" "}
-                              {item.frequency || "-"}
-                            </p>
-                            <p>
-                              <span className="font-medium">Notes:</span>{" "}
-                              {item.notes || "-"}
-                            </p>
-                          </div>
-                        </div>
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold text-[#1f1f1f]">
+                          {item.name || "Untitled Supplement"}
+                        </p>
 
                         <button
                           type="button"
                           onClick={() => onDeleteSupplement?.(item.id)}
-                          className="shrink-0 rounded-full border border-red-300 px-3 py-1 text-xs font-medium text-red-500 transition hover:bg-red-50"
+                          className="shrink-0 rounded-full border border-red-300 px-2.5 py-0.5 text-[11px] font-medium text-red-500 transition hover:bg-red-50"
                         >
                           Delete
                         </button>
+                      </div>
+
+                      <div className="space-y-1 text-sm text-[#5f5a55]">
+                        <p>
+                          <span className="font-medium">Brand:</span>{" "}
+                          {item.brand || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Dosage:</span>{" "}
+                          {item.dosage || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Frequency:</span>{" "}
+                          {item.frequency || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Notes:</span>{" "}
+                          {item.notes || "-"}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -210,6 +210,8 @@ export default function PetWorkspaceTabs({
               <SupplementSuggestionList
                 selectedPet={selectedPet}
                 suggestions={suggestions}
+                loading={suggestionLoading}
+                error={suggestionError}
               />
             </div>
           </>
