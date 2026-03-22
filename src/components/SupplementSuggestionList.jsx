@@ -13,7 +13,10 @@ export default function SupplementSuggestionList({
           Supplement Suggestion
         </h3>
         <p className="mt-1 text-sm text-[#6f655f]">
-          Recommendation for selected pet
+          Suggested products for the selected pet.
+        </p>
+        <p className="mt-1 text-xs text-[#8a7d75]">
+          For reference only. Consult your veterinarian before using any supplement.
         </p>
       </div>
 
@@ -31,7 +34,7 @@ export default function SupplementSuggestionList({
         </div>
       ) : !hasSuggestions ? (
         <div className="rounded-xl border border-[#f0d7c8] bg-white px-4 py-3 text-sm text-[#8a7d75]">
-          No data
+          No supplement suggestions available for this pet.
         </div>
       ) : (
         <div className="space-y-3">
