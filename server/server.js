@@ -3,7 +3,6 @@ import cors from "cors";
 import path from "path"
 import communityRoutes from "./routes/community.routes.js"
 import uploadRoutes from "./routes/upload.routes.js"
-import ebayRecommendationsRoute from "./routes/ebayRecommendations.js";
 
 const app = express();
 app.use(express.json()); //allow back to accept json type data // Ruifeng
@@ -23,7 +22,6 @@ const Upload_Dir = path.join(process.cwd(), "uploads")  //current working direct
 app.use("/uploads", express.static(Upload_Dir))
 app.use("/api/community", communityRoutes)
 app.use("/api/uploads", uploadRoutes)
-app.use("/api/ebay-recommendations", ebayRecommendationsRoute);
 
 
 const PORT = 8080;
