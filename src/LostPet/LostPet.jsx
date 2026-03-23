@@ -12,59 +12,75 @@ function MissingPetCard({ img }) {
     }
 
     return (
-        <div className={styles.displayedCard}>
-            <div className={`${styles.innerCard} ${isCardFlipped ? styles.flipped : ""}`}>
-                <div className={styles.frontCard}>
+        <div className="w-85 h-120 perspective">
+            <div 
+                className="relative w-full h-full transition-transform duration-700"
+                style={{
+                    transformStyle: "preserve-3d",
+                    transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)"
+                }}
+            >
+                <div className="absolute w-full h-full backface-hidden">
                     <CardFront img={img} flipCard={handleCardFlip}/>
                 </div>
 
-                <div className={styles.backCard}>
+                <div 
+                    className="absolute w-full h-full backface-hidden"
+                    style={{ transform: "rotateY(180deg" }}
+                >
                     <CardBack flipCard={handleCardFlip}/>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 function CardFront({ img, flipCard }) {
     return (
-        <div className={styles.cardFrontContainer}>
-            <div className={styles.cardFrontImgContainer}>
+        <div className="flex flex-col bg-white border rounded-lg border-red-500 transition-all duration-1000 ease-in-out 
+        hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full">
+            <div className="overflow-hidden h-52.5">
                 <img 
                     src={img}
                     alt="Pet Image"
+                    className="w-full h-full object-cover"
                 />
             </div>
 
-            <div className={styles.cardFrontInfo}>
-                <p className={styles.petName}>{`Fluffy`}</p>
-
-                <div className={styles.divider}/>
-
-                <div className={styles.petInfo}>
-                    <label>Breed: </label>
-                    <span>{`Golden Retriever`}</span>
+            <div className="px-2.5 py-2 flex-1">
+                <div>
+                    <span className="font-bold text-2xl">Pet Name</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="font-semibold text-xl">Breed </span>
+                    <span>Age</span>
                 </div>
 
-                <div className={styles.petInfo}>
-                    <label>Last Seen:</label>
-                    <span>{`3/9/2026`}</span>
+                <div className="mb-1.5">
+                    <span>Species</span>
                 </div>
-    
-                <div className={styles.petNoteContainer}>
-                    <label className={styles.petNotes}>Notes: </label>
-                    <span>
+
+                <div className="mb-1.5">
+                    <span>Date last Seen</span>
+                </div>
+
+                <div className="border-t border-t-[rgb(186, 146, 146)] pt-1 max-h-20 overflow-y-scroll ">
+                    <span className="text-[14px]">
                         Lorem ipsum dolor sit, amet consectetur adipisicing elit. 
                         Eveniet eius omnis quisquam numquam nulla non repellat totam blanditiis. 
                         Magnam velit dicta voluptates voluptate commodi a recusandae deserunt soluta necessitatibus excepturi.
                     </span>
                 </div>
+            </div>
 
-                <div className={styles.buttonContainer}>
-                    <button onClick={flipCard}>
-                        More Information
-                    </button>
-                </div>
+            <div className="flex items-center justify-center mt-2.5">
+                <button 
+                    onClick={flipCard}
+                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
+                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
+                >
+                    Contact Owner
+                </button>
             </div>
         </div>
     )
@@ -72,29 +88,36 @@ function CardFront({ img, flipCard }) {
 
 function CardBack({ flipCard }) {
     return (
-        <div className={styles.cardBackContainer}>
-            <div className={styles.cardBackInfo}>
-                <h2>Owner Information</h2>
+        <div className="bg-white border rounded-lg border-red-600 transition-all duration-1000 ease-in-out cursor-pointer 
+        hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full flex flex-col justify-between p-4">
+            <div>
                 
-                <div className={styles.ownerInfo}>
-                    <label>Name: </label>
-                    <span>{`John Smith`}</span>
-                </div>
+                <h2 className="text-2xl font-bold mb-10 text-center underline mt-5">Owner Information</h2>
                 
-    
-                <div className={styles.ownerInfo}>
-                    <label>Email Address: </label>
-                    <span>{`PlaceHolder@gmail.com`}</span>
-                </div>
-    
-                <div className={styles.ownerInfo}>
-                    <label>Phone Number: </label>
-                    <span>{`123-456-7890`}</span>
+                <div className="space-y-2 text-md">
+                    <div className="flex justify-center gap-1">
+                        <label className="font-bold">Name: </label>
+                        <span>John Smith</span>
+                    </div>
+
+                    <div className="flex justify-center gap-1">
+                        <label className="font-bold">Email Address: </label>
+                        <span>PlaceHolder@gmail.com</span>
+                    </div>
+
+                    <div className="flex justify-center gap-1">
+                        <label className="font-bold">Phone Number: </label>
+                        <span>123-456-7890</span>
+                    </div>
                 </div>
             </div>
 
-            <div className={styles.cardBackButtonContainer}>
-                <button onClick={flipCard}>
+            <div className="flex items-center justify-center mt-2.5">
+                <button 
+                    onClick={flipCard}
+                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
+                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
+                >
                     Back
                 </button>
             </div>
@@ -139,7 +162,7 @@ export default function LostPet() {
 
     // to be replaced with actual data from database
     const currentLostPets = [
-        "golden-retriever", "cat", "golden-retriever", "kitten",
+        "golden-retriever", "cat", "cat", "kitten",
         "golden-retriever", "golden-retriever", "kitten", "cat"
     ]
 
@@ -160,7 +183,7 @@ export default function LostPet() {
             </button>
             
             {/* Filler image cards. Replace when database is set up */}
-            <div className={styles.cardContainer}>
+            <div className="grid grid-cols-4 gap-6 mt-8">
                 {
                     currentLostPets.map((missingPet, idx) => (
                         <MissingPetCard
