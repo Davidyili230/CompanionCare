@@ -1,5 +1,4 @@
 
-import styles from "./modules/LostPet.module.css"
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
@@ -37,8 +36,10 @@ function MissingPetCard({ img }) {
 
 function CardFront({ img, flipCard }) {
     return (
-        <div className="flex flex-col bg-white border rounded-lg border-red-500 transition-all duration-1000 ease-in-out 
-        hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full">
+        <div 
+            className="flex flex-col bg-white border rounded-lg border-red-500 transition-all duration-1000 ease-in-out 
+            hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full"
+        >
             <div className="overflow-hidden h-52.5">
                 <img 
                     src={img}
@@ -88,8 +89,10 @@ function CardFront({ img, flipCard }) {
 
 function CardBack({ flipCard }) {
     return (
-        <div className="bg-white border rounded-lg border-red-600 transition-all duration-1000 ease-in-out cursor-pointer 
-        hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full flex flex-col justify-between p-4">
+        <div 
+            className="bg-white border rounded-lg border-red-600 transition-all duration-1000 ease-in-out cursor-pointer 
+            hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full flex flex-col justify-between p-4"
+        >
             <div>
                 
                 <h2 className="text-2xl font-bold mb-10 text-center underline mt-5">Owner Information</h2>
@@ -133,20 +136,28 @@ function SearchBar() {
     }
 
     return (
-        <div className={styles.searchContainer}>
-            <div className={styles.searchInput}>
+        <div className="flex justify-center flex-col items-center gap-2.5 mb-5">
+            <div className="flex items-center rounded-3xl px-2.5 py-1.25 border bg-white hover:shadow-[0_2px_6px_rgb(113,111,111)]">
                 <input
                     type="text"
                     placeholder="Search"
                     value={userInput}
                     onChange={handleInputChange}
+                    className="border- text-base p-1.5 outline-0 w-112.5"
                 />
 
 
-                <img src="./searchBarIcons/searchIcon.png" alt="magnifying glass"/>
+                <img 
+                    src="./searchBarIcons/searchIcon.png" 
+                    alt="magnifying glass"
+                    className="w-6.25 h-6.25 cursor-pointer ml-1.25"
+                />
             </div>
 
-            <button className={styles.filterButton}>
+            <button 
+                className="border-0 rounded-3xl bg-[#FFB6B6] px-7 py-2.5 font-bold 
+                cursor-pointer transition-colors duration-300 ease-in-out hover:bg-[#d28e8e]"
+            >
                 Filter
             </button>
         </div>
@@ -167,16 +178,21 @@ export default function LostPet() {
     ]
 
     return (
-        <div className={styles.lostPetContainer}>
+        <div className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5">
 
-            <h2 className={styles.title}>
-                <div className={styles.titleContainer}>Current Lost Pets</div>
+            <h2 className="text-center text-2xl mb-7">
+                <div 
+                    className="inline-block bg-[rgb(238,235,235)] px-7.5 py-2.5 rounded-md font-bold"
+                >
+                    Current Lost Pets
+                </div>
             </h2>
 
             <SearchBar/>
 
             <button 
-                className={styles.reportButton}
+                className="text-white bg-[#FC1818] rounded-full border-0 px-5 py-3 font-bold cursor-pointer
+                ml-5 transitioin-all duration-300 ease-in-out hover:bg-[#c71515]"
                 onClick={handleNavigation}
             >
                 Create Report
