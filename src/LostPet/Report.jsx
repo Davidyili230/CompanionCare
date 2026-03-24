@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { isValidEmail, isValidPhoneNumber } from "./ReportValidation"
+import { submitReport } from "./SubmitReport"
 
 function PetInformation({ formData, setFormData }) {
 
@@ -190,6 +191,7 @@ function ImageUpload({ formData, setFormData }) {
         if (file) {
             setFormData(prevFormData => ({
                 ...prevFormData,
+                imageFile: file,
                 image: URL.createObjectURL(file)
             }))
         }
@@ -242,6 +244,7 @@ export default function LostPetReport() {
         ownerName: "",
         email: "",
         phone: "",
+        imageFile: null,
         image: null,
     })
 
@@ -314,6 +317,7 @@ export default function LostPetReport() {
                 `}
                 onClick={() => {
                     if(isUserInfoValid()) {
+                        submitReport(formData)
                         handleNavigation()
                     }
                 }}
