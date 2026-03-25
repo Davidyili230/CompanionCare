@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const BASE_URL = "http://192.168.1.136:8080";
 
@@ -9,13 +10,14 @@ const fixUrl = (u) => {     // solve the path issue
    return u;
 };
 
-const CURRENT_USER = "Anthony";   // will delete
 const DEFAULT_COMMENTS = [    // will delete
    { id: "c1", user: "Emily", text: "So cute dog" },
    { id: "c2", user: "David", text: "Where is this" },
 ];
 
 export default function PostModal({ post, onClose }) {
+   const { user } = useAuth();
+   const currentUser = user?.username ?? "";
    const images = useMemo(() => post?.media || [], [post]);
    const [idx, setIdx] = useState(0);
 
@@ -24,19 +26,19 @@ export default function PostModal({ post, onClose }) {
    const [text, setText] = useState("");
 
    const [likedByPost, setLikedByPost] = useState({});
-   const liked = likedByPost[post?.id]?.includes(CURRENT_USER) ?? false;
+   const liked = likedByPost[post?.id]?.includes(currentUser) ?? false;
    const likeCount = (post?.likes ?? 0) + (liked ? 1 : 0);
 
    const toggleLike = () => { //check if the users click like or not
       if (!post?.id) return;
       setLikedByPost((prev) => {
          const users = prev[post.id] ?? [];
-         const alreadyLiked = users.includes(CURRENT_USER);
+         const alreadyLiked = users.includes(currentUser);
          return {
             ...prev,
             [post.id]: alreadyLiked
-               ? users.filter((u) => u !== CURRENT_USER)
-               : [...users, CURRENT_USER],
+               ? users.filter((u) => u !== currentUser)
+               : [...users, currentUser],
          };
       });
    };
@@ -65,7 +67,7 @@ export default function PostModal({ post, onClose }) {
             ...prev,
             [post.id]: [
                ...curr,
-               { id: "c" + Date.now(), user: CURRENT_USER, text: t },
+               { id: "c" + Date.now(), user: currentUser, text: t },
             ],
          };
       });
