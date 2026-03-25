@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { fetchCommunityPosts } from "../../api/community.api";
 import PostCard from "../../components/PostCard/PostCard";
 import PostModal from "../../components/PostModal/PostModal";
+import NewPostModal from "../../components/NewPostModal";
 
 const TIME_FILTERS = [
    { label: "All time", days: null },
@@ -20,6 +21,7 @@ export default function Community() {
    const [activeLabel, setActiveLabel] = useState("All");
    const [activeDays, setActiveDays] = useState(null);
    const [search, setSearch] = useState("");
+   const [showNewPost, setShowNewPost] = useState(false);
 
    useEffect(() => {
       fetchCommunityPosts()
@@ -87,6 +89,7 @@ export default function Community() {
                   }}
                >
                   <button
+                     onClick={() => setShowNewPost(true)}
                      style={{
                         width: "100%",
                         padding: "12px 0",
@@ -363,6 +366,19 @@ export default function Community() {
                key={selectedPost.id}
                post={selectedPost}
                onClose={() => setSelectedPost(null)}
+            />
+         )}
+         {showNewPost && (
+            <NewPostModal
+               onClose={() => setShowNewPost(false)}
+               onSuccess={() => {
+                  setLoading(true);
+                  fetchCommunityPosts()
+                     .then((data) => setPosts(data.items || []))
+                     .catch((err) => setError(err.message))
+                     .finally(() => setLoading(false));
+               }}
+               existingLabels={allLabels}
             />
          )}
       </div>
