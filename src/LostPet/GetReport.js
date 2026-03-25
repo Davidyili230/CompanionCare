@@ -7,9 +7,11 @@ export async function getAllUserReports() {
     try {
         const res = await getDocs(collection(db, "lostPetReports"));
         const reports = res.docs.map(r => ({
-            id: doc.id,
-            ...doc.data()
+            id: r.id,
+            ...r.data()
         }));
+
+        console.log("All the user reports:", reports)
         return reports;
     } catch(error) {
         console.log("There was an error getting all user reports: ", error)
@@ -34,11 +36,12 @@ export async function getUserReport() {
         )
 
         const r = await getDocs(res);
-        const reports = querySnapshotFromJSON.docs.map(doc => ({
+        const reports = r.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
 
+        console.log("Just the currenet user report", reports)
         return reports;
     } catch (error) {
         console.log ("Error getting user reports: ", error);
