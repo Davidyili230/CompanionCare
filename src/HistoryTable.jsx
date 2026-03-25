@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "./firebase/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
 const ENTRIES_PER_PAGE = 10;
 
@@ -38,6 +38,16 @@ function HistoryTable() {
   const handleFilterChange = (setter) => (e) => {
     setter(e.target.value);
     setCurrentPage(1);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      try {
+        await deleteDoc(doc(db, "supplementHistory", id));
+      } catch (error) {
+        console.error("Error deleting document: ", error);
+      }
+    }
   };
 
   const exportCSV = () => {
@@ -123,12 +133,13 @@ function HistoryTable() {
                 <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Dosage</th>
                 <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Scheduled</th>
                 <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Status</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-10 text-gray-400">No entries found</td>
+                  <td colSpan="7" className="text-center py-10 text-gray-400">No entries found</td>
                 </tr>
               ) : (
                 paginated.map((entry) => (
@@ -148,6 +159,15 @@ function HistoryTable() {
                       >
                         {entry.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDelete(entry.id)}
+                        className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                        style={{ backgroundColor: "#c1622f" }}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
