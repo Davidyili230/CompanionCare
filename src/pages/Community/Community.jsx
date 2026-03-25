@@ -23,11 +23,20 @@ export default function Community() {
    const [search, setSearch] = useState("");
    const [showNewPost, setShowNewPost] = useState(false);
 
+   const loadPosts = async () => {
+      setLoading(true);
+      try {
+         const data = await fetchCommunityPosts();
+         setPosts(data);
+      } catch (err) {
+         setError(err.message);
+      } finally {
+         setLoading(false);
+      }
+   };
+
    useEffect(() => {
-      fetchCommunityPosts()
-         .then((data) => setPosts(data.items || []))
-         .catch((err) => setError(err.message))
-         .finally(() => setLoading(false));
+      loadPosts();
    }, []);
 
    const allLabels = useMemo(() => {
@@ -365,18 +374,18 @@ export default function Community() {
             <PostModal
                key={selectedPost.id}
                post={selectedPost}
-               onClose={() => setSelectedPost(null)}
+               onClose={async () => {
+                  setSelectedPost(null);
+                  await loadPosts();
+               }}
             />
          )}
          {showNewPost && (
             <NewPostModal
                onClose={() => setShowNewPost(false)}
-               onSuccess={() => {
-                  setLoading(true);
-                  fetchCommunityPosts()
-                     .then((data) => setPosts(data.items || []))
-                     .catch((err) => setError(err.message))
-                     .finally(() => setLoading(false));
+               onSuccess={async () => {
+                  setShowNewPost(false);
+                  await loadPosts();
                }}
                existingLabels={allLabels}
             />
