@@ -6,3 +6,5 @@ git push
 review - main
 
 don't do git push origin main
+
+Create a `.env` file in the project root and copy the variables from `.env.example`.
