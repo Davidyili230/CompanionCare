@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
 import PetWorkspaceTabs from "../../components/PetWorkspaceTabs";
@@ -60,7 +60,6 @@ export default function MyPetPage() {
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [draftPet, setDraftPet] = useState(EMPTY_PET);
-  const [formMode, setFormMode] = useState("add");
 
   const addPetSectionRef = useRef(null);
 
@@ -68,19 +67,6 @@ export default function MyPetPage() {
     () => pets.find((p) => p.id === selectedPetId) ?? null,
     [pets, selectedPetId]
   );
-
-  useEffect(() => {
-    if (formMode !== "edit") return;
-
-    if (selectedPet) {
-      setDraftPet({
-        ...EMPTY_PET,
-        ...selectedPet,
-      });
-    } else {
-      setDraftPet(EMPTY_PET);
-    }
-  }, [selectedPet, formMode]);
 
   function handleDraftPetChange(field, value) {
     setDraftPet((prev) => {
@@ -108,7 +94,6 @@ export default function MyPetPage() {
   }
 
   function handleStartAddPet() {
-    setFormMode("add");
     setDraftPet(EMPTY_PET);
 
     addPetSectionRef.current?.scrollIntoView({
@@ -118,8 +103,9 @@ export default function MyPetPage() {
   }
 
   function handleSelectPet(petId) {
+    const pet = pets.find((p) => p.id === petId) ?? null;
     setSelectedPetId(petId);
-    setFormMode("edit");
+    setDraftPet(pet ? { ...EMPTY_PET, ...pet } : EMPTY_PET);
   }
 
   function handleAddPet(newPet) {
@@ -149,7 +135,6 @@ export default function MyPetPage() {
     });
 
     setSelectedPetId(petToSave.id);
-    setFormMode("add");
     setDraftPet(EMPTY_PET);
   }
 
