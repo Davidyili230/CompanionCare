@@ -16,20 +16,26 @@ function SupplementForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await addDoc(collection(db, "supplementHistory"), {
-        ...formData,
-        dateTime: new Date().toLocaleString(),
-      });
-      setSuccess(true);
-      setFormData({ pet: "", supplement: "", dosage: "", scheduled: "", status: "" });
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (error) {
-      console.error("Error adding document: ", error);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!formData.pet || !formData.supplement || !formData.dosage || !formData.scheduled || !formData.status) {
+    alert("Please fill in all fields before submitting!");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "supplementHistory"), {
+      ...formData,
+      dateTime: new Date().toLocaleString(),
+    });
+    setSuccess(true);
+    setFormData({ pet: "", supplement: "", dosage: "", scheduled: "", status: "" });
+    setTimeout(() => setSuccess(false), 3000);
+  } catch (error) {
+    console.error("Error adding document: ", error);
+  }
+};
 
   const inputStyle = {
     width: "100%",
