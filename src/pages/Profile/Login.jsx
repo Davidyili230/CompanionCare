@@ -48,7 +48,7 @@ export const Login = () => {
       <div className="flex flex-col items-center gap-[12px] shrink-0">
         <div className="w-[96px] h-[96px] shrink-0 flex items-center justify-center">
           <img 
-            src="public/Logo.PNG" 
+            src="public/Logo.PNG"
             alt="Main Logo" 
             className="w-full h-full object-contain"
           />
