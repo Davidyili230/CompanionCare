@@ -39,11 +39,9 @@ function MissingPetCard({ reportData, isUserDisplay, setReports }) {
 }
 
 function CardFront({ reportData, flipCard, isUserDisplay, setReports }) {
-    async function handleDeleteReport(id) {
-
-        console.log("The report id to be deleted", id)
+    async function handleDeleteReport(id, imageUrl) {
         try {
-            await deleteReport(id);
+            await deleteReport(id, imageUrl);
             const newReports = await getAllUserReports();
             setReports(newReports);
         } catch (error) {
@@ -68,7 +66,7 @@ function CardFront({ reportData, flipCard, isUserDisplay, setReports }) {
                     <button 
                         className="absolute top-2 right-2 rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
                         transition-colors duration-300 ease-in-out mb-5 hover:bg-[#f61c1c]"
-                        onClick={() => handleDeleteReport(reportData.id)}
+                        onClick={() => handleDeleteReport(reportData.id, reportData.image)}
                     >
                         Delete Report
                     </button>
