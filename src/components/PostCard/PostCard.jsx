@@ -1,13 +1,15 @@
-const BASE_URL = "http://localhost:8080";
+// const BASE_URL = "http://localhost:8080";
 
-const fixUrl = (u) => {
-   if (!u) return "";
-   const url = typeof u === "object" ? u.url : u;
-   if (!url) return "";
-   if (url.startsWith("http")) return url;
-   if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
-   return url;
-};
+// const fixUrl = (u) => {
+//    if (!u) return "";
+//    const url = typeof u === "object" ? u.url : u;
+//    if (!url) return "";
+//    if (url.startsWith("http")) return url;
+//    if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
+//    return url;
+// };
+
+
 
 const getVideoCover = (url) => {
    return url
@@ -16,9 +18,18 @@ const getVideoCover = (url) => {
 };
 
 export default function PostCard({ post, onOpen }) {
-   const firstMedia = post.media?.[0];
-   const rawUrl = fixUrl(firstMedia?.url ?? firstMedia);
-   const cover = firstMedia?.type === "video" ? getVideoCover(rawUrl) : rawUrl;
+   const firstImage = post.images?.[0];
+   const videoUrl = post.video;
+
+   let cover = null;
+   let isVideo = false;
+
+   if (firstImage) {
+      cover = firstImage;
+   } else if (videoUrl) {
+      cover = getVideoCover(videoUrl);
+      isVideo = true;
+   }
 
    return (
       <div
@@ -35,7 +46,7 @@ export default function PostCard({ post, onOpen }) {
             boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
          }}
       >
-         {/* Cover */}
+         {/* 封面图片 */}
          {cover ? (
             <img
                src={cover}
@@ -50,6 +61,7 @@ export default function PostCard({ post, onOpen }) {
                }}
             />
          ) : (
+            // 没有图片/视频时显示灰色背景
             <div
                style={{
                   position: "absolute",
@@ -59,7 +71,7 @@ export default function PostCard({ post, onOpen }) {
             />
          )}
 
-         {/* Gradient */}
+         {/* 渐变遮罩 */}
          <div
             style={{
                position: "absolute",
@@ -70,7 +82,7 @@ export default function PostCard({ post, onOpen }) {
          />
 
          {/* 视频播放图标 */}
-         {firstMedia?.type === "video" && (
+         {isVideo && (
             <div
                style={{
                   position: "absolute",
@@ -92,7 +104,7 @@ export default function PostCard({ post, onOpen }) {
             </div>
          )}
 
-         {/* Bottom info bar */}
+         {/* 底部信息栏 */}
          <div
             style={{
                position: "absolute",
@@ -114,23 +126,39 @@ export default function PostCard({ post, onOpen }) {
                   minWidth: 0,
                }}
             >
-               <div
-                  style={{
-                     width: 28,
-                     height: 28,
-                     borderRadius: 999,
-                     background: "rgba(255,255,255,0.25)",
-                     display: "grid",
-                     placeItems: "center",
-                     fontWeight: 800,
-                     textTransform: "uppercase",
-                     flexShrink: 0,
-                  }}
-               >
-                  {(post.username || "U")[0]}
-               </div>
+               {/* 头像：有头像显示图片，没有显示名字首字母 */}
+               {post.authorAvatar ? (
+                  <img
+                     src={post.authorAvatar}
+                     alt=""
+                     style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 999,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                     }}
+                  />
+               ) : (
+                  <div
+                     style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 999,
+                        background: "rgba(255,255,255,0.25)",
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 800,
+                        textTransform: "uppercase",
+                        flexShrink: 0,
+                     }}
+                  >
+                     {(post.authorName || "U")[0]}
+                  </div>
+               )}
 
                <div style={{ minWidth: 0 }}>
+                  {/* 发帖人名字 */}
                   <div
                      style={{
                         fontSize: 13,
@@ -138,8 +166,9 @@ export default function PostCard({ post, onOpen }) {
                         lineHeight: "16px",
                      }}
                   >
-                     {post.username}
+                     {post.authorName || "Anonymous"}
                   </div>
+                  {/* 帖子标题 */}
                   <div
                      style={{
                         fontSize: 14,
@@ -156,6 +185,7 @@ export default function PostCard({ post, onOpen }) {
                </div>
             </div>
 
+            {/* 点赞数 */}
             <div
                style={{
                   display: "flex",
@@ -167,7 +197,7 @@ export default function PostCard({ post, onOpen }) {
             >
                <span style={{ fontSize: 20 }}>🤍</span>
                <span style={{ fontSize: 12, fontWeight: 800 }}>
-                  {post.likes ?? 0}
+                  {post.likeCount ?? 0}
                </span>
             </div>
          </div>
