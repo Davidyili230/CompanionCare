@@ -1,24 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 
-const BASE_URL = "http://192.168.1.136:8080";
+// const BASE_URL = "http://192.168.1.136:8080";
+const BASE_URL = "http://localhost:8080";
 
-const fixUrl = (u) => {     // solve the path issue
+const fixUrl = (u) => {
    if (!u) return "";
-   if (u.startsWith("http")) return u;
-   if (u.startsWith("/uploads/")) return `${BASE_URL}${u}`;
-   return u;
+   const url = typeof u === "object" ? u.url : u; // 兼容 { type, url } 格式
+   if (!url) return "";
+   if (url.startsWith("http")) return url;
+   if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
+   return url;
 };
 
-const DEFAULT_COMMENTS = [    // will delete
+const CURRENT_USER = "Anthony"; // will delete
+const DEFAULT_COMMENTS = [
+   // will delete
    { id: "c1", user: "Emily", text: "So cute dog" },
    { id: "c2", user: "David", text: "Where is this" },
 ];
 
 export default function PostModal({ post, onClose }) {
-   const { user } = useAuth();
-   const currentUser = user?.username ?? "";
-   const images = useMemo(() => post?.media || [], [post]);
+   const images = useMemo(
+      () => (post?.media || []).filter((m) => !m?.type || m?.type === "image"),
+      [post],
+   );
+   const video = useMemo(
+      () => (post?.media || []).find((m) => m?.type === "video"),
+      [post],
+   );
    const [idx, setIdx] = useState(0);
 
    const [commentsByPost, setCommentsByPost] = useState({});
@@ -26,24 +35,26 @@ export default function PostModal({ post, onClose }) {
    const [text, setText] = useState("");
 
    const [likedByPost, setLikedByPost] = useState({});
-   const liked = likedByPost[post?.id]?.includes(currentUser) ?? false;
+   const liked = likedByPost[post?.id]?.includes(CURRENT_USER) ?? false;
    const likeCount = (post?.likes ?? 0) + (liked ? 1 : 0);
 
-   const toggleLike = () => { //check if the users click like or not
+   const toggleLike = () => {
+      //check if the users click like or not
       if (!post?.id) return;
       setLikedByPost((prev) => {
          const users = prev[post.id] ?? [];
-         const alreadyLiked = users.includes(currentUser);
+         const alreadyLiked = users.includes(CURRENT_USER);
          return {
             ...prev,
             [post.id]: alreadyLiked
-               ? users.filter((u) => u !== currentUser)
-               : [...users, currentUser],
+               ? users.filter((u) => u !== CURRENT_USER)
+               : [...users, CURRENT_USER],
          };
       });
    };
 
-   useEffect(() => {    // register some key in keyboard, only change when images length change and onCLos
+   useEffect(() => {
+      // register some key in keyboard, only change when images length change and onCLos
       const onKey = (e) => {
          if (e.key === "Escape") onClose?.();
          if (e.key === "ArrowLeft") setIdx((v) => Math.max(0, v - 1));
@@ -67,7 +78,7 @@ export default function PostModal({ post, onClose }) {
             ...prev,
             [post.id]: [
                ...curr,
-               { id: "c" + Date.now(), user: currentUser, text: t },
+               { id: "c" + Date.now(), user: CURRENT_USER, text: t },
             ],
          };
       });
@@ -89,7 +100,7 @@ export default function PostModal({ post, onClose }) {
             padding: 18,
          }}
       >
-        {/* style for pic and comment area */}
+         {/* style for pic and comment area */}
          <div
             style={{
                width: "min(1100px, 96vw)",
@@ -126,6 +137,21 @@ export default function PostModal({ post, onClose }) {
                   />
                ) : (
                   <div style={{ color: "#999", padding: 20 }}>No images</div>
+               )}
+
+               {video && images.length === 0 && (
+                  <video
+                     src={fixUrl(video)}
+                     controls
+                     style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        background: "#000",
+                     }}
+                  />
                )}
 
                <button
@@ -172,7 +198,7 @@ export default function PostModal({ post, onClose }) {
                   </>
                )}
 
-               {images.length > 1 && (  
+               {images.length > 1 && (
                   <div
                      style={{
                         position: "absolute",
@@ -363,7 +389,7 @@ export default function PostModal({ post, onClose }) {
                            borderRadius: 10,
                            border: "1px solid #e8e0d5",
                            outline: "none",
-                           background: "#fff"
+                           background: "#fff",
                         }}
                         onKeyDown={(e) => {
                            if (e.key === "Enter") addComment();
@@ -393,7 +419,8 @@ export default function PostModal({ post, onClose }) {
    );
 }
 
-function arrowStyle(side) {   //shows the arrow position
+function arrowStyle(side) {
+   //shows the arrow position
    return {
       position: "absolute",
       top: "50%",
