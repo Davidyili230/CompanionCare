@@ -1,16 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+   fetchComments,
+   addComment as apiAddComment,
+   toggleLike,
+   checkLiked,
+} from "../../api/community.api";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 // const BASE_URL = "http://192.168.1.136:8080";
 const BASE_URL = "http://localhost:8080";
 
-const fixUrl = (u) => {
-   if (!u) return "";
-   const url = typeof u === "object" ? u.url : u; // 兼容 { type, url } 格式
-   if (!url) return "";
-   if (url.startsWith("http")) return url;
-   if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
-   return url;
-};
+// const fixUrl = (u) => {
+//    if (!u) return "";
+//    const url = typeof u === "object" ? u.url : u; // 兼容 { type, url } 格式
+//    if (!url) return "";
+//    if (url.startsWith("http")) return url;
+//    if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
+//    return url;
+// };
 
 const CURRENT_USER = "Anthony"; // will delete
 const DEFAULT_COMMENTS = [
@@ -20,41 +28,35 @@ const DEFAULT_COMMENTS = [
 ];
 
 export default function PostModal({ post, onClose }) {
-   const images = useMemo(
-      () => (post?.media || []).filter((m) => !m?.type || m?.type === "image"),
-      [post],
-   );
-   const video = useMemo(
-      () => (post?.media || []).find((m) => m?.type === "video"),
-      [post],
-   );
+   const images = post?.images || [];
+   const video = post?.video || null;
    const [idx, setIdx] = useState(0);
 
-   const [commentsByPost, setCommentsByPost] = useState({});
-   const comments = commentsByPost[post?.id] ?? DEFAULT_COMMENTS;
+   // comment
+   const [comments, setComments] = useState([]);
    const [text, setText] = useState("");
+   const [submittingComment, setSubmittingComment] = useState(false);
 
-   const [likedByPost, setLikedByPost] = useState({});
-   const liked = likedByPost[post?.id]?.includes(CURRENT_USER) ?? false;
-   const likeCount = (post?.likes ?? 0) + (liked ? 1 : 0);
+   // like
+   const [liked, setLiked] = useState(false);
+   const [likeCount, setLikeCount] = useState(post?.likeCount ?? 0);
 
-   const toggleLike = () => {
-      //check if the users click like or not
+   // loading
+   useEffect(() => {
       if (!post?.id) return;
-      setLikedByPost((prev) => {
-         const users = prev[post.id] ?? [];
-         const alreadyLiked = users.includes(CURRENT_USER);
-         return {
-            ...prev,
-            [post.id]: alreadyLiked
-               ? users.filter((u) => u !== CURRENT_USER)
-               : [...users, CURRENT_USER],
-         };
-      });
-   };
+
+      // loading comment
+      fetchComments(post.id).then(setComments).catch(console.error);
+
+      // check if liked already
+      checkLiked(post.id).then(setLiked).catch(console.error);
+   }, [post?.id]);
 
    useEffect(() => {
-      // register some key in keyboard, only change when images length change and onCLos
+      setLikeCount(post?.likeCount ?? 0);
+   }, [post]);
+   
+   useEffect(() => {
       const onKey = (e) => {
          if (e.key === "Escape") onClose?.();
          if (e.key === "ArrowLeft") setIdx((v) => Math.max(0, v - 1));
@@ -67,23 +69,47 @@ export default function PostModal({ post, onClose }) {
 
    if (!post) return null;
 
-   const cover = fixUrl(images[idx]);
+   const createdAtStr = post.createdAt?.toDate
+      ? post.createdAt.toDate().toLocaleString()
+      : "";
 
-   const addComment = () => {
+   // sent comment
+   const handleAddComment = async () => {
       const t = text.trim();
       if (!t || !post?.id) return;
-      setCommentsByPost((prev) => {
-         const curr = prev[post.id] ?? DEFAULT_COMMENTS;
-         return {
-            ...prev,
-            [post.id]: [
-               ...curr,
-               { id: "c" + Date.now(), user: CURRENT_USER, text: t },
-            ],
-         };
-      });
-      setText("");
+      setSubmittingComment(true);
+      try {
+         await apiAddComment(post.id, t);
+         // reload
+         const updated = await fetchComments(post.id);
+         setComments(updated);
+         setText("");
+      } catch (err) {
+         console.error(err);
+      } finally {
+         setSubmittingComment(false);
+      }
    };
+   
+const handleToggleLike = async () => {
+   if (!post?.id) return;
+
+   try {
+      await toggleLike(post.id);
+
+      // fetch data
+      const snap = await getDoc(doc(db, "posts", post.id));
+      const data = snap.data();
+
+      setLikeCount(data.likeCount);
+
+      const isLiked = await checkLiked(post.id);
+      setLiked(isLiked);
+
+   } catch (err) {
+      console.error(err);
+   }
+};
 
    return (
       <div
@@ -100,7 +126,6 @@ export default function PostModal({ post, onClose }) {
             padding: 18,
          }}
       >
-         {/* style for pic and comment area */}
          <div
             style={{
                width: "min(1100px, 96vw)",
@@ -113,7 +138,7 @@ export default function PostModal({ post, onClose }) {
                alignItems: "stretch",
             }}
          >
-            {/* LEFT: images */}
+            {/* 左边：图片/视频 */}
             <div
                style={{
                   position: "relative",
@@ -122,10 +147,9 @@ export default function PostModal({ post, onClose }) {
                   overflow: "hidden",
                }}
             >
-               {/* img area */}
-               {cover ? (
+               {images.length > 0 ? (
                   <img
-                     src={cover}
+                     src={images[idx]}
                      alt=""
                      style={{
                         position: "absolute",
@@ -135,13 +159,9 @@ export default function PostModal({ post, onClose }) {
                         objectFit: "contain",
                      }}
                   />
-               ) : (
-                  <div style={{ color: "#999", padding: 20 }}>No images</div>
-               )}
-
-               {video && images.length === 0 && (
+               ) : video ? (
                   <video
-                     src={fixUrl(video)}
+                     src={video}
                      controls
                      style={{
                         position: "absolute",
@@ -152,8 +172,11 @@ export default function PostModal({ post, onClose }) {
                         background: "#000",
                      }}
                   />
+               ) : (
+                  <div style={{ color: "#999", padding: 20 }}>No media</div>
                )}
 
+               {/* 关闭按钮 */}
                <button
                   onClick={onClose}
                   style={{
@@ -170,18 +193,17 @@ export default function PostModal({ post, onClose }) {
                      fontSize: 16,
                      fontWeight: 900,
                   }}
-                  aria-label="Close"
                >
                   ✕
                </button>
 
+               {/* 多图切换箭头 */}
                {images.length > 1 && (
                   <>
                      <button
                         onClick={() => setIdx((v) => Math.max(0, v - 1))}
                         disabled={idx === 0}
                         style={arrowStyle("left")}
-                        aria-label="Previous image"
                      >
                         ‹
                      </button>
@@ -191,13 +213,13 @@ export default function PostModal({ post, onClose }) {
                         }
                         disabled={idx === images.length - 1}
                         style={arrowStyle("right")}
-                        aria-label="Next image"
                      >
                         ›
                      </button>
                   </>
                )}
 
+               {/* 底部缩略图 */}
                {images.length > 1 && (
                   <div
                      style={{
@@ -214,7 +236,7 @@ export default function PostModal({ post, onClose }) {
                      {images.map((src, i) => (
                         <img
                            key={src + i}
-                           src={fixUrl(src)}
+                           src={src}
                            alt=""
                            onClick={() => setIdx(i)}
                            style={{
@@ -235,7 +257,7 @@ export default function PostModal({ post, onClose }) {
                )}
             </div>
 
-            {/* RIGHT: info + comments */}
+            {/* 右边：信息 + 评论 */}
             <div
                style={{
                   height: "100%",
@@ -249,9 +271,9 @@ export default function PostModal({ post, onClose }) {
                   position: "relative",
                }}
             >
-               {/* heart button */}
+               {/* 点赞按钮 */}
                <button
-                  onClick={toggleLike}
+                  onClick={handleToggleLike}
                   style={{
                      position: "absolute",
                      top: 16,
@@ -267,7 +289,6 @@ export default function PostModal({ post, onClose }) {
                      alignItems: "center",
                      gap: 2,
                   }}
-                  aria-label="Like"
                >
                   {liked ? "🧡" : "🤍"}
                   <span style={{ fontSize: 12, color: "#999" }}>
@@ -275,26 +296,41 @@ export default function PostModal({ post, onClose }) {
                   </span>
                </button>
 
-               {/* user image */}
+               {/* 发帖人信息 */}
                <div style={{ flex: "0 0 auto" }}>
                   <div
                      style={{ display: "flex", alignItems: "center", gap: 10 }}
                   >
-                     <div
-                        style={{
-                           width: 34,
-                           height: 34,
-                           borderRadius: 999,
-                           background: "rgba(0,0,0,0.08)",
-                           display: "grid",
-                           placeItems: "center",
-                           fontWeight: 900,
-                        }}
-                     >
-                        {(post.username || "U")[0]}
-                     </div>
+                     {post.authorAvatar ? (
+                        <img
+                           src={post.authorAvatar}
+                           alt=""
+                           style={{
+                              width: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              objectFit: "cover",
+                           }}
+                        />
+                     ) : (
+                        <div
+                           style={{
+                              width: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              background: "rgba(0,0,0,0.08)",
+                              display: "grid",
+                              placeItems: "center",
+                              fontWeight: 900,
+                           }}
+                        >
+                           {(post.authorName || "U")[0]}
+                        </div>
+                     )}
                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 900 }}>{post.username}</div>
+                        <div style={{ fontWeight: 900 }}>
+                           {post.authorName || "Anonymous"}
+                        </div>
                         <div style={{ fontSize: 12, color: "#666" }}>
                            #{post.label}
                         </div>
@@ -304,18 +340,14 @@ export default function PostModal({ post, onClose }) {
                   <div style={{ fontSize: 18, fontWeight: 900, marginTop: 10 }}>
                      {post.title}
                   </div>
-
-                  {/* time */}
                   <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
-                     {new Date(post.createdAt).toLocaleString()}
+                     {createdAtStr}
                   </div>
-
                   <div
                      style={{ color: "#444", lineHeight: "20px", marginTop: 6 }}
                   >
                      {post.content || ""}
                   </div>
-
                   <div
                      style={{
                         height: 1,
@@ -324,11 +356,11 @@ export default function PostModal({ post, onClose }) {
                      }}
                   />
                   <div style={{ fontWeight: 900, marginBottom: 8 }}>
-                     Comments
+                     Comments ({comments.length})
                   </div>
                </div>
 
-               {/* comment area */}
+               {/* 评论列表 */}
                <div
                   style={{
                      flex: "1 1 auto",
@@ -340,36 +372,62 @@ export default function PostModal({ post, onClose }) {
                      paddingRight: 4,
                   }}
                >
+                  {comments.length === 0 && (
+                     <div
+                        style={{
+                           color: "#B0A090",
+                           fontSize: 13,
+                           textAlign: "center",
+                           marginTop: 20,
+                        }}
+                     >
+                        No comments yet
+                     </div>
+                  )}
                   {comments.map((c) => (
                      <div key={c.id} style={{ display: "flex", gap: 10 }}>
-                        <div
-                           style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: 999,
-                              background: "rgba(0,0,0,0.08)",
-                              display: "grid",
-                              placeItems: "center",
-                              fontWeight: 900,
-                              fontSize: 12,
-                              flexShrink: 0,
-                           }}
-                        >
-                           {(c.user || "U")[0]}
-                        </div>
+                        {c.authorAvatar ? (
+                           <img
+                              src={c.authorAvatar}
+                              alt=""
+                              style={{
+                                 width: 28,
+                                 height: 28,
+                                 borderRadius: 999,
+                                 objectFit: "cover",
+                                 flexShrink: 0,
+                              }}
+                           />
+                        ) : (
+                           <div
+                              style={{
+                                 width: 28,
+                                 height: 28,
+                                 borderRadius: 999,
+                                 background: "rgba(0,0,0,0.08)",
+                                 display: "grid",
+                                 placeItems: "center",
+                                 fontWeight: 900,
+                                 fontSize: 12,
+                                 flexShrink: 0,
+                              }}
+                           >
+                              {(c.authorName || "U")[0]}
+                           </div>
+                        )}
                         <div style={{ minWidth: 0 }}>
                            <div style={{ fontWeight: 900, fontSize: 12 }}>
-                              {c.user}
+                              {c.authorName || "Anonymous"}
                            </div>
                            <div style={{ fontSize: 13, color: "#333" }}>
-                              {c.text}
+                              {c.content}
                            </div>
                         </div>
                      </div>
                   ))}
                </div>
 
-               {/* enter comment area */}
+               {/* 输入评论 */}
                <div
                   style={{
                      flex: "0 0 auto",
@@ -392,24 +450,26 @@ export default function PostModal({ post, onClose }) {
                            background: "#fff",
                         }}
                         onKeyDown={(e) => {
-                           if (e.key === "Enter") addComment();
+                           if (e.key === "Enter") handleAddComment();
                         }}
                      />
-                     {/*sent button */}
                      <button
-                        onClick={addComment}
+                        onClick={handleAddComment}
+                        disabled={submittingComment}
                         style={{
                            padding: "10px 12px",
                            borderRadius: 10,
                            border: "1px solid #506705",
-                           background: "#c4960d",
+                           background: submittingComment ? "#ccc" : "#c4960d",
                            color: "#fff",
                            fontWeight: 900,
-                           cursor: "pointer",
+                           cursor: submittingComment
+                              ? "not-allowed"
+                              : "pointer",
                            whiteSpace: "nowrap",
                         }}
                      >
-                        Send
+                        {submittingComment ? "..." : "Send"}
                      </button>
                   </div>
                </div>
@@ -420,7 +480,6 @@ export default function PostModal({ post, onClose }) {
 }
 
 function arrowStyle(side) {
-   //shows the arrow position
    return {
       position: "absolute",
       top: "50%",
