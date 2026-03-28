@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
-        setUser({ ...firebaseUser, token });
+        setUser({ ...firebaseUser, token, username: firebaseUser.displayName });
       } else {
         setUser(null);
       }
