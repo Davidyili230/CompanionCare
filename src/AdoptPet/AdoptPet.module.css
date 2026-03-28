@@ -28,10 +28,15 @@
     padding: 10px 15px;
 }
 
-.petSpeciesAgeContainer {
+.petNameAgeContainer {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
+}
+
+.petNameText {
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .petAgeText {
@@ -47,8 +52,6 @@
 
 .petSpeciesText {
     color: rgb(158, 113, 41);
-    font-size: 20px;
-    font-weight: bold;
 }
 
 .petBreedText {

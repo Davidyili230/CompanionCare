@@ -1,9 +1,10 @@
 
+import styles from "./modules/Report.module.css"
+
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { isValidEmail, isValidPhoneNumber } from "./ReportValidation"
-import { submitReport } from "./SubmitReport"
 
 function PetInformation({ formData, setFormData }) {
 
@@ -48,24 +49,22 @@ function PetInformation({ formData, setFormData }) {
     }
 
     return (
-        <div className="flex flex-col gap-2.5 bg-white p-3 rounded-xl">
-            <h2 className="text-center"> Pet Information </h2>
+        <div className={styles.petInfoContainer}>
+            <h2> Pet Information </h2>
 
-            <label className="text-[14px] font-bold">Pet's Name</label>
+            <label>Pet's Name</label>
             <input 
                 type="text" 
                 placeholder="Enter your pet's name"
                 value={formData.petName}
                 onChange={(e) => handlePetInfoChange("petName", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
             />
 
-            <label htmlFor="species" className="text-[14px] font-bold">Species</label>
+            <label htmlFor="species">Species</label>
             <select
                 id="species"
                 value={formData.petType}
                 onChange={handlePetTypeChange}
-                className="p-2.5 rounded-[5px] text-sm border"
             >
                 <option value="" disabled>Select the type of pet you have</option>
                 <option value="dog">Dog</option>
@@ -74,12 +73,11 @@ function PetInformation({ formData, setFormData }) {
 
             {formData.petType && (
                 <>
-                    <label htmlFor="breed" className="text-[14px] font-bold">Breed</label>
+                    <label htmlFor="breed">Breed</label>
                     <select
                         id="breed"
                         value={formData.breed}
                         onChange={handleBreedChange}
-                        className="p-2.5 rounded-[5px] text-sm border"
                     >
                         <option value="" disabled>Select Your Pet's Breed</option>
                         {
@@ -98,31 +96,28 @@ function PetInformation({ formData, setFormData }) {
 
             {formData.breed == "Other" && (
                 <>
-                    <label className="text-[14px] font-bold">Custom Breed</label>
+                    <label>Custom Breed</label>
                     <input
                         type="text"
                         placeholder="Enter you pet's breed"
                         value={formData.customBreed}
                         onChange={handleCustomBreedChange}
-                        className="p-2.5 rounded-[5px] text-sm border"
                     />
                 </>
             )}
 
-            <label className="text-[14px] font-bold">Date Last Seen</label>
+            <label>Date Last Seen</label>
             <input 
                 type="date" 
                 value={formData.dateLastSeen} 
                 onChange={(e) => handlePetInfoChange("dateLastSeen", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
             />
 
-            <label className="text-[14px] font-bold">Additional Information</label>
+            <label>Additional Information</label>
             <textarea 
                 placeholder="Any additional information about your pet?"
                 value={formData.additionalInfo}
                 onChange={(e) => handlePetInfoChange("additionalInfo", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border resize-y min-h-25"
             />
         </div>
     )
@@ -138,46 +133,39 @@ function OwnerInformation({ formData, setFormData, checkUserInfo }) {
     }
 
     return (
-        <div className="flex flex-col gap-2.5 bg-white p-3 rounded-xl">
-            <h2 className="text-center">Owner Contact Information</h2>
+        <div className={styles.userInfoContainer}>
+            <h2>Owner Contact Information</h2>
 
-            <label className="text-sm font-bold">Name </label>
+            <label>Name </label>
             <input 
                 type="text" 
                 placeholder="Enter your name"
                 value={formData.ownerName}
                 onChange={(e) => handleOwnerInfoChange("ownerName", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
             />
             
-            <label className="text-sm font-bold">Email Address</label>
+            <label>Email Address</label>
             <input 
                 type="email" 
                 placeholder="Enter your email" 
                 value={formData.email}
                 onChange={(e) => handleOwnerInfoChange("email", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
             />
 
             {checkUserInfo.isValidEmailFormat === false && 
-                <span className="text-red-500 font-bold text-[12px]">
-                    Please Enter a valid email
-                </span>
+                <span className={styles.incorrectFormat}>Please Enter a valid email</span>
             }
 
-            <label className="text-sm font-bold">Phone Number</label>
+            <label>Phone Number</label>
             <input 
                 type="tel" 
                 placeholder="Enter your phone number"
                 value={formData.phone}
                 onChange={(e) => handleOwnerInfoChange("phone", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
             />
 
             {checkUserInfo.isValidPhoneFormat === false && 
-                <span className="text-red-500 font-bold text-[12px]">
-                    Please Enter a valid phone number
-                </span>
+                <span className={styles.incorrectFormat}>Please Enter a valid phone number</span>
             }
         </div>
     )
@@ -191,18 +179,13 @@ function ImageUpload({ formData, setFormData }) {
         if (file) {
             setFormData(prevFormData => ({
                 ...prevFormData,
-                imageFile: file,
                 image: URL.createObjectURL(file)
             }))
         }
     }
 
     return (
-        <label 
-            className="flex justify-center items-center flex-col border-2 border-dashed border-[rgb(151,145,145)],
-                        rounded-xl text-center w-full h-full overflow-hidden cursor-pointer hover:border-black"
-            htmlFor="imageUpload"
-        >
+        <label className={styles.imgContainer} htmlFor="imageUpload">
             {formData.image == null && <h2>Upload Image</h2>}
 
             <input
@@ -210,17 +193,13 @@ function ImageUpload({ formData, setFormData }) {
                 accept="image/*"
                 onChange={handleImageChange}
                 id="imageUpload"
-                className="hidden"
+                className={styles.imageInput}
             />
 
             <img 
                 src={formData.image || "./cameraIcon.png" }
                 alt="camera"
-                className={
-                    formData.image == null 
-                    ? "w-20 h-20 object-contain"
-                    : "w-full h-full object-cover"
-                }
+                className={formData.image == null ? styles.imgIcon : styles.userImg}
             />
         </label>
     )
@@ -244,7 +223,6 @@ export default function LostPetReport() {
         ownerName: "",
         email: "",
         phone: "",
-        imageFile: null,
         image: null,
     })
 
@@ -283,17 +261,17 @@ export default function LostPetReport() {
     }
 
     return (
-        <div className="m-7.5">
-            <h1 className="text-center">
+        <div className={styles.pageContainer}>
+            <h1 className={styles.title}>
                 Lost Pet Report
             </h1>
 
-            <p className="text-center font-['Lucida Sans', Geneva, sans-serif], mb-12.5">
+            <p className={styles.subtext}>
                 We are sorry that your pet is missing. We hope that you will be able to bring them back home soon
             </p>
 
-            <div className="flex justify-between rounded-2xl shadow-[2px_5px_10px_black] p-[2.5] bg-[#f9f7f5] gap-12.5">
-                <div className="flex flex-col gap-10 flex-1">   
+            <div className={styles.reportContent}>
+                <div className={styles.leftContent}>   
                     <PetInformation formData={formData} setFormData={setFormData}/>
                     <OwnerInformation 
                         formData={formData} 
@@ -301,23 +279,18 @@ export default function LostPetReport() {
                         checkUserInfo={checkUserInfo}
                     />
                 </div>
-                <div className="flex m-auto justify-center items-start flex-1 h-125">
+                <div className={styles.rightContent}>
                     <ImageUpload formData={formData} setFormData={setFormData}/>
                 </div>
             </div>
             
             <button 
                 className={
-                    `block m-auto border-0 rounded-xl text-white font-bold text-sm bg-[#E63737]
-                    px-7.5 py-3.75 mt-7.5 transition-all duration-300 ease-in-out
-                    ${isFormFilled 
-                        ? "bg-[#E63737] hover:bg-[#b32c2c] hover:scale-105 cursor-pointer" 
-                        : "bg-[#e28c8c] cursor-not-allowed"
-                    }
-                `}
+                    `${styles.reportButton}
+                    ${isFormFilled ? styles.reportButtonEnabled : styles.reportButtonDisabled}`
+                }
                 onClick={() => {
                     if(isUserInfoValid()) {
-                        submitReport(formData)
                         handleNavigation()
                     }
                 }}
