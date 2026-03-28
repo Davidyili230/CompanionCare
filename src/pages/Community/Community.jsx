@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { fetchCommunityPosts } from "../../api/community.api";
 import PostCard from "../../components/PostCard/PostCard";
 import PostModal from "../../components/PostModal/PostModal";
+import NewPostModal from "../../components/NewPostModal";
 
 const TIME_FILTERS = [
    { label: "All time", days: null },
@@ -20,12 +21,22 @@ export default function Community() {
    const [activeLabel, setActiveLabel] = useState("All");
    const [activeDays, setActiveDays] = useState(null);
    const [search, setSearch] = useState("");
+   const [showNewPost, setShowNewPost] = useState(false);
+
+   const loadPosts = async () => {
+      setLoading(true);
+      try {
+         const data = await fetchCommunityPosts();
+         setPosts(data);
+      } catch (err) {
+         setError(err.message);
+      } finally {
+         setLoading(false);
+      }
+   };
 
    useEffect(() => {
-      fetchCommunityPosts()
-         .then((data) => setPosts(data.items || []))
-         .catch((err) => setError(err.message))
-         .finally(() => setLoading(false));
+      loadPosts();
    }, []);
 
    const allLabels = useMemo(() => {
@@ -87,6 +98,7 @@ export default function Community() {
                   }}
                >
                   <button
+                     onClick={() => setShowNewPost(true)}
                      style={{
                         width: "100%",
                         padding: "12px 0",
@@ -362,7 +374,20 @@ export default function Community() {
             <PostModal
                key={selectedPost.id}
                post={selectedPost}
-               onClose={() => setSelectedPost(null)}
+               onClose={async () => {
+                  setSelectedPost(null);
+                  await loadPosts();
+               }}
+            />
+         )}
+         {showNewPost && (
+            <NewPostModal
+               onClose={() => setShowNewPost(false)}
+               onSuccess={async () => {
+                  setShowNewPost(false);
+                  await loadPosts();
+               }}
+               existingLabels={allLabels}
             />
          )}
       </div>
