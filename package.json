@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",
+<<<<<<< HEAD
     "firebase": "^12.11.0",
     "libphonenumber-js": "^1.12.38",
     "react": "^19.2.0",
@@ -19,6 +20,13 @@
     "tailwindcss": "^4.2.1",
     "uuid": "^13.0.0",
     "validator": "^13.15.26"
+=======
+    "firebase": "^12.10.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.1",
+    "tailwindcss": "^4.2.1"
+>>>>>>> main
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
