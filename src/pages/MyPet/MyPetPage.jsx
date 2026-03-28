@@ -331,7 +331,6 @@ export default function MyPetPage() {
   }
 
   function handleStartAddPet() {
-    setFormMode("add");
     setDraftPet(EMPTY_PET);
     setErrors({});
     setTouched({});
@@ -343,8 +342,9 @@ export default function MyPetPage() {
   }
 
   function handleSelectPet(petId) {
+    const pet = pets.find((p) => p.id === petId) ?? null;
     setSelectedPetId(petId);
-    setFormMode("edit");
+    setDraftPet(pet ? { ...EMPTY_PET, ...pet } : EMPTY_PET);
   }
 
   async function handleAddPet(newPet) {

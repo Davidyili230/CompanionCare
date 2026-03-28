@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { db } from "./firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "./firebase/firebase";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+
+const ENTRIES_PER_PAGE = 10;
 
 function HistoryTable() {
   const [entries, setEntries] = useState([]);
@@ -8,9 +10,10 @@ function HistoryTable() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "supplements"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "supplementHistory"), (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setEntries(data);
     });
@@ -26,6 +29,27 @@ function HistoryTable() {
     return matchPet && matchStatus && matchFrom && matchTo;
   });
 
+  const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * ENTRIES_PER_PAGE,
+    currentPage * ENTRIES_PER_PAGE
+  );
+
+  const handleFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      try {
+        await deleteDoc(doc(db, "supplementHistory", id));
+      } catch (error) {
+        console.error("Error deleting document: ", error);
+      }
+    }
+  };
+
   const exportCSV = () => {
     const headers = ["Date & Time", "Pet", "Supplement", "Dosage", "Scheduled", "Status"];
     const rows = filtered.map((e) => [e.dateTime, e.pet, e.supplement, e.dosage, e.scheduled, e.status]);
@@ -39,212 +63,146 @@ function HistoryTable() {
     URL.revokeObjectURL(url);
   };
 
-  const inputStyle = {
-    padding: "8px 12px",
-    borderRadius: 10,
-    border: "1.5px solid #F0E8DF",
-    background: "#fff",
-    fontSize: 13,
-    color: "#2C1810",
-    outline: "none",
-  };
-
   return (
-    <div style={{ padding: "20px 24px 40px" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <div className="min-h-screen p-6" style={{ backgroundColor: "#f5f0e8" }}>
+      <h2 className="text-2xl font-bold mb-6" style={{ color: "#5a3e2b" }}>Intake History</h2>
 
-        {/* Header row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 16,
-            marginTop: 20,
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#2C1810" }}>
-            Intake History
-            <span
-              style={{
-                marginLeft: 10,
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#D4631A",
-                background: "#FFF0E6",
-                borderRadius: 999,
-                padding: "2px 10px",
-              }}
+      <div className="flex gap-6">
+        {/* Sidebar */}
+        <div className="bg-white rounded-xl p-5 shadow-sm w-48 flex-shrink-0 flex flex-col gap-4">
+          <div>
+            <label className="block text-sm font-semibold mb-1" style={{ color: "#5a3e2b" }}>Filter by pets</label>
+            <input
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+              placeholder="Pet name"
+              value={filterPet}
+              onChange={handleFilterChange(setFilterPet)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1" style={{ color: "#5a3e2b" }}>Date Range</label>
+            <input
+              type="date"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none mb-2"
+              value={filterDateFrom}
+              onChange={handleFilterChange(setFilterDateFrom)}
+            />
+            <input
+              type="date"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+              value={filterDateTo}
+              onChange={handleFilterChange(setFilterDateTo)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1" style={{ color: "#5a3e2b" }}>Status</label>
+            <select
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+              value={filterStatus}
+              onChange={handleFilterChange(setFilterStatus)}
             >
-              {filtered.length} record{filtered.length !== 1 ? "s" : ""}
-            </span>
-          </h2>
-
+              <option value="">All</option>
+              <option value="Given">Given</option>
+              <option value="Missed">Missed</option>
+            </select>
+          </div>
+          <button
+            onClick={() => { setFilterPet(""); setFilterStatus(""); setFilterDateFrom(""); setFilterDateTo(""); setCurrentPage(1); }}
+            className="w-full border-2 rounded-lg py-2 text-sm font-semibold transition"
+            style={{ borderColor: "#c1622f", color: "#c1622f" }}
+          >
+            Clear Filters
+          </button>
           <button
             onClick={exportCSV}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 10,
-              border: "1.5px solid #F0E8DF",
-              background: "#fff",
-              color: "#D4631A",
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            className="w-full rounded-lg py-2 text-sm font-semibold text-white transition"
+            style={{ backgroundColor: "#c1622f" }}
           >
             Export CSV
           </button>
         </div>
 
-        {/* Filters */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: 16,
-            border: "1.5px solid #F0E8DF",
-            padding: "16px 20px",
-            display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          <input
-            placeholder="Filter by pet"
-            value={filterPet}
-            onChange={(e) => setFilterPet(e.target.value)}
-            style={inputStyle}
-          />
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            style={inputStyle}
-          >
-            <option value="">All Statuses</option>
-            <option value="Given">Given</option>
-            <option value="Missed">Missed</option>
-          </select>
-          <input
-            type="date"
-            value={filterDateFrom}
-            onChange={(e) => setFilterDateFrom(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="date"
-            value={filterDateTo}
-            onChange={(e) => setFilterDateTo(e.target.value)}
-            style={inputStyle}
-          />
-          <button
-            onClick={() => {
-              setFilterPet("");
-              setFilterStatus("");
-              setFilterDateFrom("");
-              setFilterDateTo("");
-            }}
-            style={{
-              padding: "8px 14px",
-              borderRadius: 10,
-              border: "1.5px solid #F0E8DF",
-              background: "transparent",
-              color: "#9A8A7A",
-              fontSize: 13,
-              cursor: "pointer",
-            }}
-          >
-            Clear
-          </button>
-        </div>
-
         {/* Table */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: 16,
-            border: "1.5px solid #F0E8DF",
-            overflow: "hidden",
-          }}
-        >
-          {filtered.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "60px 0",
-                color: "#B0A090",
-              }}
-            >
-              <div style={{ fontSize: 40, marginBottom: 10 }}>🐾</div>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>No records found</div>
-            </div>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "#FFF9F0" }}>
-                  {["Date & Time", "Pet", "Supplement", "Dosage", "Scheduled", "Status"].map(
-                    (col) => (
-                      <th
-                        key={col}
-                        style={{
-                          padding: "12px 16px",
-                          textAlign: "left",
-                          fontSize: 11,
-                          fontWeight: 800,
-                          color: "#B0A090",
-                          textTransform: "uppercase",
-                          letterSpacing: 1,
-                          borderBottom: "1.5px solid #F0E8DF",
-                        }}
-                      >
-                        {col}
-                      </th>
-                    )
-                  )}
+        <div className="bg-white rounded-xl shadow-sm flex-1 overflow-hidden flex flex-col">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ backgroundColor: "#f5f0e8" }}>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Date & Time</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Pet</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Supplement</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Dosage</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Scheduled</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Status</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-10 text-gray-400">No entries found</td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((entry, i) => (
-                  <tr
-                    key={entry.id}
-                    style={{
-                      borderBottom: i < filtered.length - 1 ? "1px solid #F0E8DF" : "none",
-                      transition: "background 0.15s",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#FFFAF6")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <td style={tdStyle}>{entry.dateTime}</td>
-                    <td style={tdStyle}>{entry.pet}</td>
-                    <td style={tdStyle}>{entry.supplement}</td>
-                    <td style={tdStyle}>{entry.dosage}</td>
-                    <td style={tdStyle}>{entry.scheduled}</td>
-                    <td style={tdStyle}>
+              ) : (
+                paginated.map((entry) => (
+                  <tr key={entry.id} className="border-t border-gray-100 hover:bg-orange-50 transition">
+                    <td className="px-4 py-3 text-gray-700">{entry.dateTime}</td>
+                    <td className="px-4 py-3 text-gray-700">{entry.pet}</td>
+                    <td className="px-4 py-3 text-gray-700">{entry.supplement}</td>
+                    <td className="px-4 py-3 text-gray-700">{entry.dosage}</td>
+                    <td className="px-4 py-3 text-gray-700">{entry.scheduled}</td>
+                    <td className="px-4 py-3">
                       <span
+                        className="px-2 py-1 rounded-full text-xs font-semibold"
                         style={{
-                          padding: "3px 10px",
-                          borderRadius: 999,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          background: entry.status === "Given" ? "#E6F4EA" : "#FFF0E6",
-                          color: entry.status === "Given" ? "#2E7D32" : "#D4631A",
+                          backgroundColor: entry.status === "Given" ? "#d4edda" : "#f8d7da",
+                          color: entry.status === "Given" ? "#155724" : "#721c24"
                         }}
                       >
                         {entry.status}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDelete(entry.id)}
+                        className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                        style={{ backgroundColor: "#c1622f" }}
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 py-4 border-t border-gray-100">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded-lg text-sm font-semibold disabled:opacity-40"
+                style={{ color: "#c1622f" }}
+              >
+                ← Prev
+              </button>
+              <span className="text-sm text-gray-500">
+                {currentPage} ... {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded-lg text-sm font-semibold disabled:opacity-40"
+                style={{ color: "#c1622f" }}
+              >
+                Next →
+              </button>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
-
-const tdStyle = { padding: "12px 16px", fontSize: 14, color: "#2C1810" };
 
 export default HistoryTable;
