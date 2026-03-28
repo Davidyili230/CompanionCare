@@ -3,7 +3,7 @@ export default function PetCard({ pet, selected, onClick }) {
     <button
       type="button"
       onClick={() => onClick(pet.id)}
-      className="flex w-23 flex-col items-center rounded-2xl border border-[#de7e52] bg-white p-3 text-center transition-colors duration-200 hover:bg-[#fcf5ef]"
+      className={`flex w-23 flex-col items-center rounded-2xl border p-3 text-center transition-colors duration-200 ${selected ? "border-[#d87c5a] bg-[#fcf5ef]" : "border-[#de7e52] bg-white hover:bg-[#fcf5ef]"}`}
     >
       <div className="mb-3 flex h-13 w-13 items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
         {pet.image ? (
