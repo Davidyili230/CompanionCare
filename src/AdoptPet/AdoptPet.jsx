@@ -14,12 +14,11 @@ function Card({ pet }) {
                 <img src={pet.img} alt="pet image"/>
             </div>
             <div className={styles.animalCardBody}>
-                <div className={styles.petNameAgeContainer}>
-                    <span className={styles.petNameText}>{pet.name}</span>
+                <div className={styles.petSpeciesAgeContainer}>
+                    <span className={styles.petSpeciesText}>{pet.breed}</span>
                     <span className={styles.petAgeText}>{pet.age} years old</span>
                 </div>
                 <div className={styles.petTypeInfoContainer}>
-                    <span className={styles.petSpeciesText}>{pet.breed}</span>
                     <span className={styles.petBreedText}>{pet.species}</span>
                 </div>
                 <div className={styles.petLocationContainer}>
@@ -64,7 +63,7 @@ function SearchBar({ setSearchQuery }) {
                 <form onSubmit={handleSearchQueryChange}>
                     <input
                         type="text"
-                        placeholder="Search by name or breed"
+                        placeholder="Search by breed"
                         value={userSearch}
                         onChange={handleUserSearchChange}
                     />
@@ -204,7 +203,6 @@ export default function AdoptPet() {
 
         const matchesSearch = (
             searchQuery == "" || 
-            adoptablePet.name.toLowerCase().includes(query) || 
             adoptablePet.breed.toLowerCase().includes(query)
         );
 
