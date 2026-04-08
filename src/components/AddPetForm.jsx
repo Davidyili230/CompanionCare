@@ -30,6 +30,9 @@ export default function AddPetForm({
   embedded = false,
   petData,
   onPetChange,
+  onFieldBlur,
+  errors = {},
+  touched = {},
 }) {
   function handleSubmit(e) {
     e.preventDefault();
@@ -82,6 +85,14 @@ export default function AddPetForm({
 
   const inputClass =
     "w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10";
+
+  function getFieldClass(fieldName) {
+    return `${inputClass} ${
+      errors[fieldName] && touched[fieldName]
+        ? "border-red-400 focus:border-red-400 focus:ring-red-400/10"
+        : ""
+    }`;
+  }
 
   const disabledSelectClass =
     "w-full rounded-xl border border-[#e8a58d] bg-white px-3 py-2 outline-none focus:border-[#d87c5a] focus:ring-2 focus:ring-[#d87c5a]/10 disabled:cursor-not-allowed disabled:bg-[#f5f1ec]";
@@ -190,9 +201,13 @@ export default function AddPetForm({
             type="number"
             value={petData.weight}
             onChange={(e) => onPetChange("weight", e.target.value)}
+            onBlur={() => onFieldBlur?.("weight")}
             placeholder="e.g. 70"
-            className={inputClass}
+            className={getFieldClass("weight")}
           />
+          {errors.weight && touched.weight && (
+            <p className="text-xs text-red-500">{errors.weight}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -218,9 +233,13 @@ export default function AddPetForm({
             type="number"
             value={petData.age}
             onChange={(e) => onPetChange("age", e.target.value)}
+            onBlur={() => onFieldBlur?.("age")}
             placeholder="e.g. 5"
-            className={inputClass}
+            className={getFieldClass("age")}
           />
+          {errors.age && touched.age && (
+            <p className="text-xs text-red-500">{errors.age}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -230,8 +249,12 @@ export default function AddPetForm({
             type="date"
             value={petData.birthDate}
             onChange={(e) => onPetChange("birthDate", e.target.value)}
-            className={inputClass}
+            onBlur={() => onFieldBlur?.("birthDate")}
+            className={getFieldClass("birthDate")}
           />
+          {errors.birthDate && touched.birthDate && (
+            <p className="text-xs text-red-500">{errors.birthDate}</p>
+          )}
         </div>
 
         <div className="col-span-2 flex flex-col gap-1">
