@@ -11,11 +11,18 @@ const TABS = [
 export default function PetWorkspaceTabs({
   selectedPet,
   draftPet,
+  supplements = [],
   onDraftPetChange,
+  onFieldBlur,
   onStartAddPet,
   onSavePet,
   onAddSupplement,
+  onDeleteSupplement,
   suggestions = [],
+  suggestionLoading = false,
+  suggestionError = "",
+  errors = {},
+  touched = {},
 }) {
   const [activeTab, setActiveTab] = useState("add-pet");
   const tabRefs = useRef([]);
@@ -64,7 +71,7 @@ export default function PetWorkspaceTabs({
   }
 
   return (
-    <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
+    <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
       <div className="mb-4 overflow-x-auto">
         <div
           role="tablist"
@@ -119,7 +126,10 @@ export default function PetWorkspaceTabs({
           embedded
           petData={draftPet}
           onPetChange={onDraftPetChange}
+          onFieldBlur={onFieldBlur}
           onSavePet={onSavePet}
+          errors={errors}
+          touched={touched}
         />
       </div>
 
@@ -130,18 +140,82 @@ export default function PetWorkspaceTabs({
         hidden={activeTab !== "add-supplement"}
         className="pt-1"
       >
-        <AddSupplementForm
-          embedded
-          selectedPet={selectedPet}
-          onAddSupplement={onAddSupplement}
-        />
+        {!selectedPet ? (
+          <div className="rounded-2xl border border-[#f0d8c8] bg-[#fff8f3] px-4 py-3 text-sm text-[#7a6d63]">
+            Please select a pet before adding supplements.
+          </div>
+        ) : (
+          <>
+            <AddSupplementForm
+              embedded
+              selectedPet={selectedPet}
+              onAddSupplement={onAddSupplement}
+            />
 
-        <div className="mt-6">
-          <SupplementSuggestionList
-            selectedPet={selectedPet}
-            suggestions={suggestions}
-          />
-        </div>
+            <div className="mt-6">
+              <h4 className="mb-3 text-sm font-bold text-[#1f1f1f]">
+                Current Supplements
+              </h4>
+
+              {supplements.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-[#ead7ca] bg-[#fffaf7] px-4 py-4 text-sm text-[#7a6d63]">
+                  No supplements added for this pet yet.
+                </div>
+              ) : (
+                <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                  {supplements.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-xl border border-[#ecdcc8] bg-[#fffaf7] p-3"
+                    >
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold text-[#1f1f1f]">
+                          {item.name || "Untitled Supplement"}
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={() => onDeleteSupplement?.(item.id)}
+                          className="shrink-0 rounded-full border border-red-300 px-2.5 py-0.5 text-[11px] font-medium text-red-500 transition hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      <div className="space-y-1 text-sm text-[#5f5a55]">
+                        <p>
+                          <span className="font-medium">Brand:</span>{" "}
+                          {item.brand || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Dosage:</span>{" "}
+                          {item.dosage || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Frequency:</span>{" "}
+                          {item.frequency || "-"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Notes:</span>{" "}
+                          {item.notes || "-"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6">
+              <SupplementSuggestionList
+                selectedPet={selectedPet}
+                suggestions={suggestions}
+                loading={suggestionLoading}
+                error={suggestionError}
+              />
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
