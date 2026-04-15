@@ -11,22 +11,6 @@ import { db } from "../../firebase";
 // const BASE_URL = "http://192.168.1.136:8080";
 const BASE_URL = "http://localhost:8080";
 
-// const fixUrl = (u) => {
-//    if (!u) return "";
-//    const url = typeof u === "object" ? u.url : u; // 兼容 { type, url } 格式
-//    if (!url) return "";
-//    if (url.startsWith("http")) return url;
-//    if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
-//    return url;
-// };
-
-const CURRENT_USER = "Anthony"; // will delete
-const DEFAULT_COMMENTS = [
-   // will delete
-   { id: "c1", user: "Emily", text: "So cute dog" },
-   { id: "c2", user: "David", text: "Where is this" },
-];
-
 export default function PostModal({ post, onClose }) {
    const images = post?.images || [];
    const video = post?.video || null;
@@ -324,12 +308,12 @@ const handleToggleLike = async () => {
                               fontWeight: 900,
                            }}
                         >
-                           {(post.authorName || "U")[0]}
+                           {(post.username || "U")[0]}
                         </div>
                      )}
                      <div style={{ minWidth: 0 }}>
                         <div style={{ fontWeight: 900 }}>
-                           {post.authorName || "Anonymous"}
+                           {post.username || "Anonymous"}
                         </div>
                         <div style={{ fontSize: 12, color: "#666" }}>
                            #{post.label}
@@ -412,12 +396,12 @@ const handleToggleLike = async () => {
                                  flexShrink: 0,
                               }}
                            >
-                              {(c.authorName || "U")[0]}
+                              {(c.username || "U")[0]}
                            </div>
                         )}
                         <div style={{ minWidth: 0 }}>
                            <div style={{ fontWeight: 900, fontSize: 12 }}>
-                              {c.authorName || "Anonymous"}
+                              {c.username || "Anonymous"}
                            </div>
                            <div style={{ fontSize: 13, color: "#333" }}>
                               {c.content}
