@@ -6,168 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { getAllUserReports, getUserReport } from "./GetReport"
 import { deleteReport } from "./DeleteReport";
 
+import { fillerReports } from "./TempReports";
+import MissingPetCard from "./Components/MissingPetCard";
+import Pagination from "./Components/ReportPagination";
 
-function MissingPetCard({ reportData, isUserDisplay, setReports }) {
-    const [isCardFlipped, setIsCardFlipped] = useState(false);
-
-    const handleCardFlip = () => {
-        setIsCardFlipped(!isCardFlipped);
-    }
-
-    return (
-        <div className="w-85 h-120 perspective">
-            <div 
-                className="relative w-full h-full transition-transform duration-700"
-                style={{
-                    transformStyle: "preserve-3d",
-                    transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)"
-                }}
-            >
-                <div className="absolute w-full h-full backface-hidden">
-                    <CardFront reportData={reportData} flipCard={handleCardFlip} isUserDisplay={isUserDisplay} setReports={setReports}/>
-                </div>
-
-                <div 
-                    className="absolute w-full h-full backface-hidden"
-                    style={{ transform: "rotateY(180deg" }}
-                >
-                    <CardBack reportData={reportData} flipCard={handleCardFlip}/>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function CardFront({ reportData, flipCard, isUserDisplay, setReports }) {
-    async function handleDeleteReport(id, imageUrl) {
-        try {
-            await deleteReport(id, imageUrl);
-            const newReports = await getAllUserReports();
-            setReports(newReports);
-        } catch (error) {
-            console.log("Error deleting and getting new reports", error);
-        }
-    }
-
-    return (
-        <div 
-            className="flex flex-col bg-white border rounded-lg border-red-500 transition-all duration-1000 ease-in-out 
-            hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full"
-        >
-            <div className="overflow-hidden h-52.5 relative">
-                <img 
-                    src={reportData.image}
-                    alt="Pet Image"
-                    className="w-full h-full object-cover"
-                />
-
-                {
-                    isUserDisplay && 
-                    <button 
-                        className="absolute top-2 right-2 rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
-                        transition-colors duration-300 ease-in-out mb-5 hover:bg-[#f61c1c]"
-                        onClick={() => handleDeleteReport(reportData.id, reportData.image)}
-                    >
-                        Delete Report
-                    </button>
-                }
-            </div>
-
-            <div className="px-2.5 py-2 flex-1">
-                <div>
-                    <span className="font-bold text-2xl">{reportData.petName}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="font-semibold text-xl">
-                        {reportData.customBreed == "" ? reportData.breed : reportData.customBreed}
-                    </span>
-                    {/* <span>Age</span> */}
-                </div>
-
-                <div className="mb-1.5">
-                    <span>{reportData.petType}</span>
-                </div>
-
-                <div className="mb-1.5">
-                    <span>{reportData.dateLastSeen}</span>
-                </div>
-
-                <div className="border-t border-t-[rgb(186, 146, 146)] pt-1 max-h-20 overflow-y-scroll ">
-                    <span className="text-[14px]">
-                        {reportData.additionalInfo}
-                    </span>
-                </div>
-            </div>
-
-            <div className="flex items-center justify-center mt-2.5">
-                <button 
-                    onClick={flipCard}
-                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
-                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
-                >
-                    Contact Owner
-                </button>
-            </div>
-        </div>
-    )
-}
-
-function CardBack({ reportData, flipCard }) {
-    return (
-        <div 
-            className="bg-white border rounded-lg border-red-600 transition-all duration-1000 ease-in-out cursor-pointer 
-            hover:-translate-y-1.25 hover:shadow-2xl overflow-hidden h-full flex flex-col justify-between p-4"
-        >
-            <div>
-                
-                <h2 className="text-2xl font-bold mb-10 text-center underline mt-5">Owner Information</h2>
-                
-                <div className="space-y-2 text-md">
-                    <div className="flex justify-center gap-1">
-                        <label className="font-bold">Name: </label>
-                        <span>{reportData.ownerName}</span>
-                    </div>
-
-                    <div className="flex justify-center gap-1">
-                        {
-                            reportData.email != "" 
-                            &&
-                            <>
-                                <label className="font-bold">Email Address: </label>
-                                <span>{reportData.email}</span>
-                            </>
-                        }
-                    </div>
-
-                    <div className="flex justify-center gap-1">
-                        {
-                            reportData.phone != "" 
-                            &&
-                            <>
-                                <label className="font-bold">Phone Number: </label>
-                                <span>{reportData.phone}</span>
-                            </>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex items-center justify-center mt-2.5">
-                <button 
-                    onClick={flipCard}
-                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
-                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
-                >
-                    Back
-                </button>
-            </div>
-        </div>
-    )
-}
-
-function SearchBar({ setSearchQuery, setBreedFilter, setPetFilter }) {
+function SearchBar({ setSearchQuery }) {
     const [userInput, setUserInput] = useState('');
-    const [displayFilter, setDisplayFilter] = useState(false);
 
     const handleInputChange = (e) => {
         setUserInput(e.target.value);
@@ -178,49 +22,31 @@ function SearchBar({ setSearchQuery, setBreedFilter, setPetFilter }) {
         setSearchQuery(userInput);
     }
 
-    const handleDisplayFilter = () => {
-        setDisplayFilter(!displayFilter);
-    }
-
     return (
-        <div className="flex justify-center flex-col items-center gap-2.5 mb-5">
-            <div className="flex items-center rounded-3xl px-2.5 py-1.25 border bg-white hover:shadow-[0_2px_6px_rgb(113,111,111)]">
-                <form onSubmit={handleSearchQueryChange}>
-                    <input
-                        type="text"
-                        placeholder="Search by name"
-                        value={userInput}
-                        onChange={handleInputChange}
-                        className="border- text-base p-1.5 outline-0 w-112.5"
-                    />
-                </form>
-
+        <div className="bg-white shadow-lg rounded-3xl px-4 py-2">
+            <form 
+                onSubmit={handleSearchQueryChange}
+                className="flex flex-row items-center"
+            >
                 <img 
                     src="./searchBarIcons/searchIcon.png" 
                     alt="magnifying glass"
-                    className="w-6.25 h-6.25 cursor-pointer ml-1.25"
+                    className="w-5 h-5 cursor-pointer mr-2"
                     onClick={handleSearchQueryChange}
                 />
-            </div>
-
-            <button 
-                className="border-0 rounded-3xl bg-[#FFB6B6] px-7 py-2.5 font-bold 
-                cursor-pointer transition-colors duration-300 ease-in-out hover:bg-[#d28e8e]"
-                onClick={handleDisplayFilter}
-            >
-                Filter
-            </button>
-
-            {displayFilter && 
-                <FilterPopUp 
-                    setBreedFilter={setBreedFilter}
-                    setPetFilter={setPetFilter}
-                />}
+                <input
+                    type="text"
+                    placeholder="Search by pet name"
+                    value={userInput}
+                    onChange={handleInputChange}
+                    className="text-sm w-full outline-0"
+                />
+            </form>
         </div>
     )
 }
 
-function FilterPopUp({ setBreedFilter, setPetFilter}) {
+function FilterPopUp({ setBreedFilter, setPetFilter, setDisplayFilter }) {
     const [selectedBreedFilter, setSelectedBreedFilter] = useState("all");
     const [selectedPetFilter, setSelectedPetFilter] = useState("all");
 
@@ -240,6 +66,7 @@ function FilterPopUp({ setBreedFilter, setPetFilter}) {
     const handleApplyFilters = () => {
         setBreedFilter(selectedBreedFilter);
         setPetFilter(selectedPetFilter);
+        setDisplayFilter(false)
     }
 
     const dogBreedList = [
@@ -258,26 +85,14 @@ function FilterPopUp({ setBreedFilter, setPetFilter}) {
     else breedList = catBreedList
 
     return (
-        <div className="border rounded-xl mt-2.5 bg-white px-5 py-2.5 w-100">
-            <div className="flex items-center justify-between mb-2.5">
-                <span className="font-bold">Filters</span>
-                <button
-                    className="border rounded-md px-1.25 py-1 transition-all duration-300 ease-in-out cursor-pointer
-                    hover:scale-[1.03] hover:bg-gray-200"
-                    onClick={handleResetFilters}
-                >
-                    Reset all
-                </button>
-            </div>
+        <div className="flex flex-col gap-4 border-t border-gray-300 mx-4 pb-4">
+            <div className="pt-2">
+                <p className="text-xs font-bold">Species</p>
 
-            <div className="text-sm mb-1.5">
-                <div className="font-semibold">
-                    Species
-                </div>
-                <div className="flex flex-wrap gap-1.25">
+                <div className="flex gap-1.5 mt-1.5">
                     <button
-                        className={`border rounded-xl px-2.5 py-1.25 text-sm transition-all duration-300 ease-in-out
-                        hover:scale-[1.03] hover:shadow-[0_3px_3px_black] ${selectedPetFilter == "all" ? "bg-[#efc3c3]" : "bg-white"}`}
+                        className={`border rounded-xl px-2.5 py-1.25 text-xs transition-all duration-300 ease-in-out
+                        hover:scale-[1.02] hover:shadow-md ${selectedPetFilter == "all" ? "bg-[#efc3c3]" : "bg-white"}`}
                         onClick={() => handlePetFilterChange('all')}
                     >
                         All
@@ -299,45 +114,96 @@ function FilterPopUp({ setBreedFilter, setPetFilter}) {
                 </div>
             </div>
 
-            <div className="border-t-2 my-3"/>
-
             <div>
-                <div className="font-semibold">
-                    Breed
-                </div>
-                <div className="flex flex-wrap gap-1.25">
-                    <button
+                <p className="text-xs font-bold">Breeds</p>
+
+                <div className="mt-1.5 flex flex-wrap gap-1.5 overflow-y-auto max-h-50">
+                     <button
                         className={`border rounded-xl px-2.5 py-1.25 text-sm transition-all duration-300 ease-in-out
-                        hover:scale-[1.03] hover:shadow-[0_3px_3px_black] ${selectedBreedFilter == "all" ? "bg-[#efc3c3]" : "bg-white"}`}
+                        hover:scale-[1.03] hover:shadow-md ${selectedBreedFilter == "all" ? "bg-[#efc3c3]" : "bg-white"}`}
                         onClick={() => handleBreedChange('all')}
                     >
                         All
                     </button>
-
-                    {
-                        breedList.map((breed, idx) => (
-                            <button
-                                key={idx}
-                                className={`border rounded-xl px-2.5 py-1.25 text-sm transition-all duration-300 ease-in-out
-                                hover:scale-[1.03] hover:shadow-[0_3px_3px_black] ${selectedBreedFilter == breed ? "bg-[#efc3c3]" : "bg-white"}`}
-                                onClick={() => handleBreedChange(breed)}
-                            >
-                                {breed}
-                            </button>
-                        ))
-                    }
+                        {
+                            breedList.map((breed, idx) => (
+                                <button
+                                    key={idx}
+                                    className={`border rounded-xl px-2.5 py-1.25 text-sm transition-all duration-300 ease-in-out
+                                    hover:scale-[1.03] hover:shadow-md ${selectedBreedFilter == breed ? "bg-[#efc3c3]" : "bg-white"}`}
+                                    onClick={() => handleBreedChange(breed)}
+                                >
+                                    {breed}
+                                </button>
+                            ))
+                        }
                 </div>
             </div>
 
-        <button
-            className="border rounded-md font-bold mt-3.5 w-full px-2.5 py-1.25 cursor-pointer
-            transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-[0_3px_3px_black]"
-            onClick={handleApplyFilters}
-        >
-            Apply Filters
-        </button>
+            <div className="flex flex-row gap-2">
+                <button
+                    className="border rounded-xl px-2 py-1.25 text-sm flex-1 cursor-pointer
+                    transition-all duration-300 ease-in-out hover:shadow-md hover:scale-[1.03]"
+                    onClick={handleResetFilters}
+                >
+                    Reset all
+                </button>
+                <button
+                    className="border rounded-xl px-2 py-1.25 text-sm flex-1 cursor-pointer
+                    transition-all duration-300 ease-in-out hover:shadow-md hover:scale-[1.03]"
+                    onClick={handleApplyFilters}
+                >
+                    Apply Filters
+                </button>
+            </div>
         </div>
     );
+}
+
+function SideBar({ handleNavigation, setBreedFilter, setPetFilter}) {
+    const [displayFilter, setDisplayFilter] = useState(false);
+
+    return (
+        <div className="flex flex-col gap-5 w-64">
+            <div className="bg-white text-xs p-4 rounded-3xl text-center shadow-md flex flex-col justify-center items-center">
+                <p className="text-2xl mb-2">🐾</p>
+                <p className="font-bold">Missing a Pet?</p>
+                <p>
+                    We are sorry to hear that you have lost your pet. We hope you 
+                    can be reunited with your companion soon.
+                </p>
+
+                <button 
+                    className="text-white bg-[#FC1818] rounded-full border-0 px-5 py-2 font-bold cursor-pointer
+                    transitioin-all duration-300 ease-in-out hover:bg-[#c71515] mt-3"
+                    onClick={handleNavigation}
+                >
+                    + Create a Report
+                </button>
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-md ">
+                <button
+                    className="flex flex-row justify-between w-full px-4 py-2 text-sm
+                    cursor-pointer"
+                    onClick={() => setDisplayFilter(prevDisplayFiler => !prevDisplayFiler)}
+                >
+                    <span>Filter</span>
+                    <span className={`transition-transform duration-200 ${displayFilter ? "rotate-180" : "rotate-0"}`}>
+                        ↓
+                    </span>
+                </button>
+
+                {displayFilter && 
+                    <FilterPopUp
+                        setBreedFilter={setBreedFilter}
+                        setPetFilter={setPetFilter}
+                        setDisplayFilter={setDisplayFilter}
+                    />
+                }
+            </div>
+        </div>
+    )
 }
 
 function AllReports({
@@ -347,15 +213,17 @@ function AllReports({
     displayedMissingPets
 }) {
     const [reports, setReports] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const REPORTS_PER_PAGE = 15;
 
-    useEffect(() => {
-        async function loadReports() {
-            const data = await getAllUserReports();
-            setReports(data);
-        }
+    // useEffect(() => {
+    //     async function loadReports() {
+    //         const data = await getAllUserReports();
+    //         setReports(data);
+    //     }
 
-        loadReports();
-    }, [])
+    //     loadReports();
+    // }, [])
 
     const filteredReports = displayedMissingPets(reports);
 
@@ -365,39 +233,50 @@ function AllReports({
         navigate("/LostPetReport");
     }
 
-    return (
-        <div className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5">
-            <SearchBar setSearchQuery={setSearchQuery}/>
+    const actualCards = filteredReports.map(report => (
+        <MissingPetCard
+            key={report.id}
+            reportData={report}
+            setReports={setReports}
+        />
+    ))
 
-            <div className="px-3">
-                <button 
-                    className="text-white bg-[#FC1818] rounded-full border-0 px-5 py-3 font-bold cursor-pointer
-                    ml-5 transitioin-all duration-300 ease-in-out hover:bg-[#c71515]"
-                    onClick={handleNavigation}
-                >
-                    Create Report
-                </button>
-            </div>
-            
-            {/* Filler image cards. Replace when database is set up */}
-            <div className="grid grid-cols-4 gap-6 mt-8 px-8">
-                {
-                    filteredReports.map(report => (
-                        <MissingPetCard
-                            key={report.id}
-                            reportData={report}
-                            setReports={setReports}
-                        />
-                    ))
-                }
-                {
-                    fillerReports.map(fillerReport => (
-                        <MissingPetCard
-                            key={fillerReport.id}
-                            reportData={fillerReport}
-                        />
-                    ))
-                }
+    const fillerCards = fillerReports.map(fillerReport => (
+        <MissingPetCard
+            key={fillerReport.id}
+            reportData={fillerReport}
+        />
+    ))
+
+    const allReports = [...actualCards, ...fillerCards]
+    const totalPages = Math.ceil(allReports.length / REPORTS_PER_PAGE)
+
+    return (
+        <div 
+            className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5 flex
+            flex-row gap-5"
+        >
+            <SideBar
+                handleNavigation={handleNavigation}
+                setBreedFilter={setBreedFilter}
+                setPetFilter={setPetFilter}
+            />
+
+            <div className="flex-1 px-3">
+                <SearchBar setSearchQuery={setSearchQuery}/>
+                <Pagination
+                    setCurrentPage={setCurrentPage}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                />
+                <div className="grid grid-cols-3 gap-6 mt-8 px-8">
+                    {allReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                </div>
+                <Pagination
+                    setCurrentPage={setCurrentPage}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                />
             </div>
         </div>
     )
@@ -417,52 +296,73 @@ function UserReports({
         navigate("/LostPetReport");
     }
 
-    useEffect(() => {
-        async function loadReports() {
-            const data = await getUserReport();
-            setReports(data);
-        }
+    // useEffect(() => {
+    //     async function loadReports() {
+    //         const data = await getUserReport();
+    //         setReports(data);
+    //     }
 
-        loadReports();
-    }, []);
+    //     loadReports();
+    // }, []);
 
-    const filterdReports = displayedMissingPets(reports);
+    const filteredReports = displayedMissingPets(reports);
+
+    const reportArr = filteredReports.map(report => (
+        <MissingPetCard
+            key={report.id}
+            reportData={report}
+            isUserDisplay={true}
+            setReports={setReports}
+        />
+    ))
+
+    const REPORTS_PER_PAGE = 15;
+    const [currentPage, setCurrentPage] = useState(1)
+    const totalPages = Math.ceil(reportArr.length / REPORTS_PER_PAGE)
 
     return (
-        <div className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5">
-            <SearchBar 
-                setSearchQuery={setSearchQuery}
+        <div 
+            className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5 flex
+            flex-row gap-5"
+        >
+            <SideBar
+                handleNavigation={handleNavigation}
                 setBreedFilter={setBreedFilter}
                 setPetFilter={setPetFilter}
             />
 
-            <div className="px-3">
-                <button 
-                    className="text-white bg-[#FC1818] rounded-full border-0 px-5 py-3 font-bold cursor-pointer
-                    ml-5 transitioin-all duration-300 ease-in-out hover:bg-[#c71515]"
-                    onClick={handleNavigation}
-                >
-                    Create Report
-                </button>
-            </div>
-            
-            {/* Filler image cards. Replace when database is set up */}
-            <div className="grid grid-cols-4 gap-6 mt-8 px-8">
-                {
-                    filterdReports.map(report => (
-                        <MissingPetCard
-                            key={report.id}
-                            reportData={report}
-                            isUserDisplay={true}
-                            setReports={setReports}
-                        />
-                    ))
-                }
+            <div className="flex-1 px-3">
+                <SearchBar setSearchQuery={setSearchQuery}/>
+                <Pagination
+                    setCurrentPage={setCurrentPage}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                />
+
+                {totalPages > 0 ? (
+                    <div className="grid grid-cols-3 gap-6 mt-8 px-8">
+                        {reportArr.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center mt-45">
+                        <p className="text-5xl mb-5">🐾</p>
+                        <p>
+                            You current do not have any active reports. Your reports will be 
+                            displayed here once you create them.
+                        </p>
+                        <button 
+                            className="text-white bg-[#FC1818] rounded-full border-0 px-5 py-2 font-bold cursor-pointer
+                            transitioin-all duration-300 ease-in-out hover:bg-[#c71515] mt-3"
+                            onClick={handleNavigation}
+                        >
+                            + Create a Report
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )
 }
-
 
 export default function LostPet() {
     const [allReportsTabSelected, setAllReportsTabSelected] = useState(true);
@@ -495,14 +395,15 @@ export default function LostPet() {
     }
 
     return (
-        <div className="mt-5">
-            <div className="flex flex-row justify-center font-bold text-lg gap-7 my-5">
+        <div className="mt-5 px-7">
+            
+            <div className="flex flex-row font-bold text-lg gap-7 my-5 border-b border-gray-500">
                 <div 
                     onClick={() => setAllReportsTabSelected(true)}
                     className={`cursor-pointer 
                         ${allReportsTabSelected
-                         ? "border-b-2 border-red-600"
-                         : ""
+                         ? "border-b-2 border-red-600 text-red-600"
+                         : "text-black"
                     }`}
                 >
                     All Reports
@@ -511,7 +412,7 @@ export default function LostPet() {
                     onClick={() => setAllReportsTabSelected(false)}
                     className={`cursor-pointer 
                         ${allReportsTabSelected == false
-                         ? "border-b-2 border-red-600"
+                         ? "border-b-2 border-red-600 text-red-600"
                          : ""
                     }`}
                 >
@@ -519,21 +420,17 @@ export default function LostPet() {
                 </div>
             </div>
                 
-            {allReportsTabSelected && 
-                <AllReports
+            {allReportsTabSelected 
+                ? <AllReports
                     setSearchQuery={setSearchQuery}
                     setBreedFilter={setBreedFilter}
                     setPetFilter={setPetFilter}
-                    displayedMissingPets={displayedMissingPets}
-                />
-            }
-            {allReportsTabSelected === false && 
-                <UserReports
+                    displayedMissingPets={displayedMissingPets} />
+                : <UserReports
                     setSearchQuery={setSearchQuery}
                     setBreedFilter={setBreedFilter}
                     setPetFilter={setPetFilter}
-                    displayedMissingPets={displayedMissingPets}
-                />
+                    displayedMissingPets={displayedMissingPets} />
             }
         </div>
     )
