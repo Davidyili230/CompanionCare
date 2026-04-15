@@ -331,6 +331,7 @@ export default function MyPetPage() {
   }
 
   function handleStartAddPet() {
+    setFormMode("add");
     setDraftPet(EMPTY_PET);
     setErrors({});
     setTouched({});
@@ -446,14 +447,14 @@ export default function MyPetPage() {
   }, [dosageSourcePet]);
 
   return (
-    <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
-      <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
-        <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
+    <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
+      <main className="mt-6 grid gap-5 xl:grid-cols-[560px_minmax(0,1fr)]">
+        <section className="min-h-[710px] rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
 
-          <div className="mt-4 flex flex-wrap gap-4">
+          <div className="mt-5 grid grid-cols-3 gap-4 content-start">
             {pets.length === 0 ? (
               <AddPetEmptyCard onClick={handleStartAddPet} />
             ) : (
@@ -476,7 +477,7 @@ export default function MyPetPage() {
 
         <div
           ref={addPetSectionRef}
-          className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"
+          className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
         >
           <PetWorkspaceTabs
             selectedPet={selectedPet}
