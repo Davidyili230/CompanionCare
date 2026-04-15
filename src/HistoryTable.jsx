@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "./firebase/firebase";
-import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 const ENTRIES_PER_PAGE = 10;
 
@@ -11,10 +11,14 @@ function HistoryTable() {
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({});
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "supplementHistory"), (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      // Sort by most recent date first
+      data.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
       setEntries(data);
     });
     return () => unsubscribe();
@@ -47,6 +51,30 @@ function HistoryTable() {
       } catch (error) {
         console.error("Error deleting document: ", error);
       }
+    }
+  };
+
+  const handleEditClick = (entry) => {
+    setEditingId(entry.id);
+    setEditData({ ...entry });
+  };
+
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSave = async () => {
+    try {
+      await updateDoc(doc(db, "supplementHistory", editingId), {
+        pet: editData.pet,
+        supplement: editData.supplement,
+        dosage: editData.dosage,
+        scheduled: editData.scheduled,
+        status: editData.status,
+      });
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error updating document: ", error);
     }
   };
 
@@ -144,31 +172,77 @@ function HistoryTable() {
               ) : (
                 paginated.map((entry) => (
                   <tr key={entry.id} className="border-t border-gray-100 hover:bg-orange-50 transition">
-                    <td className="px-4 py-3 text-gray-700">{entry.dateTime}</td>
-                    <td className="px-4 py-3 text-gray-700">{entry.pet}</td>
-                    <td className="px-4 py-3 text-gray-700">{entry.supplement}</td>
-                    <td className="px-4 py-3 text-gray-700">{entry.dosage}</td>
-                    <td className="px-4 py-3 text-gray-700">{entry.scheduled}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className="px-2 py-1 rounded-full text-xs font-semibold"
-                        style={{
-                          backgroundColor: entry.status === "Given" ? "#d4edda" : "#f8d7da",
-                          color: entry.status === "Given" ? "#155724" : "#721c24"
-                        }}
-                      >
-                        {entry.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDelete(entry.id)}
-                        className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
-                        style={{ backgroundColor: "#c1622f" }}
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    {editingId === entry.id ? (
+                      <>
+                        <td className="px-4 py-3 text-gray-400 text-xs">{entry.dateTime}</td>
+                        <td className="px-4 py-2">
+                          <input name="pet" value={editData.pet} onChange={handleEditChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm" />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input name="supplement" value={editData.supplement} onChange={handleEditChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm" />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input name="dosage" value={editData.dosage} onChange={handleEditChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm" />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input name="scheduled" value={editData.scheduled} onChange={handleEditChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm" />
+                        </td>
+                        <td className="px-4 py-2">
+                          <select name="status" value={editData.status} onChange={handleEditChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm">
+                            <option value="Given">Given</option>
+                            <option value="Missed">Missed</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button onClick={handleEditSave}
+                            className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                            style={{ backgroundColor: "#155724" }}>
+                            Save
+                          </button>
+                          <button onClick={() => setEditingId(null)}
+                            className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                            style={{ backgroundColor: "#6c757d" }}>
+                            Cancel
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-3 text-gray-700">{entry.dateTime}</td>
+                        <td className="px-4 py-3 text-gray-700">{entry.pet}</td>
+                        <td className="px-4 py-3 text-gray-700">{entry.supplement}</td>
+                        <td className="px-4 py-3 text-gray-700">{entry.dosage}</td>
+                        <td className="px-4 py-3 text-gray-700">{entry.scheduled}</td>
+                        <td className="px-4 py-3">
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold"
+                            style={{
+                              backgroundColor: entry.status === "Given" ? "#d4edda" : "#f8d7da",
+                              color: entry.status === "Given" ? "#155724" : "#721c24"
+                            }}>
+                            {entry.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            <button onClick={() => handleEditClick(entry)}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                              style={{ backgroundColor: "#5a3e2b" }}>
+                              Edit
+                            </button>
+                            <button onClick={() => handleDelete(entry.id)}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                              style={{ backgroundColor: "#c1622f" }}>
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               )}
