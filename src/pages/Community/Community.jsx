@@ -11,7 +11,14 @@ const TIME_FILTERS = [
    { label: "Last 90 days", days: 90 },
 ];
 
+const FIXED_LABELS = ["All", "Daily", "Train", "Healthy", "Food", "Other"]
 const LABEL_COLORS = { bg: "#FFF0E6", text: "#D4631A", dot: "#F08040" };
+
+const toDate = (val) => {
+   if (!val) return null;
+   if (val?.toDate) return val.toDate(); // Firestore Timestamp
+   return new Date(val); // string / number fallback
+};
 
 export default function Community() {
    const [posts, setPosts] = useState([]);
@@ -39,23 +46,14 @@ export default function Community() {
       loadPosts();
    }, []);
 
-   const allLabels = useMemo(() => {
-      // get all the label
-      const unique = new Set(
-         posts
-            .map((p) => p.label)
-            .filter((l) => l !== null && l !== undefined && l !== ""),
-      );
-      return ["All", ...Array.from(unique)];
-   }, [posts]);
-
    const filteredPosts = useMemo(() => {
       const now = new Date();
       return posts.filter((p) => {
          if (activeLabel !== "All" && p.label !== activeLabel) return false;
          if (activeDays !== null) {
             const cutoff = new Date(now - activeDays * 86400000);
-            if (new Date(p.createdAt) < cutoff) return false;
+            const postDate = toDate(p.createdAt);
+            if (!postDate || postDate < cutoff) return false;
          }
          if (search.trim() !== "") {
             const q = search.toLowerCase();
@@ -70,18 +68,12 @@ export default function Community() {
    }, [posts, activeLabel, activeDays, search]);
 
    return (
-      <div
-         style={{
-            minHeight: "100vh",
-            background: "#FFF9F0",
-            boxSizing: "border-box",
-         }}
-      >
-         <div style={{ padding: "24px" }}>
+      <>
+         <div style={{ padding: "16px 24px 24px" }}>
             <div
                style={{
                   maxWidth: 1200,
-                  margin: "0 auto",
+                  margin: "0 auto",   //this two line for size
                   display: "grid",
                   gridTemplateColumns: "1fr 3fr",
                   gap: 28,
@@ -140,7 +132,7 @@ export default function Community() {
                         Category
                      </div>
 
-                     {allLabels.map((l) => {
+                     {FIXED_LABELS.map((l) => {
                         const active = activeLabel === l;
                         return (
                            <button
@@ -387,9 +379,9 @@ export default function Community() {
                   setShowNewPost(false);
                   await loadPosts();
                }}
-               existingLabels={allLabels}
+               existingLabels={FIXED_LABELS.slice(1)}
             />
          )}
-      </div>
+      </>
    );
 }

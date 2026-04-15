@@ -1,16 +1,3 @@
-// const BASE_URL = "http://localhost:8080";
-
-// const fixUrl = (u) => {
-//    if (!u) return "";
-//    const url = typeof u === "object" ? u.url : u;
-//    if (!url) return "";
-//    if (url.startsWith("http")) return url;
-//    if (url.startsWith("/uploads/")) return `${BASE_URL}${url}`;
-//    return url;
-// };
-
-
-
 const getVideoCover = (url) => {
    return url
       .replace("/upload/", "/upload/w_400,c_scale/")
@@ -153,7 +140,7 @@ export default function PostCard({ post, onOpen }) {
                         flexShrink: 0,
                      }}
                   >
-                     {(post.authorName || "U")[0]}
+                     {(post.username || "U")[0]}
                   </div>
                )}
 
@@ -166,7 +153,7 @@ export default function PostCard({ post, onOpen }) {
                         lineHeight: "16px",
                      }}
                   >
-                     {post.authorName || "Anonymous"}
+                     {post.username || "Anonymous"}
                   </div>
                   {/* 帖子标题 */}
                   <div
