@@ -1,9 +1,21 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
 import PetWorkspaceTabs from "../../components/PetWorkspaceTabs";
 import RecommendedDosagePanel from "../../components/RecommendedDosagePanel";
 import { calcDosageItems } from "../../utils/dosageCalculator";
+import {
+  savePet,
+  subscribeToPets,
+  deletePet,
+  subscribeToSupplements,
+  saveSupplement,
+  deleteSupplement,
+} from "../../services/petService";
+import { auth } from "../../firebase.js";
+import { getSuggestedSupplementRules } from "../../utils/getSuggestedSupplements";
+import { getCatalogSuggestionsForPet } from "../../services/supplementCatalogService";
 
 const EMPTY_PET = {
   id: null,
@@ -58,8 +70,18 @@ function getAgeFromBirthDate(birthDate) {
 
 export default function MyPetPage() {
   const [pets, setPets] = useState([]);
+  const [supplements, setSupplements] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [draftPet, setDraftPet] = useState(EMPTY_PET);
+  const [formMode, setFormMode] = useState("add");
+  const [authReady, setAuthReady] = useState(false);
+  const [currentUid, setCurrentUid] = useState(null);
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [suggestionError, setSuggestionError] = useState("");
 
   const addPetSectionRef = useRef(null);
 
@@ -67,6 +89,190 @@ export default function MyPetPage() {
     () => pets.find((p) => p.id === selectedPetId) ?? null,
     [pets, selectedPetId]
   );
+
+  useEffect(() => {
+    if (formMode !== "edit") return;
+
+    if (selectedPet) {
+      setDraftPet({
+        ...EMPTY_PET,
+        ...selectedPet,
+      });
+    } else {
+      setDraftPet(EMPTY_PET);
+    }
+
+    setErrors({});
+    setTouched({});
+  }, [selectedPet, formMode]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUid(user?.uid ?? null);
+      setAuthReady(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    if (!currentUid) {
+      setPets([]);
+      setSelectedPetId(null);
+      return;
+    }
+
+    const unsubscribe = subscribeToPets((list) => {
+      setPets(list);
+
+      setSelectedPetId((prevSelectedPetId) => {
+        if (!list.length) return null;
+
+        const stillExists = list.some((pet) => pet.id === prevSelectedPetId);
+        if (stillExists) return prevSelectedPetId;
+
+        return list[0].id;
+      });
+    });
+
+    return () => unsubscribe();
+  }, [authReady, currentUid]);
+
+  useEffect(() => {
+    if (!authReady || !currentUid || !selectedPetId) {
+      setSupplements([]);
+      return;
+    }
+
+    const unsubscribe = subscribeToSupplements(selectedPetId, (list) => {
+      setSupplements(list);
+    });
+
+    return () => unsubscribe();
+  }, [authReady, currentUid, selectedPetId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSuggestions() {
+      if (!selectedPet?.species) {
+        setSuggestions([]);
+        setSuggestionError("");
+        setLoadingSuggestions(false);
+        return;
+      }
+
+      try {
+        setLoadingSuggestions(true);
+        setSuggestionError("");
+
+        const rules = getSuggestedSupplementRules(selectedPet);
+        const ruleKeys = rules.map((rule) => rule.key);
+
+        if (ruleKeys.length === 0) {
+          setSuggestions([]);
+          return;
+        }
+
+        const data = await getCatalogSuggestionsForPet(selectedPet, ruleKeys);
+
+        const ruleOrder = ruleKeys.reduce((acc, key, index) => {
+          acc[key] = index;
+          return acc;
+        }, {});
+
+        const normalized = [...data]
+          .sort((a, b) => {
+            const keyDiff =
+              (ruleOrder[a.recommendationKey] ?? 999) -
+              (ruleOrder[b.recommendationKey] ?? 999);
+
+            if (keyDiff !== 0) return keyDiff;
+
+            return (a.minWeight ?? 0) - (b.minWeight ?? 0);
+          })
+          .map((item) => ({
+            id: item.id,
+            name: item.name || "Unnamed supplement",
+            reason: `Recommended dose for ${selectedPet?.name || "this pet"}`,
+            tag: item.recommendationKey || "supplement",
+            note: [
+              item.brand ? `Brand: ${item.brand}` : "",
+              `Dose: ${item.dosageAmount} ${item.dosageUnit}`,
+            ]
+              .filter(Boolean)
+              .join(" • "),
+            imageUrl: "",
+            link: "",
+          }));
+
+        if (!cancelled) {
+          setSuggestions(normalized);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setSuggestions([]);
+          setSuggestionError(
+            error.message || "Failed to load supplement suggestions."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingSuggestions(false);
+        }
+      }
+    }
+
+    loadSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPet]);
+
+  function validatePetForm(pet) {
+    const nextErrors = {};
+
+    const weightValue = String(pet.weight ?? "").trim();
+    const ageValue = String(pet.age ?? "").trim();
+    const birthDateValue = String(pet.birthDate ?? "").trim();
+
+    if (!weightValue) {
+      nextErrors.weight = "Weight is required.";
+    } else if (
+      !Number.isFinite(Number(weightValue)) ||
+      Number(weightValue) <= 0
+    ) {
+      nextErrors.weight = "Please enter a valid weight.";
+    }
+
+    if (!ageValue && !birthDateValue) {
+      nextErrors.age = "Please enter age or birth date.";
+      nextErrors.birthDate = "Please enter age or birth date.";
+    } else {
+      if (ageValue) {
+        const ageNumber = Number(ageValue);
+        if (!Number.isFinite(ageNumber) || ageNumber < 0) {
+          nextErrors.age = "Please enter a valid age.";
+        }
+      }
+
+      if (birthDateValue) {
+        const dob = new Date(`${birthDateValue}T12:00:00`);
+        const today = new Date();
+
+        if (Number.isNaN(dob.getTime())) {
+          nextErrors.birthDate = "Please enter a valid birth date.";
+        } else if (dob > today) {
+          nextErrors.birthDate = "Birth date cannot be in the future.";
+        }
+      }
+    }
+
+    return nextErrors;
+  }
 
   function handleDraftPetChange(field, value) {
     setDraftPet((prev) => {
@@ -91,10 +297,43 @@ export default function MyPetPage() {
 
       return next;
     });
+
+    setErrors((prev) => {
+      const nextErrors = { ...prev };
+      delete nextErrors[field];
+
+      if (field === "age" || field === "birthDate") {
+        delete nextErrors.age;
+        delete nextErrors.birthDate;
+      }
+
+      return nextErrors;
+    });
+  }
+
+  function handleFieldBlur(field) {
+    setTouched((prev) => {
+      if (field === "age" || field === "birthDate") {
+        return {
+          ...prev,
+          age: true,
+          birthDate: true,
+        };
+      }
+
+      return {
+        ...prev,
+        [field]: true,
+      };
+    });
+
+    setErrors(validatePetForm(draftPet));
   }
 
   function handleStartAddPet() {
     setDraftPet(EMPTY_PET);
+    setErrors({});
+    setTouched({});
 
     addPetSectionRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -108,34 +347,85 @@ export default function MyPetPage() {
     setDraftPet(pet ? { ...EMPTY_PET, ...pet } : EMPTY_PET);
   }
 
-  function handleAddPet(newPet) {
-    const petToSave = {
+  async function handleAddPet(newPet) {
+    const petToValidate = {
       ...EMPTY_PET,
       ...draftPet,
       ...newPet,
-      id: newPet?.id ?? draftPet?.id ?? crypto.randomUUID(),
-      weight:
-        draftPet.weight === "" || draftPet.weight === null
-          ? ""
-          : Number(draftPet.weight),
-      age:
-        draftPet.age === "" || draftPet.age === null
-          ? ""
-          : Number(draftPet.age),
     };
 
-    setPets((prev) => {
-      const exists = prev.some((pet) => pet.id === petToSave.id);
+    const validationErrors = validatePetForm(petToValidate);
 
-      if (exists) {
-        return prev.map((pet) => (pet.id === petToSave.id ? petToSave : pet));
-      }
-
-      return [...prev, petToSave];
+    setErrors(validationErrors);
+    setTouched({
+      weight: true,
+      age: true,
+      birthDate: true,
     });
 
-    setSelectedPetId(petToSave.id);
-    setDraftPet(EMPTY_PET);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    try {
+      const petId = await savePet(petToValidate);
+
+      setSelectedPetId(petId);
+      setFormMode("add");
+      setDraftPet(EMPTY_PET);
+      setErrors({});
+      setTouched({});
+    } catch (error) {
+      console.error("Error saving pet:", error);
+      alert("Failed to save pet. Please try again.");
+    }
+  }
+
+  async function handleDeletePet(petId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this pet?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePet(petId);
+
+      if (selectedPetId === petId) {
+        setSelectedPetId(null);
+      }
+
+      setDraftPet((prev) => (prev.id === petId ? EMPTY_PET : prev));
+      setFormMode("add");
+      setErrors({});
+      setTouched({});
+    } catch (error) {
+      console.error("Error deleting pet:", error);
+      alert("Failed to delete pet. Please try again.");
+    }
+  }
+
+  async function handleAddSupplement(newSupplement) {
+    if (!selectedPetId) {
+      alert("Please select a pet first.");
+      return;
+    }
+
+    try {
+      await saveSupplement(selectedPetId, newSupplement);
+    } catch (error) {
+      console.error("Error saving supplement:", error);
+      alert("Failed to save supplement. Please try again.");
+    }
+  }
+
+  async function handleDeleteSupplement(supplementId) {
+    try {
+      await deleteSupplement(supplementId);
+    } catch (error) {
+      console.error("Error deleting supplement:", error);
+      alert("Failed to delete supplement. Please try again.");
+    }
   }
 
   const hasDraftInput = Boolean(
@@ -155,16 +445,10 @@ export default function MyPetPage() {
     return calcDosageItems(dosageSourcePet);
   }, [dosageSourcePet]);
 
-  const suggestions = [];
-
-  function handleAddSupplement(newSupplement) {
-    console.log("New supplement:", newSupplement);
-  }
-
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
       <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
-        <section className="rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm min-h-190">
+        <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
@@ -173,14 +457,19 @@ export default function MyPetPage() {
             {pets.length === 0 ? (
               <AddPetEmptyCard onClick={handleStartAddPet} />
             ) : (
-              pets.map((pet) => (
-                <PetCard
-                  key={pet.id}
-                  pet={pet}
-                  selected={selectedPetId === pet.id}
-                  onClick={handleSelectPet}
-                />
-              ))
+              <>
+                {pets.map((pet) => (
+                  <PetCard
+                    key={pet.id}
+                    pet={pet}
+                    selected={selectedPetId === pet.id}
+                    onClick={handleSelectPet}
+                    onDelete={handleDeletePet}
+                  />
+                ))}
+
+                <AddPetEmptyCard onClick={handleStartAddPet} />
+              </>
             )}
           </div>
         </section>
@@ -192,11 +481,18 @@ export default function MyPetPage() {
           <PetWorkspaceTabs
             selectedPet={selectedPet}
             draftPet={draftPet}
+            supplements={supplements}
             onDraftPetChange={handleDraftPetChange}
+            onFieldBlur={handleFieldBlur}
             onStartAddPet={handleStartAddPet}
             onSavePet={handleAddPet}
             onAddSupplement={handleAddSupplement}
+            onDeleteSupplement={handleDeleteSupplement}
             suggestions={suggestions}
+            suggestionLoading={loadingSuggestions}
+            suggestionError={suggestionError}
+            errors={errors}
+            touched={touched}
           />
 
           <div className="self-start">
