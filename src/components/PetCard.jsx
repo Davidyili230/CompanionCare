@@ -1,7 +1,7 @@
 export default function PetCard({ pet, selected, onClick, onDelete }) {
   return (
     <div
-      className={`flex w-23 flex-col items-center rounded-2xl border bg-white p-3 text-center transition-colors duration-200 ${
+      className={`flex w-full min-h-[210px] flex-col items-center rounded-[22px] border bg-white px-4 py-4 text-center transition-all duration-200 ${
         selected
           ? "border-[#de7e52] bg-[#fcf5ef]"
           : "border-[#de7e52] hover:bg-[#fcf5ef]"
@@ -10,9 +10,9 @@ export default function PetCard({ pet, selected, onClick, onDelete }) {
       <button
         type="button"
         onClick={() => onClick(pet.id)}
-        className="flex w-full flex-col items-center text-center"
+        className="flex w-full flex-1 flex-col items-center text-center"
       >
-        <div className="mb-3 flex h-13 w-13 items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
+        <div className="mb-3 flex h-[74px] w-[74px] items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
           {pet.image ? (
             <img
               src={pet.image}
@@ -20,25 +20,26 @@ export default function PetCard({ pet, selected, onClick, onDelete }) {
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-[18px] font-semibold text-[#d87c5a]">
+            <span className="text-[28px] font-semibold text-[#d87c5a]">
               {pet.name?.[0]?.toUpperCase() || "P"}
             </span>
           )}
         </div>
 
-        <p className="text-[14px] font-bold leading-tight text-[#1f1f1f]">
+        <p className="text-[16px] font-bold leading-tight text-[#1f1f1f]">
           {pet.name}
         </p>
 
-        <p className="mt-1 text-[12px] leading-tight text-[#4f4f4f]">
-          {pet.species}, {pet.breed || "unknown"}
+        <p className="mt-2 text-[13px] leading-snug text-[#4f4f4f]">
+          {pet.species}, <br />
+          {pet.breed || "unknown"}
         </p>
       </button>
 
       <button
         type="button"
         onClick={() => onDelete?.(pet.id)}
-        className="mt-3 rounded-full border border-red-300 px-3 py-1 text-[11px] font-medium text-red-500 transition hover:bg-red-50"
+        className="mt-4 rounded-full border border-red-300 px-4 py-1.5 text-[12px] font-medium text-red-500 transition hover:bg-red-50"
       >
         Delete
       </button>
