@@ -1,17 +1,17 @@
 import { useState, useRef } from "react";
 import { createCommunityPost } from "../api/community.api";
 
+const FIXED_LABELS = ["Daily", "Train", "Healthy", "Food", "Other"];
 const LABEL_COLORS = { bg: "#FFF0E6", text: "#D4631A", dot: "#F08040" };
 const MAX_IMAGES = 5;
 
 export default function NewPostModal({
    onClose,
    onSuccess,
-   existingLabels = [],
 }) {
    const [title, setTitle] = useState("");
    const [content, setContent] = useState("");
-   const [label, setLabel] = useState("");
+   const [label, setLabel] = useState("Other");
    const [images, setImages] = useState([]);
    const [video, setVideo] = useState(null);
    const [submitting, setSubmitting] = useState(false);
@@ -20,7 +20,7 @@ export default function NewPostModal({
    const imageInputRef = useRef(null);
    const videoInputRef = useRef(null);
 
-   const labelOptions = existingLabels.filter((l) => l !== "All");
+   const labelOptions = FIXED_LABELS
 
    const handleImageChange = (e) => {
       const selected = Array.from(e.target.files);
@@ -161,7 +161,7 @@ export default function NewPostModal({
                      return (
                         <button
                            key={l}
-                           onClick={() => setLabel(active ? "" : l)}
+                           onClick={() => setLabel(l)}
                            style={{
                               padding: "6px 14px",
                               borderRadius: 999,
@@ -390,7 +390,7 @@ export default function NewPostModal({
                      cursor: "pointer",
                   }}
                >
-                  取消
+                  Cancel
                </button>
                <button
                   onClick={handleSubmit}
