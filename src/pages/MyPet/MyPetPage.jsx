@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
@@ -69,6 +70,9 @@ function getAgeFromBirthDate(birthDate) {
 }
 
 export default function MyPetPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [pets, setPets] = useState([]);
   const [supplements, setSupplements] = useState([]);
   const [errors, setErrors] = useState({});
@@ -152,6 +156,35 @@ export default function MyPetPage() {
 
     return () => unsubscribe();
   }, [authReady, currentUid, selectedPetId]);
+
+  useEffect(() => {
+    const navState = location.state;
+
+    if (!authReady) return;
+    if (!navState?.selectedPetId || navState?.mode !== "edit") return;
+    if (!pets.length) return;
+
+    const targetPet = pets.find((pet) => pet.id === navState.selectedPetId);
+    if (!targetPet) return;
+
+    setSelectedPetId(targetPet.id);
+    setFormMode("edit");
+    setDraftPet({
+      ...EMPTY_PET,
+      ...targetPet,
+    });
+    setErrors({});
+    setTouched({});
+
+    requestAnimationFrame(() => {
+      addPetSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [authReady, pets, location, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -332,6 +365,7 @@ export default function MyPetPage() {
 
   function handleStartAddPet() {
     setFormMode("add");
+    setSelectedPetId(null);
     setDraftPet(EMPTY_PET);
     setErrors({});
     setTouched({});
@@ -345,7 +379,13 @@ export default function MyPetPage() {
   function handleSelectPet(petId) {
     const pet = pets.find((p) => p.id === petId) ?? null;
     setSelectedPetId(petId);
+    setFormMode("edit");
     setDraftPet(pet ? { ...EMPTY_PET, ...pet } : EMPTY_PET);
+
+    addPetSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }
 
   async function handleAddPet(newPet) {
@@ -449,7 +489,7 @@ export default function MyPetPage() {
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
       <main className="mt-6 grid gap-5 xl:grid-cols-[560px_minmax(0,1fr)]">
-        <section className="min-h-[710px] rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm">
+        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-[710px]">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
@@ -494,6 +534,7 @@ export default function MyPetPage() {
             suggestionError={suggestionError}
             errors={errors}
             touched={touched}
+            formMode={formMode}
           />
 
           <div className="self-start">
