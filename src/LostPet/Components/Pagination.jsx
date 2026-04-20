@@ -1,3 +1,4 @@
+
 export default function Pagination({ setCurrentPage, currentPage, totalPages }) {
 
     const prevPage = () => {
