@@ -170,3 +170,44 @@ export async function checkLiked(postId) {
    const likeSnap = await getDoc(likeRef);
    return likeSnap.exists();
 }
+
+
+export async function deleteComment(postId, commentId) {
+   const user = auth.currentUser;
+   if (!user) throw new Error("please login first");
+
+   const commentRef = doc(db, "posts", postId, "comments", commentId);
+   const commentSnap = await getDoc(commentRef);
+
+   if (!commentSnap.exists()) throw new Error("comment not found");
+   if (commentSnap.data().authorId !== user.uid) throw new Error("not your comment");
+
+   await deleteDoc(commentRef);
+   await updateDoc(doc(db, "posts", postId), { commentCount: increment(-1) });
+}
+
+export async function deletePost(postId) {
+   const user = auth.currentUser;
+   if (!user) throw new Error("please login first");
+
+   const postRef = doc(db, "posts", postId);
+   const postSnap = await getDoc(postRef);
+
+   if (!postSnap.exists()) throw new Error("post not found");
+   if (postSnap.data().authorId !== user.uid) throw new Error("not your post");
+
+   // 删 comments 子集合
+   const commentsSnap = await getDocs(collection(db, "posts", postId, "comments"));
+   for (const c of commentsSnap.docs) {
+      await deleteDoc(c.ref);
+   }
+
+   // 删 likes 子集合
+   const likesSnap = await getDocs(collection(db, "posts", postId, "likes"));
+   for (const l of likesSnap.docs) {
+      await deleteDoc(l.ref);
+   }
+
+   // 最后删帖子本身
+   await deleteDoc(postRef);
+}
