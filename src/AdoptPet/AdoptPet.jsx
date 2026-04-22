@@ -73,11 +73,11 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
     }
 
     return (
-        <div className="border rounded-2xl bg-white shadow-md overflow-hidden">
+        <div className="rounded-2xl bg-white shadow-md overflow-hidden">
             <div className="flex flex-row items-center px-4 py-2 gap-2">
                 <form
                     onSubmit={handleSubmitQuery}
-                    className="border rounded-xl px-4 py-2 min-w-45 flex-1 flex flex-row"
+                    className="rounded-xl px-4 py-2 min-w-45 flex-1 flex flex-row"
                 >
                     <span
                         className="mr-3 cursor-pointer"
@@ -221,6 +221,7 @@ function UserView({ isCurrentTabAllReports }) {
                     )
                 }
 
+                <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
             </div>
         </div>
     )
