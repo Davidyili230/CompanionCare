@@ -1,14 +1,13 @@
 
 
-export default function FilterButtons({ text, isActive, action }) {
+export default function FilterButton({ text, stateVar, action}) {
     return (
         <button
+            className={`border rounded-xl px-2.5 py-1.25 text-xs transition-all duration-300 ease-in-out cursor-pointer
+            hover:scale-[1.02] hover:shadow-md ${stateVar === text ? "bg-[#efc3c3]" : "bg-white"}`}
             onClick={action}
-            className={`border rounded-full px-4 py-2 text-sm font-semibold cursor-pointer
-            transition-all duration-200 ${isActive ? "bg-green-600 text-white border-transparent" : "text-black bg-white border-green-400"}
-            `}
         >
             {text}
         </button>
-    );
+    )
 }
