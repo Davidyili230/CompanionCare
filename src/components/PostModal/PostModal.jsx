@@ -12,6 +12,8 @@ import { auth } from "../../firebase";
 export default function PostModal({ post, onClose }) {
    const images = post?.images || [];
    const video = post?.video || null;
+   const images = post?.images || [];
+   const video = post?.video || null;
    const [idx, setIdx] = useState(0);
 
    const [comments, setComments] = useState([]);
@@ -753,7 +755,6 @@ export default function PostModal({ post, onClose }) {
                      <div style={{ height: 1, background: "#e8e0d5", margin: "12px 0" }} />
                      <div style={{ fontWeight: 900, marginBottom: 8 }}>Comments ({comments.length})</div>
                   </div>
-
                   <div
                      className="modal-comment-list"
                      style={{
@@ -894,6 +895,7 @@ export default function PostModal({ post, onClose }) {
    );
 }
 
+function arrowStyle(side) {
 function arrowStyle(side) {
    return {
       position: "absolute",
