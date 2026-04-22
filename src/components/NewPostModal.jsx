@@ -199,7 +199,7 @@ export default function NewPostModal({
             </Field>
 
             {/* Images */}
-            <Field label={`Pic (At most ${MAX_IMAGES} ）`}>
+            <Field label={`Pic (At most ${MAX_IMAGES}`}>
                {images.length > 0 && (
                   <div
                      style={{
