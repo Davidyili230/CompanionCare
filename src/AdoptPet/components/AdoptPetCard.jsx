@@ -3,8 +3,8 @@
 
 export default function AdoptPetCard({ reportData, isCurrentTabAllReports }) {
     return (
-        <div className="flex flex-col border rounded-2xl overflow-hidden bg-white
-        transition-all duration-300 hover:translate-y-1.25 hover:shadow-md">
+        <div className="flex flex-col shadow-md rounded-2xl overflow-hidden bg-white
+        transition-all duration-300 hover:translate-y-1.25 hover:shadow-xl">
             <TopCard reportData={reportData}/>
             <BottomCard reportData={reportData}/>
         </div>
