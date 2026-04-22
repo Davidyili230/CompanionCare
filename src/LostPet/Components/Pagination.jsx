@@ -19,9 +19,9 @@ export default function Pagination({ setCurrentPage, currentPage, totalPages }) 
         <div className="flex flex-row justify-center items-center space-x-4 my-5">
             <button 
                 onClick={prevPage}
-                className="border rounded-xl px-4 py-2 font-bold text-white text-sm bg-red-600
-                transition-all duration-300 ease-in-out cursor-pointer hover:bg-red-700
-                disabled:cursor-not-allowed disabled:bg-red-300"
+                className="border rounded-xl px-4 py-2 font-bold text-white text-sm bg-[#43aa8b]
+                transition-all duration-300 ease-in-out cursor-pointer hover:bg-[#2f8f73]
+                disabled:cursor-not-allowed disabled:bg-[#a8dadc]"
                 disabled={currentPage == 1}
             >
                 Prev
@@ -31,9 +31,9 @@ export default function Pagination({ setCurrentPage, currentPage, totalPages }) 
             </span>
             <button 
                 onClick={nextPage}
-                className="border rounded-xl px-4 py-2 font-bold text-white text-sm bg-red-600
-                transition-all duration-300 ease-in-out cursor-pointer hover:bg-red-700
-                disabled:cursor-not-allowed disabled:bg-red-300"
+                className="border rounded-xl px-4 py-2 font-bold text-white text-sm bg-[#43aa8b]
+                transition-all duration-300 ease-in-out cursor-pointer hover:bg-[#2f8f73]
+                disabled:cursor-not-allowed disabled:bg-[#a8dadc]"
                 disabled={currentPage >= totalPages}
             >
                 Next
