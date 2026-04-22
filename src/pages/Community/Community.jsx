@@ -3,6 +3,7 @@ import { fetchCommunityPosts } from "../../api/community.api";
 import PostCard from "../../components/PostCard/PostCard";
 import PostModal from "../../components/PostModal/PostModal";
 import NewPostModal from "../../components/NewPostModal";
+import NewPostModal from "../../components/NewPostModal";
 
 const TIME_FILTERS = [
    { label: "All time", days: null },
