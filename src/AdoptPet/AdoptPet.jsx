@@ -1,264 +1,45 @@
 
 
-// import styles from "./AdoptPet.module.css"
-
-// import AdoptablePets from "./AdoptablePets.json"
-
-// import { useState } from "react"
-
-
-// function Card({ pet }) {
-//     return (
-//         <div className={styles.animalCard}>
-//             <div className={styles.imageContainer}>
-//                 <img src={pet.img} alt="pet image"/>
-//             </div>
-//             <div className={styles.animalCardBody}>
-//                 <div className={styles.petSpeciesAgeContainer}>
-//                     <span className={styles.petSpeciesText}>{pet.breed}</span>
-//                     <span className={styles.petAgeText}>{pet.age} years old</span>
-//                 </div>
-//                 <div className={styles.petTypeInfoContainer}>
-//                     <span className={styles.petBreedText}>{pet.species}</span>
-//                 </div>
-//                 <div className={styles.petLocationContainer}>
-//                     <span>{`${pet.city}, ${pet.state}`}</span>
-//                     <span>{`${pet.address}`}</span>
-//                 </div>
-//                 <div className={styles.petNotesContainer}>
-//                     <span>
-//                         {pet.notes}
-//                     </span>
-//                 </div>
-//             </div>
-//         </div>
-//     )
-// }
-
-// function SearchAndFilterUI({ setSearchQuery, setPetFilter, setStateFilter }) {
-//     return (
-//         <div className={styles.SearchAndFilter}>
-//             <SearchBar setSearchQuery={setSearchQuery}/>
-//             <FilterUI setPetFilter={setPetFilter} setStateFilter={setStateFilter}/>
-//         </div>
-//     )
-// }
-
-// function SearchBar({ setSearchQuery }) {
-
-//     const [userSearch, setUserSearch] = useState("");
-
-//     const handleUserSearchChange = (e) => {
-//         setUserSearch(e.target.value);
-//     }
-
-//     const handleSearchQueryChange = (e) => {
-//         e.preventDefault();
-//         setSearchQuery(userSearch)
-//     }
-
-//     return (
-//         <div className={styles.searchContainer}>
-//             <div className={styles.searchInput}>
-//                 <form onSubmit={handleSearchQueryChange}>
-//                     <input
-//                         type="text"
-//                         placeholder="Search by breed"
-//                         value={userSearch}
-//                         onChange={handleUserSearchChange}
-//                     />
-//                 </form>
-
-//                 <img 
-//                     src="./searchBarIcons/searchIcon.png" 
-//                     alt="magnifying glass"
-//                     onClick={handleSearchQueryChange}
-//                 />
-//             </div>
-//         </div>
-//     )
-// }
-
-// function FilterUI({ setPetFilter, setStateFilter }) {
-//     const [showFilters, setShowFilters] = useState(false);
-//     const [selectedPetFilter, setSelectedPetFilter] = useState("all");
-//     const [selectedStateFilter, setSelectedStateFilter] = useState("all");
-
-
-//     const handlePetFilterChanger = (selectedFilter) => {
-//         setSelectedPetFilter(selectedFilter);
-//     }
-
-//     const handlePetStateChanger = (selectedState) => {
-//         setSelectedStateFilter(selectedState)
-//     }
-
-//     const handleResetFilters = () => {
-//         setSelectedPetFilter("all");
-//         setSelectedStateFilter("all");
-//     }
-
-//     const handleApplyFilters = () => {
-//         setPetFilter(selectedPetFilter);
-//         setStateFilter(selectedStateFilter);
-//         setShowFilters(false)
-//     }
-
-//     return (
-//         <div className={styles.filterButtonContainer}>
-//             <button 
-//                 className={styles.filterButton}
-//                 onClick={() => setShowFilters(!showFilters)}
-//             >
-//                 Filter
-//             </button>
-    
-
-//             {showFilters && (
-//                 <div className={styles.filterDisplayContainer}> 
-
-//                     <div className={styles.filterHeader}>
-//                         <span>Filters</span>
-//                         <button 
-//                             className={styles.filterResetButton}
-//                             onClick={handleResetFilters}
-//                         >
-//                             Reset all
-//                         </button>
-//                     </div>
-
-//                     <div className={styles.filterSection}>
-//                         <div className={styles.filterByTitle}>
-//                             Animal Type
-//                         </div>
-//                         <div className={styles.filterButtonsContainer}>
-//                             <button 
-//                                 onClick={() => handlePetFilterChanger('all')}
-//                                 className={`${selectedPetFilter == "all" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             >
-//                                 All
-//                             </button>
-//                             <button 
-//                                 onClick={() => handlePetFilterChanger('dog')}
-//                                 className={`${selectedPetFilter == "dog" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             > 
-//                                 Dogs
-//                             </button>
-//                             <button 
-//                                 onClick={() => handlePetFilterChanger('cat')}
-//                                 className={`${selectedPetFilter == "cat" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             >
-//                                 Cats
-//                             </button>
-//                         </div>
-//                     </div>
-
-//                     <div className={styles.sectionDivider}/>
-
-//                     <div className={styles.filterSection}>
-//                         <div className={styles.filterByTitle}>
-//                             State
-//                         </div>
-//                         <div className={styles.filterButtonsContainer}>
-//                             <button 
-//                                 onClick={() => handlePetStateChanger('all')}
-//                                 className={`${selectedStateFilter == "all" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             >
-//                                 All
-//                             </button>
-//                             <button 
-//                                 onClick={() => handlePetStateChanger('NY')}
-//                                 className={`${selectedStateFilter == "NY" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             > 
-//                                 New York
-//                             </button>
-//                             <button 
-//                                 onClick={() => handlePetStateChanger('NJ')}
-//                                 className={`${selectedStateFilter == "NJ" ? styles.activeFilter : styles.inactiveFilter}`}
-//                             >
-//                                 New Jersey
-//                             </button>
-//                         </div>
-//                     </div>
-
-//                     <button 
-//                         className={styles.applyFilterButton}
-//                         onClick={handleApplyFilters}
-//                     >
-//                         Apply Filters
-//                     </button>
-//                 </div>
-//             )}
-//         </div>
-//     )
-// }
-
-// export default function AdoptPet() {
-//     const [searchQuery, setSearchQuery] = useState("");
-//     const [petFilter, setPetFilter] = useState("all");
-//     const [stateFilter, setStateFilter] = useState("all")
-    
-//     const displayedAdoptablePets = AdoptablePets.filter((adoptablePet) => {
-//         const query = searchQuery.toLowerCase();
-
-//         const matchesSearch = (
-//             searchQuery == "" || 
-//             adoptablePet.breed.toLowerCase().includes(query)
-//         );
-
-//         const matchesPetFilter = (
-//             petFilter == "all" ||
-//             adoptablePet.species.toLowerCase() == petFilter
-//         );
-
-//         const matchesStateFilter = (
-//             stateFilter === "all" ||
-//             adoptablePet.state == stateFilter
-//         )
-
-//         return matchesSearch && matchesPetFilter && matchesStateFilter;
-//     });
-
-//     return (
-//         <div className={styles.adoptPetContainer}>
-
-//             <h2 className={styles.title}>
-//                 <div className={styles.titleContainer}>Adopt Pet</div>
-//             </h2>
-
-//             <SearchAndFilterUI
-//                 setSearchQuery={setSearchQuery}
-//                 setPetFilter={setPetFilter}
-//                 setStateFilter={setStateFilter}
-//             />
-            
-//             {/* Filler image cards. Replace when database is set up */}
-//             <div className={styles.cardContainer}>
-//                 {
-//                     displayedAdoptablePets.map((adoptablePet) => {
-//                         return <Card key={adoptablePet.id} pet={adoptablePet}/> 
-//                     })
-//                 }
-//             </div>
-//         </div>
-//     )
-// }
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import  AdoptablePets from "./AdoptablePets.json"
 
 import Pagination from "./components/Pagination";
 import FilterButtons from "./components/FilterButtons";
+import AdoptPetCard from "./components/AdoptPetCard";
 
-function FilterDisplay() {
+function FilterDisplay({ setStateFilter, stateFilter, setSpeciesFilter, speciesFilter }) {
     return (
-        <div className="border-t border-gray-300 bg-[#f8f5f0] px-4 py-4 gap-6">
+        <div className="border-t border-gray-300 bg-[#f8f5f0] px-4 py-4 space-y-3">
+            <div>
+                <p className="text-sm font-bold mb-2"> Species </p>
+                <div className="flex flex-row flex-wrap gap-2">
+                    {
+                        ["All", "Dog", "Cat"].map((species, idx) => (
+                            <FilterButtons 
+                                key={idx}
+                                text={species} 
+                                stateVar = {speciesFilter} 
+                                action={() => setSpeciesFilter(species)} 
+                            />
+                        ))
+                    }
+                </div>
+            </div>
+            
+            <div className="border border-gray-300"/>
+
             <div>
                 <p className="text-sm font-bold mb-2"> State</p>
                 <div className="flex flex-row flex-wrap gap-2">
                     {
-                        ["All States", "New York", "New Jersey"].map((state, idx) => (
-                            <FilterButtons id={idx} text={state}/>
+                        ["All States", "NY", "NJ"].map((state, idx) => (
+                            <FilterButtons 
+                                key={idx} 
+                                text={state}
+                                stateVar={stateFilter}
+                                action={() => setStateFilter(state)}
+                            />
                         ))
                     }
                 </div>
@@ -267,25 +48,65 @@ function FilterDisplay() {
     )
 }
 
-function SearchFilterBar({ }) {
-    const [userInput, setUserInput] = useState()
+function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, speciesFilter, setStateFilter, stateFilter }) {
+    const [currentQuery, setCurrentQuery] = useState(searchQuery)
     const [isFilterDisplayed, setIsFilterDisplayed] = useState(false);
+    const isFilterActive = (speciesFilter !== "All") || (stateFilter !== "All States")
 
+    const handleQueryChange = (e) => {
+        setCurrentQuery(e.target.value);
+    }
+
+    const handleSubmitQuery = (e) => {
+        e.preventDefault();
+        setSearchQuery(currentQuery);
+    }
+
+    const handleRemoveFilters = () => {
+        setSpeciesFilter("All");
+        setStateFilter("All States");
+    }
+
+    const navigate = useNavigate();
+    const handleNavigation = () => {
+        console.log("User is taken to a new view")
+    }
 
     return (
-        <div className="border rounded-2xl bg-white shadow-md">
+        <div className="border rounded-2xl bg-white shadow-md overflow-hidden">
             <div className="flex flex-row items-center px-4 py-2 gap-2">
                 <form
-                    className=""
+                    onSubmit={handleSubmitQuery}
+                    className="border rounded-xl px-4 py-2 min-w-45 flex-1 flex flex-row"
                 >
-                    <span>🔍</span>
+                    <span
+                        className="mr-3 cursor-pointer"
+                        onClick={handleSubmitQuery}
+                    >
+                        🔍
+                    </span>
                     <input
                         type="text"
                         placeholder="Search by name"
+                        value={currentQuery}
+                        onChange={handleQueryChange}
+                        className="text-sm cursor-pointer flex-1 w-full outline-none"
                     />
                 </form>
 
-                <div className="border h-6"/>
+                <div className="border border-gray-400 h-10"/>
+
+                <div>
+                    <button
+                        onClick={handleNavigation}
+                        className="border rounded-xl px-3 py-1.5 text-sm font-bold cursor-pointer bg-green-300
+                        hover:bg-green-400"
+                    >
+                        🐾 Put Pet for Adoption
+                    </button>
+                </div>
+
+                <div className="border border-gray-400 h-10"/>
 
                 <button 
                     onClick={() => setIsFilterDisplayed(!isFilterDisplayed)}
@@ -297,46 +118,79 @@ function SearchFilterBar({ }) {
                 >
                     More Filters
                 </button>
+
+                {isFilterActive && 
+                    <button
+                        onClick={handleRemoveFilters}
+                        className="border rounded-xl px-3 py-1.5 text-sm font-semibold cursor-pointer
+                        transition-al duration-200 hover:shadow-md"
+                    >
+                        Clear
+                    </button>
+                }
             </div>
             
-            {isFilterDisplayed && <FilterDisplay/>}
+            {isFilterDisplayed && 
+                <FilterDisplay 
+                    setStateFilter={setStateFilter} 
+                    stateFilter={stateFilter}
+                    setSpeciesFilter={setSpeciesFilter}
+                    speciesFilter={speciesFilter}
+                />}
         </div>
     );
+}
+
+function getFilteredReport(reportList, searchQuery, speciesFilter, stateFilter) {
+    return reportList.filter((report) => {
+        const query = (searchQuery || "").toLowerCase();
+        const species = (speciesFilter || "All").toLowerCase();
+        const state = (stateFilter || "All States").toLowerCase();
+
+        const matchesQuery = query === "" || report.name.toLowerCase().includes(query);
+        const matchesSpecies = species === "all" || report.species.toLowerCase() === species;
+        const matchesState = state === "all states" || report.state.toLowerCase() === state;
+
+        return matchesQuery && matchesSpecies && matchesState
+    });
 }
 
 function UserView({ isCurrentTabAllReports }) {
     const [reports, setReports] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [petFilter, setPetFilter] = useState("all");
-    const [stateFilter, setStateFilter] = useState("all");
+    const [speciesFilter, setSpeciesFilter] = useState("All");
+    const [stateFilter, setStateFilter] = useState("All States");
+    
+    const [currentPage, setCurrentpage] = useState(1);
 
-    const navigate = useNavigate();
-    const handleNavigation = () => {
-        console.log("User is taken to a new view")
-    }
+    useEffect(() => {
+        // async function loadReports() {
+        //     const data = await getUserReport();
+        //     setReports(data);
+        // }
 
-    const displayedReports = reports.filter(report => {
-        const query = searchQuery.toLowerCase()
+        // loadReports();
 
-        return (
-            (searchQuery === "" || report.breed.toLowerCase().includes(query) || report.name.toLowerCase().includes(q)) &&
-            (petFilter === "all" || report.species.toLowerCase() === petFilter) && 
-            (stateFilter === "all" || report.state === stateFilter)
-        );
-    });
+        if (isCurrentTabAllReports) {
+            setReports(reports.concat(AdoptablePets))
+        } else {
+            setReports([])
+        }
 
-    // useEffect(() => {
-    //     async function loadReports() {
-    //         const data = await getUserReport();
-    //         setReports(data);
-    //     }
 
-    //     loadReports();
-    // }, [])
+    }, [isCurrentTabAllReports])
 
-    if (isCurrentTabAllReports) {
-        // setReports(pReports => pReports + fillerReportsArr)
-    }
+    const filteredReports = getFilteredReport(reports, searchQuery, speciesFilter, stateFilter);
+    const displayedReports = filteredReports.map((report, idx) => (
+        <AdoptPetCard
+            key={report.id}
+            reportData={report}
+            isUserDisplay={isCurrentTabAllReports !== true}
+        />
+    ))
+
+    const REPORTS_PER_PAGE = 20;
+    const totalPages = Math.ceil(displayedReports.length / REPORTS_PER_PAGE);
 
     return (
         <div
@@ -345,16 +199,32 @@ function UserView({ isCurrentTabAllReports }) {
         >
 
             <div className="flex-1">
-                <SearchFilterBar/>
-                <Pagination ReportList={reports}/>
+                <SearchFilterBar
+                    setSearchQuery={setSearchQuery}
+                    searchQuery={searchQuery}
+                    setSpeciesFilter={setSpeciesFilter}
+                    speciesFilter={speciesFilter}
+                    setStateFilter={setStateFilter}
+                    stateFilter={stateFilter}
+                />
+                <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
                 
+                {
+                    totalPages > 0 ? (
+                        <div className="grid grid-cols-4 gap-6 mt-8">
+                            {displayedReports.slice((currentPage-1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                        </div>
+                    ) : (
+                        <div>
+                            Fall back display
+                        </div>
+                    )
+                }
 
-                
             </div>
         </div>
     )
 }
-
 
 export default function AdoptPet() {
     const [currentActiveTab, setCurrentActiveTab] = useState("All Reports");
@@ -367,7 +237,7 @@ export default function AdoptPet() {
                         <div
                             key={idx}
                             onClick={() => setCurrentActiveTab(tabName)}
-                            className={`cursor-pointer ${currentActiveTab === tabName ? "border-b-2 border-red-600 text-red-600" : "text-black"}`}
+                            className={`cursor-pointer w${currentActiveTab === tabName ? "border-b-2 border-red-600 text-red-600" : "text-black"}`}
                         >
                             {tabName}
                         </div>
