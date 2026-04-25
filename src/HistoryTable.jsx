@@ -4,12 +4,26 @@ import { collection, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/fire
 
 const ENTRIES_PER_PAGE = 10;
 
+const formatDateTime = (dateTimeStr) => {
+  const date = new Date(dateTimeStr);
+  if (isNaN(date)) return dateTimeStr;
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 function HistoryTable() {
   const [entries, setEntries] = useState([]);
   const [filterPet, setFilterPet] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -17,7 +31,6 @@ function HistoryTable() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "supplementHistory"), (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      // Sort by most recent date first
       data.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
       setEntries(data);
     });
@@ -30,7 +43,10 @@ function HistoryTable() {
     const entryDate = new Date(entry.dateTime);
     const matchFrom = filterDateFrom === "" || entryDate >= new Date(filterDateFrom);
     const matchTo = filterDateTo === "" || entryDate <= new Date(filterDateTo);
-    return matchPet && matchStatus && matchFrom && matchTo;
+    const matchSearch = searchQuery === "" || [
+      entry.pet, entry.supplement, entry.dosage, entry.scheduled, entry.status, entry.dateTime
+    ].some((field) => field?.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchPet && matchStatus && matchFrom && matchTo && matchSearch;
   });
 
   const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE);
@@ -93,7 +109,17 @@ function HistoryTable() {
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: "#f5f0e8" }}>
-      <h2 className="text-2xl font-bold mb-6" style={{ color: "#5a3e2b" }}>Intake History</h2>
+      <h2 className="text-2xl font-bold mb-4" style={{ color: "#5a3e2b" }}>Intake History</h2>
+
+      {/* Search Bar */}
+      <div className="mb-4">
+        <input
+          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none bg-white"
+          placeholder="Search by pet, supplement, dosage, status..."
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+        />
+      </div>
 
       <div className="flex gap-6">
         {/* Sidebar */}
@@ -135,7 +161,7 @@ function HistoryTable() {
             </select>
           </div>
           <button
-            onClick={() => { setFilterPet(""); setFilterStatus(""); setFilterDateFrom(""); setFilterDateTo(""); setCurrentPage(1); }}
+            onClick={() => { setFilterPet(""); setFilterStatus(""); setFilterDateFrom(""); setFilterDateTo(""); setSearchQuery(""); setCurrentPage(1); }}
             className="w-full border-2 rounded-lg py-2 text-sm font-semibold transition"
             style={{ borderColor: "#c1622f", color: "#c1622f" }}
           >
@@ -165,16 +191,23 @@ function HistoryTable() {
               </tr>
             </thead>
             <tbody>
-              {paginated.length === 0 ? (
+              {entries.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-gray-400">No entries found</td>
+                  <td colSpan="7" className="text-center py-16">
+                    <p className="text-gray-400 text-base font-semibold mb-1">No supplements logged yet</p>
+                    <p className="text-gray-300 text-sm">Use the form above to log your first supplement!</p>
+                  </td>
+                </tr>
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center py-10 text-gray-400">No entries match your search or filters</td>
                 </tr>
               ) : (
                 paginated.map((entry) => (
                   <tr key={entry.id} className="border-t border-gray-100 hover:bg-orange-50 transition">
                     {editingId === entry.id ? (
                       <>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{entry.dateTime}</td>
+                        <td className="px-4 py-3 text-gray-400 text-xs">{formatDateTime(entry.dateTime)}</td>
                         <td className="px-4 py-2">
                           <input name="pet" value={editData.pet} onChange={handleEditChange}
                             className="w-full border border-gray-300 rounded px-2 py-1 text-sm" />
@@ -213,7 +246,7 @@ function HistoryTable() {
                       </>
                     ) : (
                       <>
-                        <td className="px-4 py-3 text-gray-700">{entry.dateTime}</td>
+                        <td className="px-4 py-3 text-gray-700">{formatDateTime(entry.dateTime)}</td>
                         <td className="px-4 py-3 text-gray-700">{entry.pet}</td>
                         <td className="px-4 py-3 text-gray-700">{entry.supplement}</td>
                         <td className="px-4 py-3 text-gray-700">{entry.dosage}</td>
