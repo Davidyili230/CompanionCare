@@ -5,6 +5,7 @@ import { auth } from "../../firebase.js";
 import {
   subscribeToPets,
   subscribeToSupplements,
+  deleteSupplement,
 } from "../../services/petService";
 
 function getAgeLabel(pet) {
@@ -31,9 +32,7 @@ function formatSupplementDescription(supplement) {
 
   if (supplement.brand) parts.push(`Brand: ${supplement.brand}`);
   if (supplement.dosage) {
-    parts.push(
-      `Dose: ${supplement.dosage} ${supplement.unit || ""}`.trim()
-    );
+    parts.push(`Dose: ${supplement.dosage} ${supplement.unit || ""}`.trim());
   }
 
   if (supplement.notes) parts.push(supplement.notes);
@@ -56,13 +55,13 @@ function DashboardPetCard({ pet, selected, onSelect }) {
     <button
       type="button"
       onClick={() => onSelect(pet.id)}
-      className={`flex w-full min-h-[170px] flex-col items-center rounded-[22px] border px-4 py-4 text-center transition-all duration-200 ${
+      className={`flex w-full min-h-42.5 flex-col items-center rounded-[22px] border px-4 py-4 text-center transition-all duration-200 ${
         selected
           ? "border-[#de7e52] bg-[#fcf5ef]"
           : "border-[#de7e52] bg-white hover:bg-[#fcf5ef]"
       }`}
     >
-      <div className="mb-3 flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
+      <div className="mb-3 flex h-17 w-17 items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
         {pet.image ? (
           <img
             src={pet.image}
@@ -93,9 +92,9 @@ function AddPetShortcutCard() {
   return (
     <Link
       to="/my-pet"
-      className="flex w-full min-h-[170px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#de7e52] bg-white px-4 py-4 text-center transition-all duration-200 hover:bg-[#fcf5ef]"
+      className="flex w-full min-h-42.5 flex-col items-center justify-center rounded-[22px] border border-dashed border-[#de7e52] bg-white px-4 py-4 text-center transition-all duration-200 hover:bg-[#fcf5ef]"
     >
-      <div className="mb-4 flex h-[68px] w-[68px] items-center justify-center rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
+      <div className="mb-4 flex h-17 w-17 items-center justify-center rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
         <span className="text-[28px] font-medium leading-none text-[#d87c5a]">
           +
         </span>
@@ -122,7 +121,7 @@ function EmptyModule({ title, minHeight = "min-h-[220px]" }) {
   );
 }
 
-function ActiveSupplementCard({ supplement, selectedPet }) {
+function ActiveSupplementCard({ supplement, onDelete }) {
   return (
     <div className="rounded-[18px] border border-[#ecdcc8] bg-white px-4 py-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -136,7 +135,7 @@ function ActiveSupplementCard({ supplement, selectedPet }) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 lg:w-[220px]">
+        <div className="flex flex-col gap-2 lg:w-55">
           <div className="rounded-[14px] border border-[#ecdcc8] bg-[#fffaf6] px-3 py-3">
             <p className="text-[12px] font-medium uppercase tracking-wide text-[#8a786c]">
               Time to take
@@ -147,21 +146,13 @@ function ActiveSupplementCard({ supplement, selectedPet }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link
-              to="/my-pet"
-              state={
-                selectedPet
-                  ? {
-                      selectedPetId: selectedPet.id,
-                      mode: "edit",
-                      openTab: "supplement",
-                    }
-                  : undefined
-              }
-              className="rounded-full border border-[#de7e52] px-4 py-2 text-[12px] font-semibold text-[#de7e52] transition hover:bg-[#fcf5ef]"
+            <button
+              type="button"
+              onClick={() => onDelete(supplement.id)}
+              className="rounded-full bg-red-500 px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-red-600"
             >
-              Edit
-            </Link>
+              Delete
+            </button>
 
             <span className="rounded-full bg-[#f7efe7] px-4 py-2 text-[12px] font-semibold text-[#b67a5d]">
               Active
@@ -173,48 +164,36 @@ function ActiveSupplementCard({ supplement, selectedPet }) {
   );
 }
 
-function ActiveSupplementsSection({ selectedPet, supplements }) {
+function ActiveSupplementsSection({
+  selectedPet,
+  supplements,
+  onDeleteSupplement,
+}) {
   return (
     <section className="rounded-[28px] border border-[#ecdcc8] bg-white px-5 py-5 shadow-sm">
       <div className="flex items-center justify-between">
         <h2 className="text-[20px] font-bold text-[#1f1f1f]">
           Active Supplements
         </h2>
-
-        <Link
-          to="/my-pet"
-          state={
-            selectedPet
-              ? {
-                  selectedPetId: selectedPet.id,
-                  mode: "edit",
-                  openTab: "supplement",
-                }
-              : undefined
-          }
-          className="rounded-full border border-[#de7e52] px-4 py-2 text-[13px] font-semibold text-[#de7e52] transition hover:bg-[#fcf5ef]"
-        >
-          Manage
-        </Link>
       </div>
 
       {!selectedPet ? (
-        <div className="mt-5 flex min-h-[520px] items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center">
+        <div className="mt-5 flex min-h-130 items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center">
           <p className="text-[14px] text-[#8a786c]">
             Select a pet from the My Pets section first.
           </p>
         </div>
       ) : supplements.length === 0 ? (
-        <div className="mt-5 flex min-h-[520px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center">
+        <div className="mt-5 flex min-h-130 flex-col items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center">
           <p className="text-[18px] font-semibold text-[#1f1f1f]">
             No active supplements
           </p>
-          <p className="mt-2 max-w-[380px] text-[14px] leading-6 text-[#7b6e65]">
+          <p className="mt-2 max-w-95 text-[14px] leading-6 text-[#7b6e65]">
             {selectedPet.name || "This pet"} does not have any supplements yet.
           </p>
 
           <Link
-            to="/my-pet"
+            to="/my-pet?tab=addSupplement"
             state={{
               selectedPetId: selectedPet.id,
               mode: "edit",
@@ -231,13 +210,13 @@ function ActiveSupplementsSection({ selectedPet, supplements }) {
             <ActiveSupplementCard
               key={supplement.id}
               supplement={supplement}
-              selectedPet={selectedPet}
+              onDelete={onDeleteSupplement}
             />
           ))}
 
-          <div className="pt-1">
+          <div className="pt-3 flex justify-center">
             <Link
-              to="/my-pet"
+              to="/my-pet?tab=addSupplement"
               state={{
                 selectedPetId: selectedPet.id,
                 mode: "edit",
@@ -313,25 +292,35 @@ export default function Dashboard() {
     [pets, selectedPetId]
   );
 
+  const handleDeleteSupplement = async (supplementId) => {
+    if (!selectedPetId || !supplementId) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this supplement?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteSupplement(supplementId);
+    } catch (error) {
+      console.error("Failed to delete supplement:", error);
+      alert("Failed to delete supplement. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
       <main className="mt-6 grid gap-5">
         {/* Top row */}
         <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-          <EmptyModule title="Today’s Reminders" minHeight="min-h-[230px]" />
+          <EmptyModule title="Today's Reminders" minHeight="min-h-[230px]" />
 
           <section className="rounded-[28px] border border-[#ecdcc8] bg-white px-5 py-5 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-[20px] font-bold text-[#1f1f1f]">
                 My Pets (Choose a pet)
               </h2>
-
-              <Link
-                to="/my-pet"
-                className="rounded-full bg-[#de7e52] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#cf7045]"
-              >
-                Manage Pets
-              </Link>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -373,7 +362,7 @@ export default function Dashboard() {
                         }
                       : undefined
                   }
-                  className="rounded-full border border-[#de7e52] px-4 py-2 text-[13px] font-semibold text-[#de7e52] transition hover:bg-[#fcf5ef]"
+                  className="rounded-full bg-[#de7e52] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#cf7045]"
                 >
                   Edit in My Pet
                 </Link>
@@ -382,7 +371,7 @@ export default function Dashboard() {
               {selectedPet ? (
                 <div className="mt-5">
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
-                    <div className="flex h-[96px] w-[96px] items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
+                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[#9a9a9a] bg-[#f2f2f2]">
                       {selectedPet.image ? (
                         <img
                           src={selectedPet.image}
@@ -452,12 +441,13 @@ export default function Dashboard() {
                       Health Conditions & Activity Level
                     </p>
                     <p className="mt-2 text-[15px] leading-7 text-[#3f3a36]">
-                      {selectedPet.healthConditions || "No information added yet."}
+                      {selectedPet.healthConditions ||
+                        "No information added yet."}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="mt-5 flex min-h-[220px] items-center justify-center rounded-[18px] border border-dashed border-[#e7cdbd] bg-white px-6 text-center">
+                <div className="mt-5 flex min-h-55 items-center justify-center rounded-[18px] border border-dashed border-[#e7cdbd] bg-white px-6 text-center">
                   <p className="text-[14px] text-[#8a786c]">
                     Select a pet from the My Pets section first.
                   </p>
@@ -470,7 +460,7 @@ export default function Dashboard() {
                 Recent Intake
               </h3>
 
-              <div className="mt-4 flex min-h-[220px] items-center justify-center rounded-[18px] border border-dashed border-[#e7cdbd] bg-white px-6 text-center">
+              <div className="mt-4 flex min-h-55 items-center justify-center rounded-[18px] border border-dashed border-[#e7cdbd] bg-white px-6 text-center">
                 <p className="text-[14px] text-[#8a786c]">
                   Reserved for teammate implementation
                 </p>
@@ -481,6 +471,7 @@ export default function Dashboard() {
           <ActiveSupplementsSection
             selectedPet={selectedPet}
             supplements={supplements}
+            onDeleteSupplement={handleDeleteSupplement}
           />
         </div>
       </main>
