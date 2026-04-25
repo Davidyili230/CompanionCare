@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
@@ -72,6 +72,8 @@ function getAgeFromBirthDate(birthDate) {
 export default function MyPetPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [workspaceTab, setWorkspaceTab] = useState("add-pet");
 
   const [pets, setPets] = useState([]);
   const [supplements, setSupplements] = useState([]);
@@ -159,9 +161,33 @@ export default function MyPetPage() {
 
   useEffect(() => {
     const navState = location.state;
+    const tabFromQuery = searchParams.get("tab");
+    const tabFromState = navState?.openTab;
 
     if (!authReady) return;
-    if (!navState?.selectedPetId || navState?.mode !== "edit") return;
+
+    const shouldOpenSupplementTab =
+      tabFromQuery === "addSupplement" || tabFromState === "supplement";
+
+    if (shouldOpenSupplementTab) {
+      setWorkspaceTab("add-supplement");
+    }
+
+    if (!navState?.selectedPetId || navState?.mode !== "edit") {
+      if (shouldOpenSupplementTab) {
+        requestAnimationFrame(() => {
+          addPetSectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+
+        navigate(location.pathname, { replace: true, state: null });
+      }
+
+      return;
+    }
+
     if (!pets.length) return;
 
     const targetPet = pets.find((pet) => pet.id === navState.selectedPetId);
@@ -184,7 +210,7 @@ export default function MyPetPage() {
     });
 
     navigate(location.pathname, { replace: true, state: null });
-  }, [authReady, pets, location, navigate]);
+  }, [authReady, pets, location, navigate, searchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -489,7 +515,7 @@ export default function MyPetPage() {
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
       <main className="mt-6 grid gap-5 xl:grid-cols-[560px_minmax(0,1fr)]">
-        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-[710px]">
+        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-177.5">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
@@ -523,6 +549,8 @@ export default function MyPetPage() {
             selectedPet={selectedPet}
             draftPet={draftPet}
             supplements={supplements}
+            activeTab={workspaceTab}
+            onTabChange={setWorkspaceTab}
             onDraftPetChange={handleDraftPetChange}
             onFieldBlur={handleFieldBlur}
             onStartAddPet={handleStartAddPet}
