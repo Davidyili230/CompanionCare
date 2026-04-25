@@ -93,8 +93,8 @@ function CardFront({ reportData, flipCard, isUserDisplay, setReports }) {
             <div className="flex items-center justify-center mt-2.5">
                 <button 
                     onClick={flipCard}
-                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
-                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
+                    className="rounded-lg border-0 bg-[#f4a261] hover:bg-[#e76f51] text-white font-bold px-2.5 py-1.5 
+                    cursor-pointer transition-colors duration-300 ease-in-out w-4/5 mb-5"
                 >
                     Contact Owner
                 </button>
@@ -164,8 +164,8 @@ function CardBack({ reportData, flipCard }) {
             <div className="flex items-center justify-center mt-10">
                 <button 
                     onClick={flipCard}
-                    className="rounded-lg border-0 text-white font-bold bg-[#f16b6b] px-2.5 py-1.5 cursor-pointer 
-                    transition-colors duration-300 ease-in-out w-4/5 mb-5 hover:bg-[#f61c1c]"
+                    className="rounded-lg border-0 bg-[#f4a261] hover:bg-[#e76f51] text-white font-bold px-2.5 py-1.5 
+                    cursor-pointer transition-colors duration-300 ease-in-out w-4/5 mb-5"
                 >
                     Back
                 </button>
