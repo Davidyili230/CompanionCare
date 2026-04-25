@@ -515,7 +515,7 @@ export default function MyPetPage() {
   return (
     <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
       <main className="mt-6 grid gap-5 xl:grid-cols-[560px_minmax(0,1fr)]">
-        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-[710px]">
+        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-177.5">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
