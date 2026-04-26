@@ -104,7 +104,7 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
                 </div>
             </div>
 
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
                 {
                     ["Reset All", "Apply Filters"].map((text, idx) => (
                         <button
@@ -123,12 +123,11 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
     )
 }
 
-
 function SideBar({ handleNavigation, setSpeciesFilter, speciesFilter, setBreedFilter, breedFilter}) {
     const [isFilterDisplayed, setIsFilterDisplayed] = useState(false);
 
     return (
-        <div className="flex flex-col gap-5 w-64">
+        <div className="flex flex-col gap-5 w-full lg:w-64">
             <div className="bg-white text-xs p-4 rounded-3xl text-center shadow-md
             flex flex-col justify-center items-center">
                 <p className="text-2xl">🐾</p>
@@ -185,7 +184,6 @@ function getFilteredReports(reportList, searchQuery, speciesFilter, breedFilter)
     });
 }
 
-
 function UserView({ isCurrentTabAllReports }) {
     const [reports, setReports] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -230,8 +228,8 @@ function UserView({ isCurrentTabAllReports }) {
 
     return (
         <div
-            className="bg-[#FFF9F0] min-h screen pb-12.5 pt-5 flex
-            flex-row gap-5"
+            className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5 flex
+            flex-col lg:flex-row gap-5"
         >
             <SideBar
                 handleNavigation={handleNavigation}
@@ -241,14 +239,17 @@ function UserView({ isCurrentTabAllReports }) {
                 breedFilter={breedFilter}
             />
 
-            <div className="flex-1 px-3">
+            <div className="flex-1 lg:px-3">
                 <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
                 <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
 
                 {totalPages > 0 ? (
-                    <div className="grid grid-cols-3 gap-6 mt-8 px-8">
-                        {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 lg:px-8">
+                            {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                        </div>
+                        <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
+                    </>
                 ) : (
                     <div className="flex flex-col items-center mt-45">
                         <p className="text-5xl mb-5">🐾</p>
@@ -266,11 +267,9 @@ function UserView({ isCurrentTabAllReports }) {
                     </div>
                 )}
             </div>
-
         </div>
     )
 }
-
 
 export default function LostPet() {
     const [currentActiveTab, setCurrentActiveTab] = useState("All Reports");
