@@ -8,7 +8,7 @@ import Pagination from "./components/Pagination";
 import FilterButtons from "./components/FilterButtons";
 import AdoptPetCard from "./components/AdoptPetCard";
 
-function FilterDisplay({ setStateFilter, stateFilter, setSpeciesFilter, speciesFilter }) {
+function FilterDisplay({ setStateFilter, stateFilter, setSpeciesFilter, speciesFilter, handleRemoveFilters }) {
     return (
         <div className="border-t border-gray-300 bg-[#f8f5f0] px-4 py-4 space-y-3">
             <div>
@@ -44,6 +44,14 @@ function FilterDisplay({ setStateFilter, stateFilter, setSpeciesFilter, speciesF
                     }
                 </div>
             </div>
+
+            <button 
+                onClick={handleRemoveFilters}
+                className="border rounded-xl px-3 py-1.5 text-sm font-semibold cursor-pointer transition-all 
+                        duration-200 hover:shadow-md text-green-500 border-green-500 w-full sm:hidden"
+            >
+                Clear
+            </button>
         </div>
     )
 }
@@ -74,10 +82,10 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
 
     return (
         <div className="rounded-2xl bg-white shadow-md overflow-hidden">
-            <div className="flex flex-row items-center px-4 py-2 gap-2">
+            <div className="flex flex-col md:flex-row md:items-center md:flex-wrap px-4 py-2 gap-2">
                 <form
                     onSubmit={handleSubmitQuery}
-                    className="rounded-xl px-4 py-2 min-w-45 flex-1 flex flex-row"
+                    className="rounded-xl px-4 py-2 min-w-45 flex-1 flex flex-row bg-gray-50 md:bg-white w-full"
                 >
                     <span
                         className="mr-3 cursor-pointer"
@@ -94,23 +102,23 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
                     />
                 </form>
 
-                <div className="border border-gray-400 h-10"/>
+                <div className="border border-gray-400 h-10 hidden md:block"/>
 
-                <div>
-                    <button
-                        onClick={handleNavigation}
-                        className="border rounded-xl px-3 py-1.5 text-sm font-bold cursor-pointer bg-green-300
-                        hover:bg-green-400"
-                    >
+    
+                <button
+                    onClick={handleNavigation}
+                    className="border rounded-xl px-3 py-1.5 text-sm font-bold cursor-pointer bg-green-300
+                    hover:bg-green-400"
+                >
+                    <span>
                         🐾 Put Pet for Adoption
-                    </button>
-                </div>
-
-                <div className="border border-gray-400 h-10"/>
+                    </span>
+                </button>
 
                 <button 
                     onClick={() => setIsFilterDisplayed(!isFilterDisplayed)}
-                    className={`border rounded-xl px-3 py-1.5 text-sm font-semibold cursor-pointer transition-al duration-200 hover:shadow-md
+                    className={`border rounded-xl px-3 py-1.5 text-sm font-semibold cursor-pointer transition-all 
+                        duration-200 hover:shadow-md
                         ${isFilterDisplayed 
                             ? "text-green-500 border-green-500" 
                             : "text-black border-black hover:text-green-400 hover:border-green-500"
@@ -123,7 +131,7 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
                     <button
                         onClick={handleRemoveFilters}
                         className="border rounded-xl px-3 py-1.5 text-sm font-semibold cursor-pointer
-                        transition-al duration-200 hover:shadow-md"
+                        transition-al duration-200 hover:shadow-md hidden sm:block"
                     >
                         Clear
                     </button>
@@ -136,6 +144,7 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
                     stateFilter={stateFilter}
                     setSpeciesFilter={setSpeciesFilter}
                     speciesFilter={speciesFilter}
+                    handleRemoveFilters={handleRemoveFilters}
                 />}
         </div>
     );
@@ -194,7 +203,7 @@ function UserView({ isCurrentTabAllReports }) {
 
     return (
         <div
-            className="bg-[FFF9F0] min-h screen pb-12.5 pt-5 flex
+            className="bg-[#FFF9F0] min-h-screen pb-12.5 pt-5 flex
             flex-col gap-5"
         >
 
@@ -211,17 +220,20 @@ function UserView({ isCurrentTabAllReports }) {
                 
                 {
                     totalPages > 0 ? (
-                        <div className="grid grid-cols-4 gap-6 mt-8">
-                            {displayedReports.slice((currentPage-1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
-                        </div>
+
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
+                                {displayedReports.slice((currentPage-1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                            </div>
+
+                            <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
+                        </>
                     ) : (
                         <div>
                             Fall back display
                         </div>
                     )
                 }
-
-                <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
             </div>
         </div>
     )
