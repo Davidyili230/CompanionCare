@@ -1,6 +1,6 @@
 
 
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { deleteDoc, doc} from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 
