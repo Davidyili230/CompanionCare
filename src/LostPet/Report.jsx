@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { isValidEmail, isValidPhoneNumber } from "./ReportValidation"
-import { submitReport } from "./SubmitReport"
+import { submitReport } from "./databaseAccess/SubmitReport"
 
 function PetInformation({ formData, setFormData }) {
 

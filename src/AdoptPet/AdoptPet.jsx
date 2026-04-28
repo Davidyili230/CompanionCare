@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import  AdoptablePets from "./AdoptablePets.json"
+
+import { getAllAdoptionReports } from "./dbAdoptAccess/getAdoptionReports";
 
 import Pagination from "./components/Pagination";
 import FilterButtons from "./components/FilterButtons";
@@ -166,6 +167,9 @@ function getFilteredReport(reportList, searchQuery, speciesFilter, stateFilter) 
 
 function UserView({ isCurrentTabAllReports }) {
     const [reports, setReports] = useState([]);
+    const [allReports, setAllReports] = useState([]);
+    const [userOnlyReports, setUserOnlyReports] = useState([]);
+
     const [searchQuery, setSearchQuery] = useState("");
     const [speciesFilter, setSpeciesFilter] = useState("All");
     const [stateFilter, setStateFilter] = useState("All States");
@@ -173,21 +177,20 @@ function UserView({ isCurrentTabAllReports }) {
     const [currentPage, setCurrentpage] = useState(1);
 
     useEffect(() => {
-        // async function loadReports() {
-        //     const data = await getUserReport();
-        //     setReports(data);
-        // }
-
-        // loadReports();
-
-        if (isCurrentTabAllReports) {
-            setReports(reports.concat(AdoptablePets))
-        } else {
-            setReports([])
+        async function loadReports() {
+            const defaultData = await getAllAdoptionReports();
+            setAllReports(defaultData);
         }
 
+        loadReports();
+    }, [])
 
-    }, [isCurrentTabAllReports])
+
+    useEffect(() => {
+        isCurrentTabAllReports ? setReports(allReports) : setReports(userOnlyReports);
+        setCurrentpage(1);
+
+    }, [isCurrentTabAllReports, allReports, userOnlyReports])
 
     const filteredReports = getFilteredReport(reports, searchQuery, speciesFilter, stateFilter);
     const displayedReports = filteredReports.map((report, idx) => (

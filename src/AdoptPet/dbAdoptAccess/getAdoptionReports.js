@@ -1,26 +1,27 @@
 
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { getAuth } from "firebase/auth";
 
-export async function getAllUserReports() {
+export async function getAllAdoptionReports() {
     try {
-        const res = await getDocs(collection(db, "lostPetReports"));
-        const reports = res.docs.map(r => ({
+        const defaultRes = await getDocs(collection(db, "defaultAdoptReports"));
+        const defaultReports = defaultRes.docs.map(r => ({
             id: r.id,
             ...r.data()
-        }));
+        }))
 
-        console.log("All the user reports:", reports)
-        return reports;
+        console.log("All the default adoption reports:", defaultReports);
+        return defaultReports;
+        // return [...reports, ...defaultReports];
     } catch(error) {
-        console.log("There was an error getting all user reports: ", error)
+        console.log("There was an error getting all adoption reports: ", error)
         return [];
     }
 }
 
 
-export async function getUserReport() {
+export async function getUserAdoptionReport() {
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -41,7 +42,7 @@ export async function getUserReport() {
             ...doc.data()
         }));
 
-        console.log("Just the currenet user report", reports)
+        console.log("Just the current user report", reports)
         return reports;
     } catch (error) {
         console.log ("Error getting user reports: ", error);

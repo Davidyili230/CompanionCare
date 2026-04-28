@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 
-import { getAllUserReports, getUserReport } from "./GetReport";
-import { deleteReport } from "./DeleteReport";
+import { getAllUserReports, getUserReport } from "./databaseAccess/GetReport";
+import { deleteReport } from "./databaseAccess/DeleteReport";
 
-import { fillerReports } from "./TempReports";
 import MissingPetCard from "./Components/MissingPetCard";
 import Pagination from "./Components/Pagination";
 import FilterButton from "./Components/FilterButtons";
@@ -185,7 +184,11 @@ function getFilteredReports(reportList, searchQuery, speciesFilter, breedFilter)
 }
 
 function UserView({ isCurrentTabAllReports }) {
-    const [reports, setReports] = useState([]);
+    // stores the report to prevent spam usuage of api
+    const [allUserReports, setAllUserReports] = useState([]);
+    const [onlyUserReports, setOnlyUserReports] = useState([]);
+
+    const [reports, setReports] = useState([]); // repots that will actually be displayed
     const [currentPage, setCurrentPage] = useState(1);
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -196,23 +199,32 @@ function UserView({ isCurrentTabAllReports }) {
     const handleNavigation = () => {
         navigate("/LostPetReport");
     }
-  
+    
+    // initial api call to get all reports
+    // (All Reports view and User Reports View)
     useEffect(() => {
-        // async function loadReports() {
-        //     const data = isCurrentTabAllReports ? await getAllUserReport() : await getUserReport;
-        //     setReports(data);
-        // }
+        async function loadReports() {
+            const allData = await getAllUserReports();
+            setAllUserReports(allData);
 
-        // loadReports();
-
-        if (isCurrentTabAllReports) {
-            setReports(reports.concat(fillerReports));
-        } else {
-            setReports([]);
+            const userData = await getUserReport();
+            setOnlyUserReports(userData);
         }
 
+        loadReports();
         setCurrentPage(1);
-    }, [isCurrentTabAllReports]);
+    }, []);
+
+
+    useEffect(() => {
+        function setDisplayedReports() {
+            isCurrentTabAllReports ? setReports(allUserReports) : setReports(onlyUserReports);
+        }
+
+        setDisplayedReports();
+        setCurrentPage(1);
+    }, [isCurrentTabAllReports, allUserReports, onlyUserReports])
+
     
     const filteredReports = getFilteredReports(reports, searchQuery, speciesFilter, breedFilter);
     const displayedReports = filteredReports.map((report, idx) => (
