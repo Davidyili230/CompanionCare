@@ -31,6 +31,20 @@ export async function fetchCommunityPosts() {
    }));
 }
 
+export async function fetchMyPosts() {
+   const user = auth.currentUser;
+   if (!user) return [];
+
+   const q = query(
+      collection(db, "posts"),
+      orderBy("createdAt", "desc")
+   );
+   const snapshot = await getDocs(q);
+   return snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((post) => post.authorId === user.uid);
+}
+
 //for Cloudinary
 async function uploadToCloudinary(file) {
    const formData = new FormData();
