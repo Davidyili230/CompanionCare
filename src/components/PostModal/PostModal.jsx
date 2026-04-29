@@ -12,8 +12,6 @@ import { auth } from "../../firebase";
 export default function PostModal({ post, onClose }) {
    const images = post?.images || [];
    const video = post?.video || null;
-   const images = post?.images || [];
-   const video = post?.video || null;
    const [idx, setIdx] = useState(0);
 
    const [comments, setComments] = useState([]);
@@ -895,7 +893,6 @@ export default function PostModal({ post, onClose }) {
    );
 }
 
-function arrowStyle(side) {
 function arrowStyle(side) {
    return {
       position: "absolute",
