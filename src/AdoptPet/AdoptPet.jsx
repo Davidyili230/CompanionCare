@@ -78,7 +78,7 @@ function SearchFilterBar({ setSearchQuery, searchQuery, setSpeciesFilter, specie
 
     const navigate = useNavigate();
     const handleNavigation = () => {
-        console.log("User is taken to a new view")
+        navigate("/AdoptionForm")
     }
 
     return (
@@ -197,7 +197,8 @@ function UserView({ isCurrentTabAllReports }) {
         <AdoptPetCard
             key={report.id}
             reportData={report}
-            isUserDisplay={isCurrentTabAllReports !== true}
+            isCurrentTabAllReports={isCurrentTabAllReports}
+            setReports={setReports}
         />
     ))
 

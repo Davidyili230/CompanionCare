@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 
 export async function getAllAdoptionReports() {
     try {
-        const defaultRes = await getDocs(collection(db, "defaultAdoptReports"));
+        const defaultRes = await getDocs(collection(db, "defaultAdoptionReports"));
         const defaultReports = defaultRes.docs.map(r => ({
             id: r.id,
             ...r.data()

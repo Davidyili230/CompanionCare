@@ -14,10 +14,10 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import MyPet from "./pages/MyPet/MyPetPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Need a to re-add a way to go to the PetAdoptionHomePage
-// import PetAdoptionHomePage from "./petAdoption/PetAdoptionHomePage"
+
 import LostPet from "./LostPet/LostPet"
 import AdoptPet from "./AdoptPet/AdoptPet"
+import AdoptionForm from "./AdoptPet/adoptionForm";
 
 import LostPetReport from "./LostPet/Report"
 
@@ -44,8 +44,8 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/adopt" element={<ProtectedRoute><Adopt /></ProtectedRoute>} />
         <Route path="/missing" element={<ProtectedRoute><Missing /></ProtectedRoute>} />
-        {/* <Route path="/PetAdoptionHomePage" element={<PetAdoptionHomePage />} />  */}
         <Route path="/AdoptPet" element={<AdoptPet/>} />
+        <Route path="/AdoptionForm" element={<AdoptionForm/> } />
         <Route path="/LostPet" element={<LostPet/>} /> 
         <Route path="/LostPetReport" element={<LostPetReport/>} />
 
