@@ -43,39 +43,26 @@ export default function MyPosts() {
       loadPosts();
    }, []);
 
-   if (loading)
-      return <p style={{ color: "#9A8A7A", fontSize: 14 }}>Loading...</p>;
+   if (loading) return <p className="text-[#9A8A7A] text-sm">Loading...</p>;
 
+   // when no post
    if (posts.length === 0)
       return (
-         <div
-            style={{ textAlign: "center", padding: "60px 0", color: "#B0A090" }}
-         >
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🐾</div>
-            <div style={{ fontSize: 16, fontWeight: 600 }}>No posts yet</div>
+         <div className="text-center py-16 text-[#B0A090]">
+            <div className="text-5xl mb-3">🐾</div>
+            <div className="text-base font-semibold">No posts yet</div>
          </div>
       );
 
    return (
       <>
-         <div
-            style={{
-               fontSize: 11,
-               fontWeight: 800,
-               color: "#B0A090",
-               textTransform: "uppercase",
-               letterSpacing: 1.1,
-               marginBottom: 16,
-            }}
-         >
+         <div className="text-[11px] font-extrabold text-[#B0A090] uppercase tracking-widest mb-4">
             My Posts ({posts.length})
          </div>
-
          <div
+            className="grid gap-4"
             style={{
-               display: "grid",
                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-               gap: 16,
             }}
          >
             {posts.map((post) => {
@@ -88,120 +75,46 @@ export default function MyPosts() {
                   <div
                      key={post.id}
                      onClick={() => setSelectedPost(post)}
-                     style={{
-                        position: "relative",
-                        height: 300,
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        cursor: "pointer",
-                        border: "1px solid #e6e8ee",
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
-                     }}
+                     className="relative h-[300px] rounded-xl overflow-hidden cursor-pointer border border-[#e6e8ee]"
+                     style={{ boxShadow: "0 6px 18px rgba(0,0,0,0.06)" }}
                   >
-                     {/* 封面 */}
                      {cover ? (
                         <img
                            src={cover}
                            alt=""
-                           style={{
-                              position: "absolute",
-                              inset: 0,
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                           }}
+                           className="absolute inset-0 w-full h-full object-cover"
                         />
                      ) : (
-                        <div
-                           style={{
-                              position: "absolute",
-                              inset: 0,
-                              backgroundColor: "#f2f3f5",
-                           }}
-                        />
+                        <div className="absolute inset-0 bg-[#f2f3f5]" />
                      )}
-
-                     {/* 渐变遮罩 */}
                      <div
+                        className="absolute inset-0"
                         style={{
-                           position: "absolute",
-                           inset: 0,
                            background:
                               "linear-gradient(to bottom, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.55) 100%)",
                         }}
                      />
-
-                     {/* 视频播放图标 */}
                      {isVideo && (
-                        <div
-                           style={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              width: 36,
-                              height: 36,
-                              borderRadius: 999,
-                              background: "rgba(0,0,0,0.5)",
-                              display: "grid",
-                              placeItems: "center",
-                              color: "#fff",
-                              fontSize: 16,
-                           }}
-                        >
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 grid place-items-center text-white text-base">
                            ▶
                         </div>
                      )}
-                     {/* 底部信息：label + title + like */}
-                     <div
-                        style={{
-                           position: "absolute",
-                           left: 0,
-                           right: 0,
-                           bottom: 0,
-                           padding: 10,
-                           color: "#fff",
-                           display: "flex",
-                           alignItems: "flex-end",
-                           justifyContent: "space-between",
-                           gap: 8,
-                        }}
-                     >
-                        <div style={{ minWidth: 0 }}>
-                           <div
-                              style={{
-                                 fontSize: 11,
-                                 color: "rgba(255,255,255,0.75)",
-                                 marginBottom: 3,
-                              }}
-                           >
+
+                     {/* info */}
+                     <div className="absolute left-0 right-0 bottom-0 p-2.5 text-white flex items-end justify-between gap-2">
+                        <div className="min-w-0">
+                           <div className="text-[11px] text-white/75 mb-0.5">
                               #{post.label}
                            </div>
-                           <div
-                              style={{
-                                 fontSize: 13,
-                                 fontWeight: 800,
-                                 whiteSpace: "nowrap",
-                                 overflow: "hidden",
-                                 textOverflow: "ellipsis",
-                              }}
-                           >
+                           <div className="text-[13px] font-extrabold truncate">
                               {post.title}
                            </div>
                         </div>
-                        <div
-                           style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              flexShrink: 0,
-                              gap: 1,
-                           }}
-                        >
-                           <span style={{ fontSize: 18 }}>
+                        <div className="flex flex-col items-center shrink-0 gap-0.5">
+                           <span className="text-lg">
                               {likedMap[post.id] ? "🧡" : "🤍"}
                            </span>
-                           <span style={{ fontSize: 11, fontWeight: 800 }}>
+                           <span className="text-[11px] font-extrabold">
                               {post.likeCount ?? 0}
                            </span>
                         </div>
@@ -224,3 +137,5 @@ export default function MyPosts() {
       </>
    );
 }
+
+//done
