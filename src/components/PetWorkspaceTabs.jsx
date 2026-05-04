@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import AddPetForm from "./AddPetForm";
 import AddSupplementForm from "./AddSupplementForm";
 import SupplementSuggestionList from "./SupplementSuggestionList";
@@ -12,6 +12,8 @@ export default function PetWorkspaceTabs({
   selectedPet,
   draftPet,
   supplements = [],
+  activeTab = "add-pet",
+  onTabChange,
   onDraftPetChange,
   onFieldBlur,
   onStartAddPet,
@@ -24,18 +26,21 @@ export default function PetWorkspaceTabs({
   errors = {},
   touched = {},
 }) {
-  const [activeTab, setActiveTab] = useState("add-pet");
   const tabRefs = useRef([]);
+
+  function changeTab(tabId) {
+    onTabChange?.(tabId);
+
+    if (tabId === "add-pet") {
+      onStartAddPet?.();
+    }
+  }
 
   function moveTo(index) {
     const normalized = (index + TABS.length) % TABS.length;
     const next = TABS[normalized];
-    setActiveTab(next.id);
 
-    if (next.id === "add-pet") {
-      onStartAddPet?.();
-    }
-
+    changeTab(next.id);
     tabRefs.current[normalized]?.focus();
   }
 
@@ -45,26 +50,28 @@ export default function PetWorkspaceTabs({
         event.preventDefault();
         moveTo(index + 1);
         break;
+
       case "ArrowLeft":
         event.preventDefault();
         moveTo(index - 1);
         break;
+
       case "Home":
         event.preventDefault();
         moveTo(0);
         break;
+
       case "End":
         event.preventDefault();
         moveTo(TABS.length - 1);
         break;
+
       case "Enter":
       case " ":
         event.preventDefault();
-        setActiveTab(TABS[index].id);
-        if (TABS[index].id === "add-pet") {
-          onStartAddPet?.();
-        }
+        changeTab(TABS[index].id);
         break;
+
       default:
         break;
     }
@@ -93,12 +100,7 @@ export default function PetWorkspaceTabs({
                 aria-selected={selected}
                 aria-controls={`panel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  if (tab.id === "add-pet") {
-                    onStartAddPet?.();
-                  }
-                }}
+                onClick={() => changeTab(tab.id)}
                 onKeyDown={(event) => handleKeyDown(event, index)}
                 className={[
                   "rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200",
@@ -176,7 +178,7 @@ export default function PetWorkspaceTabs({
                         <button
                           type="button"
                           onClick={() => onDeleteSupplement?.(item.id)}
-                          className="shrink-0 rounded-full border border-red-300 px-2.5 py-0.5 text-[11px] font-medium text-red-500 transition hover:bg-red-50"
+                          className="shrink-0 rounded-full bg-red-500 px-3 py-1 text-[11px] font-medium text-white transition hover:bg-red-600"
                         >
                           Delete
                         </button>
@@ -187,14 +189,17 @@ export default function PetWorkspaceTabs({
                           <span className="font-medium">Brand:</span>{" "}
                           {item.brand || "-"}
                         </p>
+
                         <p>
                           <span className="font-medium">Dosage:</span>{" "}
                           {item.dosage || "-"}
                         </p>
+
                         <p>
                           <span className="font-medium">Frequency:</span>{" "}
                           {item.frequency || "-"}
                         </p>
+
                         <p>
                           <span className="font-medium">Notes:</span>{" "}
                           {item.notes || "-"}
