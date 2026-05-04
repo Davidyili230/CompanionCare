@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import PetCard from "../../components/PetCard";
 import AddPetEmptyCard from "../../components/AddPetEmptyCard";
@@ -69,6 +70,11 @@ function getAgeFromBirthDate(birthDate) {
 }
 
 export default function MyPetPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [workspaceTab, setWorkspaceTab] = useState("add-pet");
+
   const [pets, setPets] = useState([]);
   const [supplements, setSupplements] = useState([]);
   const [errors, setErrors] = useState({});
@@ -152,6 +158,59 @@ export default function MyPetPage() {
 
     return () => unsubscribe();
   }, [authReady, currentUid, selectedPetId]);
+
+  useEffect(() => {
+    const navState = location.state;
+    const tabFromQuery = searchParams.get("tab");
+    const tabFromState = navState?.openTab;
+
+    if (!authReady) return;
+
+    const shouldOpenSupplementTab =
+      tabFromQuery === "addSupplement" || tabFromState === "supplement";
+
+    if (shouldOpenSupplementTab) {
+      setWorkspaceTab("add-supplement");
+    }
+
+    if (!navState?.selectedPetId || navState?.mode !== "edit") {
+      if (shouldOpenSupplementTab) {
+        requestAnimationFrame(() => {
+          addPetSectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        });
+
+        navigate(location.pathname, { replace: true, state: null });
+      }
+
+      return;
+    }
+
+    if (!pets.length) return;
+
+    const targetPet = pets.find((pet) => pet.id === navState.selectedPetId);
+    if (!targetPet) return;
+
+    setSelectedPetId(targetPet.id);
+    setFormMode("edit");
+    setDraftPet({
+      ...EMPTY_PET,
+      ...targetPet,
+    });
+    setErrors({});
+    setTouched({});
+
+    requestAnimationFrame(() => {
+      addPetSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [authReady, pets, location, navigate, searchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -331,6 +390,8 @@ export default function MyPetPage() {
   }
 
   function handleStartAddPet() {
+    setFormMode("add");
+    setSelectedPetId(null);
     setDraftPet(EMPTY_PET);
     setErrors({});
     setTouched({});
@@ -344,7 +405,13 @@ export default function MyPetPage() {
   function handleSelectPet(petId) {
     const pet = pets.find((p) => p.id === petId) ?? null;
     setSelectedPetId(petId);
+    setFormMode("edit");
     setDraftPet(pet ? { ...EMPTY_PET, ...pet } : EMPTY_PET);
+
+    addPetSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }
 
   async function handleAddPet(newPet) {
@@ -446,14 +513,14 @@ export default function MyPetPage() {
   }, [dosageSourcePet]);
 
   return (
-    <div className="min-h-screen w-full bg-[#f7f2e9] p-3">
-      <main className="mt-4 grid gap-4 xl:grid-cols-[520px_minmax(0,1fr)]">
-        <section className="min-h-190 rounded-3xl border border-[#ecdcc8] bg-white p-4 shadow-sm">
+    <div className="min-h-screen w-full bg-[#f7f2e9] px-6 pb-6 pt-4">
+      <main className="mt-6 grid gap-5 xl:grid-cols-[560px_minmax(0,1fr)]">
+        <section className="self-start rounded-[28px] border border-[#ecdcc8] bg-white px-4 py-5 shadow-sm xl:min-h-177.5">
           <h3 className="text-[15px] font-bold text-[#1f1f1f]">
             My Pets (Choose a pet)
           </h3>
 
-          <div className="mt-4 flex flex-wrap gap-4">
+          <div className="mt-5 grid grid-cols-3 gap-4 content-start">
             {pets.length === 0 ? (
               <AddPetEmptyCard onClick={handleStartAddPet} />
             ) : (
@@ -476,12 +543,14 @@ export default function MyPetPage() {
 
         <div
           ref={addPetSectionRef}
-          className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"
+          className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
         >
           <PetWorkspaceTabs
             selectedPet={selectedPet}
             draftPet={draftPet}
             supplements={supplements}
+            activeTab={workspaceTab}
+            onTabChange={setWorkspaceTab}
             onDraftPetChange={handleDraftPetChange}
             onFieldBlur={handleFieldBlur}
             onStartAddPet={handleStartAddPet}
@@ -493,6 +562,7 @@ export default function MyPetPage() {
             suggestionError={suggestionError}
             errors={errors}
             touched={touched}
+            formMode={formMode}
           />
 
           <div className="self-start">
