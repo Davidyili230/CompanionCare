@@ -11,48 +11,52 @@ function SupplementForm() {
     status: "",
   });
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  if (!formData.pet || !formData.supplement || !formData.dosage || !formData.scheduled || !formData.status) {
-    alert("Please fill in all fields before submitting!");
-    return;
-  }
+    if (!formData.pet || !formData.supplement || !formData.dosage || !formData.scheduled || !formData.status) {
+      setError("Please fill in all fields before submitting!");
+      return;
+    }
 
-  try {
-    await addDoc(collection(db, "supplementHistory"), {
-      ...formData,
-      dateTime: new Date().toLocaleString(),
-    });
-    setSuccess(true);
-    setFormData({ pet: "", supplement: "", dosage: "", scheduled: "", status: "" });
-    setTimeout(() => setSuccess(false), 3000);
-  } catch (error) {
-    console.error("Error adding document: ", error);
-  }
-};
-
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 14px",
-    borderRadius: 10,
-    border: "1.5px solid #F0E8DF",
-    background: "#fff",
-    fontSize: 14,
-    color: "#2C1810",
-    outline: "none",
-    boxSizing: "border-box",
+    try {
+      await addDoc(collection(db, "supplementHistory"), {
+        ...formData,
+        dateTime: new Date().toLocaleString(),
+      });
+      setSuccess(true);
+      setFormData({ pet: "", supplement: "", dosage: "", scheduled: "", status: "" });
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      setError("Failed to log supplement. Please try again.");
+      console.error("Error adding document: ", error);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center pt-10 px-6" style={{ backgroundColor: "#f5f0e8" }}>
-      <div className="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
+    <div className="min-h-screen flex items-start justify-center pt-10 px-4 md:px-6" style={{ backgroundColor: "#f5f0e8" }}>
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6" style={{ color: "#5a3e2b" }}>Log a Supplement</h2>
+
+        {success && (
+          <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#d4edda", color: "#155724" }}>
+            Supplement logged successfully!
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           <input
             name="pet"
