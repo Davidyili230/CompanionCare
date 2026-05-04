@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getAllAdoptionReports } from "./dbAdoptAccess/getAdoptionReports";
+import { getAllAdoptionReports, getUserAdoptionReport } from "./dbAdoptAccess/getAdoptionReports";
 
 import Pagination from "./components/Pagination";
 import FilterButtons from "./components/FilterButtons";
@@ -178,8 +178,11 @@ function UserView({ isCurrentTabAllReports }) {
 
     useEffect(() => {
         async function loadReports() {
-            const defaultData = await getAllAdoptionReports();
-            setAllReports(defaultData);
+            const allData = await getAllAdoptionReports();
+            setAllReports(allData);
+
+            const userData = await getUserAdoptionReport();
+            setUserOnlyReports(userData);
         }
 
         loadReports();
@@ -254,7 +257,7 @@ export default function AdoptPet() {
                         <div
                             key={idx}
                             onClick={() => setCurrentActiveTab(tabName)}
-                            className={`cursor-pointer w${currentActiveTab === tabName ? "border-b-2 border-red-600 text-red-600" : "text-black"}`}
+                            className={`cursor-pointer ${currentActiveTab === tabName ? "border-b-2 border-red-600 text-red-600" : "text-black"}`}
                         >
                             {tabName}
                         </div>

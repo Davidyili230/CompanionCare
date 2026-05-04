@@ -5,6 +5,14 @@ import { getAuth } from "firebase/auth";
 
 export async function getAllAdoptionReports() {
     try {
+        const res = await getDocs(collection(db, "AdoptionPetReports"));
+        const reports = res.docs.map(r => ({
+            id: r.id,
+            ...r.data()
+        }));
+
+        console.log("All pet adoption reports:", reports);
+
         const defaultRes = await getDocs(collection(db, "defaultAdoptionReports"));
         const defaultReports = defaultRes.docs.map(r => ({
             id: r.id,
@@ -12,8 +20,7 @@ export async function getAllAdoptionReports() {
         }))
 
         console.log("All the default adoption reports:", defaultReports);
-        return defaultReports;
-        // return [...reports, ...defaultReports];
+        return [...reports, ...defaultReports];
     } catch(error) {
         console.log("There was an error getting all adoption reports: ", error)
         return [];
@@ -32,7 +39,7 @@ export async function getUserAdoptionReport() {
 
     try {
         const res = query (
-            collection(db, "lostPetReports"),
+            collection(db, "AdoptionPetReports"),
             where("userId", "==", user.uid)
         )
 

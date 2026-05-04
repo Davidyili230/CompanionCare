@@ -21,7 +21,7 @@ export default function AdoptPetCard({ reportData, isCurrentTabAllReports, setRe
             >
                 <div className="absolute w-full h-full backface-hidden"
                 >
-                    <CardFront reportData={reportData} flipCard={handleCardFlip} isCurrentTabAllReports={isCurrentTabAllReports !== true} setReports={setReports}/>
+                    <CardFront reportData={reportData} flipCard={handleCardFlip} isCurrentTabAllReports={isCurrentTabAllReports} setReports={setReports}/>
                 </div>
 
                 <div 
@@ -41,8 +41,9 @@ function CardFront({ reportData, flipCard, isCurrentTabAllReports }) {
         <div className="flex flex-col shadow-md rounded-2xl overflow-hidden bg-white
         transition-all duration-300 hover:translate-y-1.25 hover:shadow-xl">
             <div className="overflow-hidden h-52.5 relative shrink-0">
+                {/* the default report uses .img file the actual report uses .image */}
                 <img
-                    src={reportData.img}
+                    src={reportData.img || reportData.image}
                     alt="Pet Image"
                     className="w-full h-full object-cover"
                 />
