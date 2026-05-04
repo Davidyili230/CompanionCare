@@ -77,6 +77,14 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
         setIsFilterDisplayed(false)
     }
 
+    const handleSelectedSpeciesChange = (species) => {
+        if(selectedSpeciesFilter !== species && species != "All") {
+            setSelectedBreedFilter("All")
+        }
+
+        setSelectedSpeciesFilter(species);
+    }
+
     return (
         <div className="flex flex-col gap-4 border-t border-gray-300 mx-4 pb-4">
             <div className="pt-2">
@@ -85,7 +93,7 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
                 <div className="flex gap-1.5 mt-1.5">
                     {
                         ["All", "Dog", "Cat"].map((species, idx) => (
-                            <FilterButton key={idx} text={species} stateVar={selectedSpeciesFilter} action={() => setSelectedSpeciesFilter(species)}/>
+                            <FilterButton key={idx} text={species} stateVar={selectedSpeciesFilter} action={() => handleSelectedSpeciesChange(species)}/>
                         ))
                     }
                 </div>
@@ -108,8 +116,8 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
                     ["Reset All", "Apply Filters"].map((text, idx) => (
                         <button
                             key={idx}
-                            className="border rounded-xl px-2 py-1.25 text-sm flex-1 cursor-pointer
-                            transition-all duration-300 ease-in-out hover:shadow-md hover:scale-[1.03]"
+                            className="border rounded-xl px-3.5 py-1.5 text-sm transition-all duration-300 cursor-pointer
+                            hover:shadow-md border-[#7ce68c] hover:bg-green-100 hover:border-[#58da6c]"
                             onClick={text === "Apply Filters" ? handleApplyFilters : handleResetFilters}
                         >
                             {text}
