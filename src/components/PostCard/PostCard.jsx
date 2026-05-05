@@ -70,7 +70,12 @@ export default function PostCard({ post, onOpen }) {
                   className="absolute inset-0 w-full h-full object-cover object-center"
                />
             ) : (
-               <div className="absolute inset-0 bg-[#f2f3f5]" />
+               // 没有图片/视频时显示内容文字
+               <div className="absolute inset-0 bg-[#FFF9F0] flex items-center justify-center p-4">
+                  <p className="text-[#7A6A5A] text-sm leading-relaxed line-clamp-6 text-center">
+                     {post.content || "No content"}
+                  </p>
+               </div>
             )}
             <div
                className="absolute inset-0"
@@ -79,14 +84,12 @@ export default function PostCard({ post, onOpen }) {
                      "linear-gradient(to bottom, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.55) 100%)",
                }}
             />
-
             {/* the video sign */}
             {isVideo && (
                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 flex items-center justify-center text-white text-xl">
                   ▶
                </div>
             )}
-
             {/* info */}
             <div className="absolute left-0 right-0 bottom-0 p-3 text-white flex items-center justify-between">
                {/* info */}

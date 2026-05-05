@@ -14,14 +14,6 @@ import {
    deleteDoc,
 } from "firebase/firestore";
 
-// export async function fetchCommunityPosts() {
-//    const res = await fetch("/api/community/posts");
-//    if (!res.ok) {
-//       throw new Error("Failed to fetch posts");
-//    }
-//    return res.json(); //frontend is called data
-// }
-
 export async function fetchCommunityPosts() {
    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
    const snapshot = await getDocs(q);
@@ -102,6 +94,7 @@ export async function createCommunityPost({
       video: videoUrl,
       authorId: user.uid,
       username,
+      authorAvatar: user.photoURL || null,
       likeCount: 0,
       commentCount: 0,
       createdAt: serverTimestamp(),
