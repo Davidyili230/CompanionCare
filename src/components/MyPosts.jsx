@@ -85,7 +85,19 @@ export default function MyPosts() {
                            className="absolute inset-0 w-full h-full object-cover"
                         />
                      ) : (
-                        <div className="absolute inset-0 bg-[#f2f3f5]" />
+                        <div className="absolute inset-0 bg-[#FFF9F0] flex items-center justify-center p-4">
+                           <p
+                              className="text-[#7A6A5A] text-sm leading-relaxed text-center"
+                              style={{
+                                 display: "-webkit-box",
+                                 WebkitLineClamp: 6,
+                                 WebkitBoxOrient: "vertical",
+                                 overflow: "hidden",
+                              }}
+                           >
+                              {post.content || "No content"}
+                           </p>
+                        </div>
                      )}
                      <div
                         className="absolute inset-0"
