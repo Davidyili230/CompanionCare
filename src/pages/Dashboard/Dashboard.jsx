@@ -7,6 +7,8 @@ import {
   subscribeToSupplements,
   deleteSupplement,
 } from "../../services/petService";
+import TodaysReminders from "../../components/TodaysReminders";
+import RecentIntake from "../../components/RecentIntake";
 
 function getAgeLabel(pet) {
   if (pet?.age) return `${pet.age} yr`;
@@ -105,21 +107,6 @@ function AddPetShortcutCard() {
   );
 }
 
-function EmptyModule({ title, minHeight = "min-h-[220px]" }) {
-  return (
-    <section className="rounded-[28px] border border-[#ecdcc8] bg-white px-5 py-5 shadow-sm">
-      <h2 className="text-[20px] font-bold text-[#1f1f1f]">{title}</h2>
-
-      <div
-        className={`mt-5 flex ${minHeight} items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center`}
-      >
-        <p className="text-[14px] text-[#8a786c]">
-          Reserved for teammate implementation
-        </p>
-      </div>
-    </section>
-  );
-}
 
 function ActiveSupplementCard({ supplement, onDelete }) {
   return (
@@ -314,7 +301,7 @@ export default function Dashboard() {
       <main className="mt-6 grid gap-5">
         {/* Top row */}
         <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-          <EmptyModule title="Today's Reminders" minHeight="min-h-[230px]" />
+          <TodaysReminders pets={pets} />
 
           <section className="rounded-[28px] border border-[#ecdcc8] bg-white px-5 py-5 shadow-sm">
             <div className="flex items-center justify-between">
@@ -455,17 +442,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="mt-5 rounded-[22px] border border-[#ecdcc8] bg-[#fffaf6] px-4 py-4">
-              <h3 className="text-[18px] font-bold text-[#1f1f1f]">
-                Recent Intake
-              </h3>
-
-              <div className="mt-4 flex min-h-55 items-center justify-center rounded-[18px] border border-dashed border-[#e7cdbd] bg-white px-6 text-center">
-                <p className="text-[14px] text-[#8a786c]">
-                  Reserved for teammate implementation
-                </p>
-              </div>
-            </div>
+            <RecentIntake />
           </section>
 
           <ActiveSupplementsSection
