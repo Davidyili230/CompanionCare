@@ -22,7 +22,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center rounded-lg overflow-hidden shrink-0">
               <img
-                src="public/Logo.PNG"
+                src="/Logo.PNG"
                 alt="CompanionCare logo"
                 className="h-8 w-8 object-contain"
               />
