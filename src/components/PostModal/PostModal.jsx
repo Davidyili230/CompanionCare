@@ -12,8 +12,6 @@ import { auth } from "../../firebase";
 export default function PostModal({ post, onClose }) {
    const images = post?.images || [];
    const video = post?.video || null;
-   const images = post?.images || [];
-   const video = post?.video || null;
    const [idx, setIdx] = useState(0);
    const [comments, setComments] = useState([]);
    const [text, setText] = useState("");
@@ -57,9 +55,6 @@ export default function PostModal({ post, onClose }) {
 
    if (!post) return null;
 
-   const createdAtStr = post.createdAt?.toDate
-      ? post.createdAt.toDate().toLocaleString()
-      : "";
    const createdAtStr = post.createdAt?.toDate
       ? post.createdAt.toDate().toLocaleString()
       : "";
