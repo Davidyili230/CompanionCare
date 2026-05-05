@@ -185,7 +185,7 @@ function SearchFilterBar({
                     </span>
                     <input
                         type="text"
-                        placeholder="Search by name"
+                        placeholder="Search by name or by breed"
                         value={currentQuery}
                         onChange={handleQueryChange}
                         className="text-sm cursor-pointer flex-1 w-full outline-none"
@@ -249,7 +249,10 @@ function getFilteredReport(reportList, searchQuery, speciesFilter, stateFilter, 
         const state = (stateFilter || "All States").toLowerCase();
         const breed = breedFilter.toLowerCase();
 
-        const matchesQuery = query === "" || report.name.toLowerCase().includes(query);
+        const matchesQuery = query === "" || 
+        report.name.toLowerCase().includes(query) || 
+        report.breed.toLowerCase().includes(query);
+        
         const matchesSpecies = species === "all" || report.species.toLowerCase() === species;
         const matchesState = state === "all states" || report.state.toLowerCase() === state;
         const matchesBreed = breed === "all" || report.breed.toLowerCase() === breed;
@@ -267,6 +270,19 @@ function UserView({ isCurrentTabAllReports }) {
     const [speciesFilter, setSpeciesFilter] = useState("All");
     const [breedFilter, setBreedFilter] = useState("All");
     const [stateFilter, setStateFilter] = useState("All States");
+    
+    const hasActiveFilters = 
+        searchQuery !== ""
+        speciesFilter !== "All" || 
+        stateFilter !== "All States" || 
+        breedFilter !== "All";
+
+    const resetFilters = () => {
+        setSearchQuery("");
+        setSpeciesFilter("All");
+        setBreedFilter("All");
+        setStateFilter("All States");
+    }
     
     const [currentPage, setCurrentpage] = useState(1);
 
@@ -286,7 +302,7 @@ function UserView({ isCurrentTabAllReports }) {
     useEffect(() => {
         isCurrentTabAllReports ? setReports(allReports) : setReports(userOnlyReports);
         setCurrentpage(1);
-
+        resetFilters();
     }, [isCurrentTabAllReports, allReports, userOnlyReports])
 
     const filteredReports = getFilteredReport(reports, searchQuery, speciesFilter, stateFilter, breedFilter);
@@ -322,7 +338,15 @@ function UserView({ isCurrentTabAllReports }) {
                 <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
                 
                 {
-                    totalPages > 0 ? (
+                    totalPages == 0 && !isCurrentTabAllReports ? (
+                        <div className="flex flex-col justify-center items-center mt-30">
+                            <p className="text-5xl mb-5">🐾</p>
+                            <p className="font-bold">
+                                You currently do not have any active reports. You reports will be
+                                displayed here once you create them.
+                            </p>
+                        </div>
+                    ) : totalPages > 0 ? (
 
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
@@ -331,9 +355,17 @@ function UserView({ isCurrentTabAllReports }) {
 
                             <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
                         </>
+                    ) : totalPages === 0 && hasActiveFilters ? (
+                        <div className="flex flex-col justify-center items-center mt-30">
+                            <span className="text-5xl mb-5">🐾</span>
+                            <p className="font-bold">There is an error retrieving the reports</p>
+                            <p className="font-bold">Please try again later</p>
+                        </div>
                     ) : (
-                        <div>
-                            Fall back display
+                        <div className="flex flex-col justify-center items-center mt-30">
+                            <span className="text-5xl mb-5">🐾</span>
+                            <p className="font-bold">No Pets Found</p>
+                            <p className="text-sm">Try to adjust your search or filters</p>
                         </div>
                     )
                 }

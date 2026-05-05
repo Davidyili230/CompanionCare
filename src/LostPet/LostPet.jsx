@@ -36,7 +36,7 @@ function SearchBar({ searchQuery, setSearchQuery }) {
                 </span>
                 <input
                     type="text"
-                    placeholder="Search by Pet Name"
+                    placeholder="Search by Pet Name or Breed"
                     value={currentQuery}
                     onChange={handleQueryChange}
                     className="text-sm w-full outline-0" 
@@ -183,7 +183,10 @@ function getFilteredReports(reportList, searchQuery, speciesFilter, breedFilter)
         const species = (speciesFilter || "All").toLowerCase();
         const breed = (breedFilter || "All").toLowerCase();
 
-        const matchesQuery = query === "" || report.petName.toLowerCase().includes(query);
+        const matchesQuery = 
+            query === "" || 
+            report.petName.toLowerCase().includes(query) ||
+            report.breed.toLowerCase().includes(query);
         const matchesSpecies = species === "all" || report.petType.toLowerCase() === species;
         const matchesBreed = breed === "all" || report.breed.toLowerCase() === breed;
         
@@ -206,6 +209,17 @@ function UserView({ isCurrentTabAllReports }) {
     const navigate = useNavigate();
     const handleNavigation = () => {
         navigate("/LostPetReport");
+    }
+
+    const hasActiveFilters = 
+        searchQuery !== ""
+        speciesFilter !== "All" ||  
+        breedFilter !== "All";
+
+    const resetFilters = () => {
+        setSearchQuery("");
+        setSpeciesFilter("All");
+        setBreedFilter("All");
     }
     
     // initial api call to get all reports
@@ -231,6 +245,7 @@ function UserView({ isCurrentTabAllReports }) {
 
         setDisplayedReports();
         setCurrentPage(1);
+        resetFilters();
     }, [isCurrentTabAllReports, allUserReports, onlyUserReports])
 
     
@@ -263,14 +278,7 @@ function UserView({ isCurrentTabAllReports }) {
                 <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
                 <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
 
-                {totalPages > 0 ? (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 lg:px-8">
-                            {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
-                        </div>
-                        <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
-                    </>
-                ) : (
+                {totalPages == 0 && !isCurrentTabAllReports ? (
                     <div className="flex flex-col items-center mt-45">
                         <p className="text-5xl mb-5">🐾</p>
                         <p>
@@ -284,6 +292,19 @@ function UserView({ isCurrentTabAllReports }) {
                         >
                             + Create a Report
                         </button>
+                    </div>
+                ) : totalPages > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 lg:px-8">
+                            {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                        </div>
+                        <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
+                    </>
+                ) : (
+                    <div className="flex flex-col justify-center items-center mt-30">
+                        <span className="text-5xl mb-5">🐾</span>
+                        <p className="font-bold">No Pets Found</p>
+                        <p className="text-sm">Try to adjust your search or filters</p>
                     </div>
                 )}
             </div>
