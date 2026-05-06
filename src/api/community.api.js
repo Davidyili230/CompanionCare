@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { db, auth } from "../firebase"
 import { collection, addDoc, getDoc, getDocs, serverTimestamp, query, orderBy, doc, updateDoc, increment, setDoc,deleteDoc } from "firebase/firestore"
 
@@ -142,3 +143,12 @@ export async function checkLiked(postId) {
    const likeSnap = await getDoc(likeRef);
    return likeSnap.exists();
 }
+=======
+export async function fetchCommunityPosts() {
+  const res = await fetch("http://192.168.1.136:8080/api/community/posts")
+  if(!res.ok){
+    throw new Error("Failed to fetch posts")
+  }
+  return res.json()   //frontend is called data
+}
+>>>>>>> Stashed changes
