@@ -68,6 +68,7 @@ function FilterDisplay({
         }
 
         setSelectedSpeciesFilter(species);
+        setSpeciesFilter(species);
     }
 
     let displayedBreedList = []
@@ -85,7 +86,7 @@ function FilterDisplay({
                             <FilterButtons 
                                 key={idx}
                                 text={species} 
-                                stateVar = {speciesFilter} 
+                                stateVar = {selectedSpeciesFilter} 
                                 action={() => handleSelectedSpeciesChange(species)} 
                             />
                         ))
