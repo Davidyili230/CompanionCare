@@ -27,10 +27,7 @@ export async function fetchMyPosts() {
    const user = auth.currentUser;
    if (!user) return [];
 
-   const q = query(
-      collection(db, "posts"),
-      orderBy("createdAt", "desc")
-   );
+   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
    const snapshot = await getDocs(q);
    return snapshot.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -121,7 +118,7 @@ export async function addComment(postId, content) {
 
    // 把评论写入 posts/{postId}/comments 子集合
    const userSnap = await getDoc(doc(db, "users", user.uid));
-   
+
    const username = userSnap.exists()
       ? userSnap.data().username
       : user.username || "Anonymous";
@@ -178,7 +175,6 @@ export async function checkLiked(postId) {
    return likeSnap.exists();
 }
 
-
 export async function deleteComment(postId, commentId) {
    const user = auth.currentUser;
    if (!user) throw new Error("please login first");
@@ -187,7 +183,8 @@ export async function deleteComment(postId, commentId) {
    const commentSnap = await getDoc(commentRef);
 
    if (!commentSnap.exists()) throw new Error("comment not found");
-   if (commentSnap.data().authorId !== user.uid) throw new Error("not your comment");
+   if (commentSnap.data().authorId !== user.uid)
+      throw new Error("not your comment");
 
    await deleteDoc(commentRef);
    await updateDoc(doc(db, "posts", postId), { commentCount: increment(-1) });
@@ -204,7 +201,9 @@ export async function deletePost(postId) {
    if (postSnap.data().authorId !== user.uid) throw new Error("not your post");
 
    // 删 comments 子集合
-   const commentsSnap = await getDocs(collection(db, "posts", postId, "comments"));
+   const commentsSnap = await getDocs(
+      collection(db, "posts", postId, "comments"),
+   );
    for (const c of commentsSnap.docs) {
       await deleteDoc(c.ref);
    }
