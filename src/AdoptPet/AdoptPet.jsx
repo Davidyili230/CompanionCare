@@ -347,7 +347,6 @@ function UserView({ isCurrentTabAllReports }) {
                             </p>
                         </div>
                     ) : totalPages > 0 ? (
-
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
                                 {displayedReports.slice((currentPage-1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
@@ -355,7 +354,7 @@ function UserView({ isCurrentTabAllReports }) {
 
                             <Pagination setCurrentPage={setCurrentpage} currentPage={currentPage} totalPages={totalPages}/>
                         </>
-                    ) : totalPages === 0 && hasActiveFilters ? (
+                    ) : totalPages === 0 && !hasActiveFilters ? (
                         <div className="flex flex-col justify-center items-center mt-30">
                             <span className="text-5xl mb-5">🐾</span>
                             <p className="font-bold">There is an error retrieving the reports</p>
