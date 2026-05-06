@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import { useEffect, useState } from "react";
 import {
    fetchComments,
