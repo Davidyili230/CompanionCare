@@ -41,8 +41,8 @@ function SupplementForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center pt-10 px-4 md:px-6" style={{ backgroundColor: "#f5f0e8" }}>
-      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 w-full max-w-md">
+    <div className="px-4 md:px-6 pt-6 pb-2" style={{ backgroundColor: "#f5f0e8" }}>
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 w-full">
         <h2 className="text-2xl font-bold mb-6" style={{ color: "#5a3e2b" }}>Log a Supplement</h2>
 
         {success && (
@@ -57,13 +57,13 @@ function SupplementForm() {
           </div>
         )}
 
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input
             name="pet"
             placeholder="Pet Name"
             value={formData.pet}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none"
           />
           <input
             name="supplement"
