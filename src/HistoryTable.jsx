@@ -124,7 +124,7 @@ function HistoryTable() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ backgroundColor: "#f5f0e8" }}>
+    <div className="p-4 md:p-6 pt-2" style={{ backgroundColor: "#f5f0e8" }}>
       <h2 className="text-2xl font-bold mb-4" style={{ color: "#5a3e2b" }}>Intake History</h2>
 
       {tableError && (
