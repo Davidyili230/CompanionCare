@@ -221,6 +221,7 @@ function ActiveSupplementsSection({
 }
 
 export default function Dashboard() {
+  const [reminders, setReminders] = useState(MOCK_REMINDERS);
   const [pets, setPets] = useState([]);
   const [supplements, setSupplements] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
@@ -273,6 +274,12 @@ export default function Dashboard() {
     () => pets.find((pet) => pet.id === effectiveSelectedPetId) ?? null,
     [pets, effectiveSelectedPetId]
   );
+
+  function toggleReminder(id) {
+    setReminders((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, completed: !r.completed } : r))
+    );
+  }
 
   const handleDeleteSupplement = async (supplementId) => {
     if (!effectiveSelectedPetId || !supplementId) return;
