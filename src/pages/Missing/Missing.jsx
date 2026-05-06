@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import LostPet from "../../LostPet/LostPet";
 
 export default function Missing() {
@@ -6,10 +5,4 @@ export default function Missing() {
     <LostPet/>
   );
 }
-=======
-export default function Missing() {
-  return (
-    <div />
-  );
-}
->>>>>>> Stashed changes
+
