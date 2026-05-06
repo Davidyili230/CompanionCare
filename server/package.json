@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
   "name": "server",
   "version": "1.0.0",
@@ -21,3 +22,28 @@
     "nodemon": "^3.1.11"
   }
 }
+=======
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.0.2",
+    "react-router-dom": "^7.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+>>>>>>> Stashed changes
