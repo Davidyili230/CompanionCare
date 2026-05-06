@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useEffect, useState, useMemo } from "react";
 import { fetchCommunityPosts } from "../../api/community.api";
 import PostCard from "../../components/PostCard/PostCard";
