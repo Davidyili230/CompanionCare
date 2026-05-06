@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -455,3 +456,8 @@ export default function Dashboard() {
     </div>
   );
 }
+=======
+export default function Dashboard() {
+  return <></>;
+}
+>>>>>>> Stashed changes
