@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -20,18 +20,15 @@ export const Register = () => {
       return;
     }
     try {
-      const usernameRef = doc(db, "usernames", username);
-      const usernameSnap = await getDoc(usernameRef);
-      if (usernameSnap.exists()) {
+      const usernameQuery = query(collection(db, "users"), where("username", "==", username));
+      const usernameSnap = await getDocs(usernameQuery);
+      if (!usernameSnap.empty) {
         setError("Username is already taken. Please choose another.");
         return;
       }
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
       await updateProfile(userCredential.user, { displayName: username });
-      // Reserve the username (for uniqueness checks)
-      await setDoc(usernameRef, { uid });
-      // Store full user profile keyed by UID
       await setDoc(doc(db, "users", uid), {
         username,
         email,
@@ -58,7 +55,7 @@ export const Register = () => {
       <div className="flex flex-col items-center gap-[12px] shrink-0">
         <div className="w-[96px] h-[96px] shrink-0 flex items-center justify-center">
           <img
-            src="public/Logo.PNG"
+            src="/Logo.PNG"
             alt="Main Logo"
             className="w-full h-full object-contain"
           />
