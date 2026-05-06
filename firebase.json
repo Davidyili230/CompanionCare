@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
   "firestore": {
     "indexes": "firestore.indexes.json"
@@ -17,3 +18,21 @@
     ]
   }
 }
+=======
+{
+  "hosting": {
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+>>>>>>> Stashed changes
