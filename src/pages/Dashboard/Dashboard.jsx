@@ -450,6 +450,3 @@ export default function Dashboard() {
     </div>
   );
 }
-export default function Dashboard() {
-  return <></>;
-}
