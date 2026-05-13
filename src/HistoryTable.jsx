@@ -19,6 +19,7 @@ const formatDateTime = (dateTimeStr) => {
 
 function HistoryTable() {
   const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterPet, setFilterPet] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -38,11 +39,13 @@ function HistoryTable() {
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         data.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
         setEntries(data);
+        setLoading(false);
         setTableError("");
       },
       (error) => {
         console.error("Error fetching data: ", error);
         setTableError("Failed to load supplement history. Please refresh the page.");
+        setLoading(false);
       }
     );
     return () => unsubscribe();
@@ -123,6 +126,17 @@ function HistoryTable() {
     URL.revokeObjectURL(url);
   };
 
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 pt-2 flex justify-center items-center min-h-[200px]" style={{ backgroundColor: "#f5f0e8" }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-gray-200 rounded-full animate-spin" style={{ borderTopColor: "#c1622f" }}></div>
+          <p className="text-sm" style={{ color: "#5a3e2b" }}>Loading history...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-6 pt-2" style={{ backgroundColor: "#f5f0e8" }}>
       <h2 className="text-2xl font-bold mb-4" style={{ color: "#5a3e2b" }}>Intake History</h2>
@@ -132,13 +146,11 @@ function HistoryTable() {
           {tableError}
         </div>
       )}
-
       {deleteError && (
         <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
           {deleteError}
         </div>
       )}
-
       {editError && (
         <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
           {editError}
@@ -212,6 +224,14 @@ function HistoryTable() {
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm flex-1 overflow-x-auto flex flex-col">
+
+          {/* Entry Count */}
+          {filtered.length > 0 && (
+            <div className="px-4 pt-3 pb-1 text-sm font-semibold" style={{ color: "#5a3e2b" }}>
+              Showing {Math.min((currentPage - 1) * ENTRIES_PER_PAGE + 1, filtered.length)}–{Math.min(currentPage * ENTRIES_PER_PAGE, filtered.length)} of {filtered.length} {filtered.length === 1 ? "entry" : "entries"}
+            </div>
+          )}
+
           <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr style={{ backgroundColor: "#f5f0e8" }}>
