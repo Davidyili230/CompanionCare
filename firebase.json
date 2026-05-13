@@ -1,5 +1,8 @@
 <<<<<<< Updated upstream
 {
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
   "hosting": {
     "public": "dist",
     "ignore": [

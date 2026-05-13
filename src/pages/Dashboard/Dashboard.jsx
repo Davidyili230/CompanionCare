@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -238,50 +237,45 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (!authReady) return;
-
-    if (!currentUid) {
-      setPets([]);
-      setSelectedPetId(null);
-      return;
-    }
+    if (!authReady || !currentUid) return;
 
     const unsubscribe = subscribeToPets((list) => {
       setPets(list);
-
-      setSelectedPetId((prevSelectedPetId) => {
-        if (!list.length) return null;
-
-        const stillExists = list.some((pet) => pet.id === prevSelectedPetId);
-        if (stillExists) return prevSelectedPetId;
-
-        return list[0].id;
-      });
     });
 
-    return () => unsubscribe();
+    return () => {
+      setPets([]);
+      setSelectedPetId(null);
+      unsubscribe();
+    };
   }, [authReady, currentUid]);
 
-  useEffect(() => {
-    if (!authReady || !currentUid || !selectedPetId) {
-      setSupplements([]);
-      return;
-    }
+  const effectiveSelectedPetId = useMemo(() => {
+    if (!pets.length) return null;
+    const exists = pets.some((pet) => pet.id === selectedPetId);
+    return exists ? selectedPetId : pets[0].id;
+  }, [pets, selectedPetId]);
 
-    const unsubscribe = subscribeToSupplements(selectedPetId, (list) => {
+  useEffect(() => {
+    if (!authReady || !currentUid || !effectiveSelectedPetId) return;
+
+    const unsubscribe = subscribeToSupplements(effectiveSelectedPetId, (list) => {
       setSupplements(list);
     });
 
-    return () => unsubscribe();
-  }, [authReady, currentUid, selectedPetId]);
+    return () => {
+      setSupplements([]);
+      unsubscribe();
+    };
+  }, [authReady, currentUid, effectiveSelectedPetId]);
 
   const selectedPet = useMemo(
-    () => pets.find((pet) => pet.id === selectedPetId) ?? null,
-    [pets, selectedPetId]
+    () => pets.find((pet) => pet.id === effectiveSelectedPetId) ?? null,
+    [pets, effectiveSelectedPetId]
   );
 
   const handleDeleteSupplement = async (supplementId) => {
-    if (!selectedPetId || !supplementId) return;
+    if (!effectiveSelectedPetId || !supplementId) return;
 
     const confirmed = window.confirm(
       "Are you sure you want to delete this supplement?"
@@ -320,7 +314,7 @@ export default function Dashboard() {
                     <DashboardPetCard
                       key={pet.id}
                       pet={pet}
-                      selected={selectedPetId === pet.id}
+                      selected={effectiveSelectedPetId === pet.id}
                       onSelect={setSelectedPetId}
                     />
                   ))}
@@ -456,8 +450,6 @@ export default function Dashboard() {
     </div>
   );
 }
-=======
 export default function Dashboard() {
   return <></>;
 }
->>>>>>> Stashed changes

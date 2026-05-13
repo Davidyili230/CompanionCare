@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import { useRef } from "react";
 import AddPetForm from "./AddPetForm";
 import AddSupplementForm from "./AddSupplementForm";
@@ -225,7 +224,6 @@ export default function PetWorkspaceTabs({
       </div>
     </section>
   );
-=======
 import { useRef, useState } from "react";
 import AddPetForm from "./AddPetForm";
 import AddSupplementForm from "./AddSupplementForm";
@@ -373,5 +371,4 @@ export default function PetWorkspaceTabs({
       </div>
     </section>
   );
->>>>>>> Stashed changes
 }
