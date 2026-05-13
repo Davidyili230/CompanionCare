@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 git add .
 git commit -m ""
 git push
@@ -18,3 +19,13 @@ VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+=======
+git add .
+git commit -m ""
+git push
+
+去push branch, github, compare and pull request 
+review - main
+
+don't do git push origin main
+>>>>>>> Stashed changes

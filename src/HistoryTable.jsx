@@ -27,13 +27,24 @@ function HistoryTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
+  const [tableError, setTableError] = useState("");
+  const [editError, setEditError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "supplementHistory"), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-      setEntries(data);
-    });
+    const unsubscribe = onSnapshot(
+      collection(db, "supplementHistory"),
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        data.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+        setEntries(data);
+        setTableError("");
+      },
+      (error) => {
+        console.error("Error fetching data: ", error);
+        setTableError("Failed to load supplement history. Please refresh the page.");
+      }
+    );
     return () => unsubscribe();
   }, []);
 
@@ -61,11 +72,13 @@ function HistoryTable() {
   };
 
   const handleDelete = async (id) => {
+    setDeleteError("");
     if (window.confirm("Are you sure you want to delete this entry?")) {
       try {
         await deleteDoc(doc(db, "supplementHistory", id));
       } catch (error) {
         console.error("Error deleting document: ", error);
+        setDeleteError("Failed to delete entry. Please try again.");
       }
     }
   };
@@ -73,6 +86,7 @@ function HistoryTable() {
   const handleEditClick = (entry) => {
     setEditingId(entry.id);
     setEditData({ ...entry });
+    setEditError("");
   };
 
   const handleEditChange = (e) => {
@@ -80,6 +94,7 @@ function HistoryTable() {
   };
 
   const handleEditSave = async () => {
+    setEditError("");
     try {
       await updateDoc(doc(db, "supplementHistory", editingId), {
         pet: editData.pet,
@@ -91,6 +106,7 @@ function HistoryTable() {
       setEditingId(null);
     } catch (error) {
       console.error("Error updating document: ", error);
+      setEditError("Failed to save changes. Please try again.");
     }
   };
 
@@ -108,8 +124,26 @@ function HistoryTable() {
   };
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: "#f5f0e8" }}>
+    <div className="p-4 md:p-6 pt-2" style={{ backgroundColor: "#f5f0e8" }}>
       <h2 className="text-2xl font-bold mb-4" style={{ color: "#5a3e2b" }}>Intake History</h2>
+
+      {tableError && (
+        <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
+          {tableError}
+        </div>
+      )}
+
+      {deleteError && (
+        <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
+          {deleteError}
+        </div>
+      )}
+
+      {editError && (
+        <div className="mb-4 px-4 py-3 rounded-lg text-sm font-semibold" style={{ backgroundColor: "#f8d7da", color: "#721c24" }}>
+          {editError}
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="mb-4">
@@ -121,9 +155,9 @@ function HistoryTable() {
         />
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
-        <div className="bg-white rounded-xl p-5 shadow-sm w-48 flex-shrink-0 flex flex-col gap-4">
+        <div className="bg-white rounded-xl p-5 shadow-sm md:w-48 flex-shrink-0 flex flex-col gap-4">
           <div>
             <label className="block text-sm font-semibold mb-1" style={{ color: "#5a3e2b" }}>Filter by pets</label>
             <input
@@ -177,8 +211,8 @@ function HistoryTable() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm flex-1 overflow-hidden flex flex-col">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-xl shadow-sm flex-1 overflow-x-auto flex flex-col">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr style={{ backgroundColor: "#f5f0e8" }}>
                 <th className="text-left px-4 py-3 font-semibold" style={{ color: "#5a3e2b" }}>Date & Time</th>
@@ -231,17 +265,19 @@ function HistoryTable() {
                             <option value="Missed">Missed</option>
                           </select>
                         </td>
-                        <td className="px-4 py-2 flex gap-2">
-                          <button onClick={handleEditSave}
-                            className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
-                            style={{ backgroundColor: "#155724" }}>
-                            Save
-                          </button>
-                          <button onClick={() => setEditingId(null)}
-                            className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
-                            style={{ backgroundColor: "#6c757d" }}>
-                            Cancel
-                          </button>
+                        <td className="px-4 py-2">
+                          <div className="flex flex-col gap-1">
+                            <button onClick={handleEditSave}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                              style={{ backgroundColor: "#155724" }}>
+                              Save
+                            </button>
+                            <button onClick={() => setEditingId(null)}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
+                              style={{ backgroundColor: "#6c757d" }}>
+                              Cancel
+                            </button>
+                          </div>
                         </td>
                       </>
                     ) : (
@@ -261,7 +297,7 @@ function HistoryTable() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-2">
+                          <div className="flex flex-col md:flex-row gap-1 md:gap-2">
                             <button onClick={() => handleEditClick(entry)}
                               className="px-3 py-1 rounded-lg text-xs font-semibold text-white"
                               style={{ backgroundColor: "#5a3e2b" }}>

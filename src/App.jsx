@@ -1,5 +1,4 @@
 
-
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import Community from "./pages/Community/Community";
 import HistoryTable from "./HistoryTable";
@@ -13,12 +12,9 @@ import Profile from "./pages/Profile/Profile";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MyPet from "./pages/MyPet/MyPetPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-
 import LostPet from "./LostPet/LostPet"
 import AdoptPet from "./AdoptPet/AdoptPet"
 import AdoptionForm from "./AdoptPet/adoptionForm";
-
 import LostPetReport from "./LostPet/Report"
 
 

@@ -1,17 +1,14 @@
 import { useState, useRef } from "react";
 import { createCommunityPost } from "../api/community.api";
 
+const FIXED_LABELS = ["Daily", "Train", "Healthy", "Food", "Other"];
 const LABEL_COLORS = { bg: "#FFF0E6", text: "#D4631A", dot: "#F08040" };
 const MAX_IMAGES = 5;
 
-export default function NewPostModal({
-   onClose,
-   onSuccess,
-   existingLabels = [],
-}) {
+export default function NewPostModal({ onClose, onSuccess }) {
    const [title, setTitle] = useState("");
    const [content, setContent] = useState("");
-   const [label, setLabel] = useState("");
+   const [label, setLabel] = useState("Other");
    const [images, setImages] = useState([]);
    const [video, setVideo] = useState(null);
    const [submitting, setSubmitting] = useState(false);
@@ -20,9 +17,8 @@ export default function NewPostModal({
    const imageInputRef = useRef(null);
    const videoInputRef = useRef(null);
 
-   const labelOptions = existingLabels.filter((l) => l !== "All");
-
    const handleImageChange = (e) => {
+      // allow 5 image
       const selected = Array.from(e.target.files);
       const mapped = selected.map((file) => ({
          file,
@@ -33,7 +29,7 @@ export default function NewPostModal({
    };
 
    const handleVideoChange = (e) => {
-      const file = e.target.files[0];   // only allow one video
+      const file = e.target.files[0]; // only allow one video
       if (file) setVideo({ file, name: file.name });
       e.target.value = "";
    };
@@ -48,6 +44,7 @@ export default function NewPostModal({
    };
 
    const handleSubmit = async () => {
+      // submit post
       if (!title.trim()) return setError("Please enter title");
       if (!content.trim()) return setError("Please enter content");
 
@@ -73,105 +70,63 @@ export default function NewPostModal({
    return (
       <div
          onClick={onClose}
+         className="fixed inset-0 z-[1000] flex items-center justify-center p-6"
          style={{
-            position: "fixed",
-            inset: 0,
             background: "rgba(44,24,16,0.45)",
             backdropFilter: "blur(4px)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
          }}
       >
          <div
             onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-[20px] w-full max-w-[560px] flex flex-col gap-5 max-h-[90vh] overflow-y-auto border border-[#F0E8DF]"
             style={{
-               background: "#fff",
-               borderRadius: 20,
                padding: "32px 28px",
-               width: "100%",
-               maxWidth: 560,
                boxShadow: "0 24px 60px rgba(44,24,16,0.18)",
-               border: "1.5px solid #F0E8DF",
-               display: "flex",
-               flexDirection: "column",
-               gap: 20,
-               maxHeight: "90vh",
-               overflowY: "auto",
             }}
          >
-            {/* Header */}
-            <div
-               style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-               }}
-            >
+            {/* top title */}
+            <div className="flex justify-between items-center">
                <div>
-                  <div
-                     style={{ fontSize: 20, fontWeight: 800, color: "#2C1810" }}
-                  >
+                  <div className="text-xl font-extrabold text-[#2C1810]">
                      ✍️ Publish a new post
                   </div>
-                  <div style={{ fontSize: 12, color: "#B0A090", marginTop: 2 }}>
+                  <div className="text-xs text-[#B0A090] mt-0.5">
                      Share your idea to community
                   </div>
                </div>
                <button
                   onClick={onClose}
-                  style={{
-                     background: "#F5EDE6",
-                     border: "none",
-                     borderRadius: "50%",
-                     width: 32,
-                     height: 32,
-                     cursor: "pointer",
-                     fontSize: 14,
-                     color: "#9A8A7A",
-                     display: "flex",
-                     alignItems: "center",
-                     justifyContent: "center",
-                  }}
+                  className="w-8 h-8 rounded-full bg-[#F5EDE6] border-none cursor-pointer text-sm text-[#9A8A7A] flex items-center justify-center"
                >
                   ✕
                </button>
             </div>
 
-            {/* Title */}
-            <Field label="title">
+            {/* title */}
+            <Field label="Title">
                <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Give a title to your post..."
                   maxLength={100}
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "#E8854A")}
-                  onBlur={(e) => (e.target.style.borderColor = "#F0E8DF")}
+                  className="w-full px-3.5 py-3 rounded-xl border border-[#F0E8DF] text-sm text-[#2C1810] outline-none bg-[#FFFBF8] box-border focus:border-[#E8854A] transition-colors"
                />
             </Field>
 
-            {/* Label */}
-            <Field label="Category(option)">
-               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {labelOptions.map((l) => {
+            {/* category */}
+            <Field label="Category (optional)">
+               <div className="flex gap-2 flex-wrap">
+                  {FIXED_LABELS.map((l) => {
                      const active = label === l;
                      return (
                         <button
                            key={l}
-                           onClick={() => setLabel(active ? "" : l)}
-                           style={{
-                              padding: "6px 14px",
-                              borderRadius: 999,
-                              border: `1.5px solid ${active ? "#E8854A" : "#F0E8DF"}`,
-                              background: active ? LABEL_COLORS.bg : "#fff",
-                              color: active ? LABEL_COLORS.text : "#7A6A5A",
-                              fontSize: 12,
-                              fontWeight: active ? 700 : 400,
-                              cursor: "pointer",
-                           }}
+                           onClick={() => setLabel(l)}
+                           className={`px-3.5 py-1.5 rounded-full text-xs cursor-pointer transition-all ${
+                              active
+                                 ? "border-[#E8854A] bg-[#FFF0E6] text-[#D4631A] font-bold border-[1.5px]"
+                                 : "border-[#F0E8DF] bg-white text-[#7A6A5A] font-normal border-[1.5px]"
+                           }`}
                         >
                            {l.charAt(0).toUpperCase() + l.slice(1)}
                         </button>
@@ -180,72 +135,35 @@ export default function NewPostModal({
                </div>
             </Field>
 
-            {/* Content */}
+            {/* content */}
             <Field label="Content">
                <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Write down what you want to share..."
                   rows={4}
-                  style={{
-                     ...inputStyle,
-                     resize: "vertical",
-                     lineHeight: 1.6,
-                     fontFamily: "inherit",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#E8854A")}
-                  onBlur={(e) => (e.target.style.borderColor = "#F0E8DF")}
+                  className="w-full px-3.5 py-3 rounded-xl border border-[#F0E8DF] text-sm text-[#2C1810] outline-none bg-[#FFFBF8] box-border resize-y leading-relaxed focus:border-[#E8854A] transition-colors"
+                  style={{ fontFamily: "inherit" }}
                />
             </Field>
 
-            {/* Images */}
-            <Field label={`Pic (At most ${MAX_IMAGES} ）`}>
+            {/* image */}
+            <Field label={`Pic (at most ${MAX_IMAGES})`}>
                {images.length > 0 && (
-                  <div
-                     style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(5, 1fr)",
-                        gap: 6,
-                        marginBottom: 8,
-                     }}
-                  >
+                  <div className="grid grid-cols-5 gap-1.5 mb-2">
                      {images.map((img, i) => (
                         <div
                            key={i}
-                           style={{
-                              position: "relative",
-                              borderRadius: 8,
-                              overflow: "hidden",
-                              aspectRatio: "1",
-                           }}
+                           className="relative rounded-lg overflow-hidden aspect-square"
                         >
                            <img
                               src={img.preview}
                               alt=""
-                              style={{
-                                 width: "100%",
-                                 height: "100%",
-                                 objectFit: "cover",
-                              }}
+                              className="w-full h-full object-cover"
                            />
                            <button
                               onClick={() => removeImage(i)}
-                              style={{
-                                 position: "absolute",
-                                 top: 2,
-                                 right: 2,
-                                 background: "rgba(44,24,16,0.6)",
-                                 border: "none",
-                                 borderRadius: "50%",
-                                 width: 18,
-                                 height: 18,
-                                 cursor: "pointer",
-                                 color: "#fff",
-                                 fontSize: 10,
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                              }}
+                              className="absolute top-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-none cursor-pointer text-white text-[10px] flex items-center justify-center bg-[rgba(44,24,16,0.6)]"
                            >
                               ✕
                            </button>
@@ -261,11 +179,11 @@ export default function NewPostModal({
                         accept="image/*"
                         multiple
                         onChange={handleImageChange}
-                        style={{ display: "none" }}
+                        className="hidden"
                      />
                      <button
                         onClick={() => imageInputRef.current.click()}
-                        style={uploadBtnStyle}
+                        className="w-full py-3 rounded-xl border-[1.5px] border-dashed border-[#E8C4A0] bg-[#FFFBF8] text-[#D4631A] text-sm font-semibold cursor-pointer flex items-center justify-center gap-2"
                      >
                         🖼️ Add image{" "}
                         {images.length > 0
@@ -276,48 +194,19 @@ export default function NewPostModal({
                )}
             </Field>
 
-            {/* Video */}
+            {/* video */}
             <Field label="Video (at most one)">
                {video ? (
-                  <div
-                     style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        background: "#FFF0E6",
-                        borderRadius: 10,
-                        padding: "10px 14px",
-                     }}
-                  >
-                     <div
-                        style={{
-                           display: "flex",
-                           alignItems: "center",
-                           gap: 8,
-                        }}
-                     >
-                        <span style={{ fontSize: 20 }}>🎬</span>
-                        <span
-                           style={{
-                              fontSize: 12,
-                              color: "#7A6A5A",
-                              wordBreak: "break-all",
-                           }}
-                        >
+                  <div className="flex items-center justify-between bg-[#FFF0E6] rounded-xl px-3.5 py-2.5">
+                     <div className="flex items-center gap-2">
+                        <span className="text-xl">🎬</span>
+                        <span className="text-xs text-[#7A6A5A] break-all">
                            {video.name}
                         </span>
                      </div>
                      <button
                         onClick={() => setVideo(null)}
-                        style={{
-                           background: "none",
-                           border: "none",
-                           cursor: "pointer",
-                           color: "#D4631A",
-                           fontSize: 12,
-                           fontWeight: 700,
-                           flexShrink: 0,
-                        }}
+                        className="bg-none border-none cursor-pointer text-[#D4631A] text-xs font-bold shrink-0"
                      >
                         Delete
                      </button>
@@ -329,11 +218,11 @@ export default function NewPostModal({
                         type="file"
                         accept="video/*"
                         onChange={handleVideoChange}
-                        style={{ display: "none" }}
+                        className="hidden"
                      />
                      <button
                         onClick={() => videoInputRef.current.click()}
-                        style={uploadBtnStyle}
+                        className="w-full py-3 rounded-xl border-[1.5px] border-dashed border-[#E8C4A0] bg-[#FFFBF8] text-[#D4631A] text-sm font-semibold cursor-pointer flex items-center justify-center gap-2"
                      >
                         🎬 Add video
                      </button>
@@ -341,77 +230,40 @@ export default function NewPostModal({
                )}
             </Field>
 
-            {/* 上传提示 */}
             {submitting && (
-               <div
-                  style={{
-                     fontSize: 12,
-                     color: "#D4631A",
-                     background: "#FFF0E6",
-                     padding: "10px 14px",
-                     borderRadius: 10,
-                     textAlign: "center",
-                  }}
-               >
-                  ⏳ Uploading
+               <div className="text-xs text-[#D4631A] bg-[#FFF0E6] px-3.5 py-2.5 rounded-xl text-center">
+                  ⏳ Uploading...
                </div>
             )}
 
-            {/* Error */}
             {error && (
-               <div
-                  style={{
-                     fontSize: 12,
-                     color: "#D4631A",
-                     background: "#FFF0E6",
-                     padding: "10px 14px",
-                     borderRadius: 10,
-                  }}
-               >
+               <div className="text-xs text-[#D4631A] bg-[#FFF0E6] px-3.5 py-2.5 rounded-xl">
                   ⚠️ {error}
                </div>
             )}
 
-            {/* Actions */}
-            <div
-               style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}
-            >
+            <div className="flex gap-2.5 justify-end">
                <button
                   onClick={onClose}
                   disabled={submitting}
-                  style={{
-                     padding: "10px 22px",
-                     borderRadius: 12,
-                     border: "1.5px solid #F0E8DF",
-                     background: "#fff",
-                     color: "#7A6A5A",
-                     fontSize: 13,
-                     fontWeight: 600,
-                     cursor: "pointer",
-                  }}
+                  className="px-5 py-2.5 rounded-xl border border-[#F0E8DF] bg-white text-[#7A6A5A] text-sm font-semibold cursor-pointer"
                >
-                  取消
+                  Cancel
                </button>
                <button
                   onClick={handleSubmit}
                   disabled={submitting}
+                  className={`px-5 py-2.5 rounded-xl border-none text-white text-sm font-bold ${submitting ? "bg-[#E0C8B8] cursor-not-allowed" : "cursor-pointer"}`}
                   style={{
-                     padding: "10px 22px",
-                     borderRadius: 12,
-                     border: "none",
                      background: submitting
                         ? "#E0C8B8"
                         : "linear-gradient(135deg, #E8854A, #D4631A)",
-                     color: "#fff",
-                     fontSize: 13,
-                     fontWeight: 700,
-                     cursor: submitting ? "not-allowed" : "pointer",
                      boxShadow: submitting
                         ? "none"
                         : "0 4px 14px rgba(212,99,26,0.28)",
                   }}
                >
-                  {submitting ? "Publishing..." : "🚀 Published"}
+                  {submitting ? "Publishing..." : "🚀 Publish"}
                </button>
             </div>
          </div>
@@ -421,16 +273,8 @@ export default function NewPostModal({
 
 function Field({ label, children }) {
    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-         <label
-            style={{
-               fontSize: 12,
-               fontWeight: 700,
-               color: "#B0A090",
-               textTransform: "uppercase",
-               letterSpacing: 1,
-            }}
-         >
+      <div className="flex flex-col gap-1.5">
+         <label className="text-xs font-bold text-[#B0A090] uppercase tracking-wider">
             {label}
          </label>
          {children}
@@ -438,30 +282,4 @@ function Field({ label, children }) {
    );
 }
 
-const inputStyle = {
-   padding: "12px 14px",
-   borderRadius: 12,
-   border: "1.5px solid #F0E8DF",
-   fontSize: 14,
-   color: "#2C1810",
-   outline: "none",
-   background: "#FFFBF8",
-   width: "100%",
-   boxSizing: "border-box",
-};
-
-const uploadBtnStyle = {
-   padding: "11px",
-   borderRadius: 12,
-   border: "1.5px dashed #E8C4A0",
-   background: "#FFFBF8",
-   color: "#D4631A",
-   fontSize: 13,
-   fontWeight: 600,
-   cursor: "pointer",
-   width: "100%",
-   display: "flex",
-   alignItems: "center",
-   justifyContent: "center",
-   gap: 8,
-};
+//done
