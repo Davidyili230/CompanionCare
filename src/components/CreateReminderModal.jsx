@@ -19,6 +19,11 @@ const FREQUENCIES = [
   { value: "as needed",   label: "As Needed" },
 ];
 
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function createBlankForm() {
   return {
     petId: "",
@@ -26,6 +31,7 @@ function createBlankForm() {
     title: "",
     category: "walk",
     frequency: "daily",
+    date: "",
     timeOfDay: "",
     notes: "",
   };
@@ -66,6 +72,10 @@ export default function CreateReminderModal({ pets = [], onClose, onSaved }) {
     e.preventDefault();
     if (!form.title.trim()) {
       setError("Reminder title is required.");
+      return;
+    }
+    if (form.frequency === "once" && !form.date) {
+      setError("Please choose a date for this one-time reminder.");
       return;
     }
     setSaving(true);
@@ -212,19 +222,37 @@ export default function CreateReminderModal({ pets = [], onClose, onSaved }) {
               )}
             </div>
 
-            {/* Time */}
-            <div>
-              <label className="block text-[13px] font-semibold text-[#5a514a]">
-                Time{" "}
-                <span className="font-normal text-[#9a8a7e]">(optional)</span>
-              </label>
-              <input
-                type="time"
-                name="timeOfDay"
-                value={form.timeOfDay}
-                onChange={handleChange}
-                className="mt-1.5 w-full rounded-[12px] border border-[#ecdcc8] bg-[#fffaf6] px-3 py-2.5 text-[14px] text-[#1f1f1f] outline-none transition focus:border-[#de7e52] focus:ring-2 focus:ring-[#de7e52]/10"
-              />
+            {/* Date + Time */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[13px] font-semibold text-[#5a514a]">
+                  Date{" "}
+                  <span className="font-normal text-[#9a8a7e]">
+                    {isOnce ? "" : "(start)"}
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  min={todayString()}
+                  onChange={handleChange}
+                  className="mt-1.5 w-full rounded-[12px] border border-[#ecdcc8] bg-[#fffaf6] px-3 py-2.5 text-[14px] text-[#1f1f1f] outline-none transition focus:border-[#de7e52] focus:ring-2 focus:ring-[#de7e52]/10"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-semibold text-[#5a514a]">
+                  Time{" "}
+                  <span className="font-normal text-[#9a8a7e]">(optional)</span>
+                </label>
+                <input
+                  type="time"
+                  name="timeOfDay"
+                  value={form.timeOfDay}
+                  onChange={handleChange}
+                  className="mt-1.5 w-full rounded-[12px] border border-[#ecdcc8] bg-[#fffaf6] px-3 py-2.5 text-[14px] text-[#1f1f1f] outline-none transition focus:border-[#de7e52] focus:ring-2 focus:ring-[#de7e52]/10"
+                />
+              </div>
             </div>
 
             {/* Notes */}
