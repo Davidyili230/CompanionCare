@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { checkLiked } from "../../api/community.api";
+
 const getVideoCover = (url) => {
    //video - jpg
    return url

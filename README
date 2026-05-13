@@ -2,7 +2,7 @@ git add .
 git commit -m ""
 git push
 
-去push branch, github, compare and pull request 
-review - main
+In the terminal, type `cd ` (with a space after `cd`), then drag the `CompanionCare`
+folder from Finder/File Explorer into the terminal window. It should look like:
 
 don't do git push origin main
