@@ -3,9 +3,9 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   limit,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -135,24 +135,16 @@ export async function completeReminder({
   dosage,
 }) {
   const uid = getCurrentUid();
+  if (!sourceType || !sourceId) {
+    throw new Error("completeReminder requires sourceType and sourceId.");
+  }
   const now = new Date();
 
-  await addDoc(reminderLogsCol, {
-    ownerUid: uid,
-    petId: petId || null,
-    petName: petName || null,
-    sourceType,
-    sourceId,
-    title,
-    category: category || sourceType || "other",
-    frequency: frequency || "",
-    scheduledDate: todayString(),
-    completedAt: serverTimestamp(),
-  });
-
-  // Mirror to supplementHistory so the /history page reflects completions.
+  // Mirror supplements to supplementHistory first, so we can store the
+  // resulting doc id on the log for cascade-delete on uncomplete.
+  let historyDocId = null;
   if (sourceType === "supplement") {
-    await addDoc(collection(db, "supplementHistory"), {
+    const histRef = await addDoc(collection(db, "supplementHistory"), {
       pet: petName || "",
       supplement: supplementName || title,
       dosage: dosage || "",
@@ -160,11 +152,69 @@ export async function completeReminder({
       status: "Given",
       dateTime: now.toISOString(),
     });
+    historyDocId = histRef.id;
+  }
+
+  await addDoc(reminderLogsCol, {
+    ownerUid: uid,
+    petId: petId || null,
+    petName: petName || null,
+    sourceType,
+    sourceId,
+    title: title || "",
+    category: category || sourceType || "other",
+    frequency: frequency || "",
+    scheduledDate: todayString(),
+    completedAt: serverTimestamp(),
+    historyDocId,
+  });
+
+  // One-time custom reminders disappear after completion; the matching log
+  // keeps them visible in the "Completed" section for the rest of the day.
+  if (sourceType === "custom" && frequency === "once") {
+    try {
+      await updateDoc(doc(db, "reminders", sourceId), { isActive: false });
+    } catch (err) {
+      console.error("Failed to deactivate one-time reminder:", err);
+    }
   }
 }
 
 export async function uncompleteReminder(logId) {
-  await deleteDoc(doc(db, "reminderLogs", logId));
+  const logRef = doc(db, "reminderLogs", logId);
+  let logData = null;
+  try {
+    const snap = await getDoc(logRef);
+    if (snap.exists()) logData = snap.data();
+  } catch (err) {
+    console.error("Failed to read reminderLog for uncomplete:", err);
+  }
+
+  if (logData?.historyDocId) {
+    try {
+      await deleteDoc(doc(db, "supplementHistory", logData.historyDocId));
+    } catch (err) {
+      console.error("Failed to delete supplementHistory mirror:", err);
+    }
+  }
+
+  // Reactivate a one-time custom reminder that was auto-deactivated on
+  // completion. Other custom reminders are already active — this is a no-op.
+  if (
+    logData?.sourceType === "custom" &&
+    logData?.sourceId &&
+    logData?.frequency === "once"
+  ) {
+    try {
+      await updateDoc(doc(db, "reminders", logData.sourceId), {
+        isActive: true,
+      });
+    } catch {
+      // Reminder may have been hard-deleted; ignore.
+    }
+  }
+
+  await deleteDoc(logRef);
 }
 
 export async function saveReminder(reminder) {
@@ -182,6 +232,7 @@ export async function saveReminder(reminder) {
     title: reminder.title?.trim() || "",
     category: reminder.category || "other",
     frequency: reminder.frequency || "daily",
+    date: reminder.date?.trim() || "",
     timeOfDay: reminder.timeOfDay?.trim() || "",
     notes: reminder.notes?.trim() || "",
     isActive: true,

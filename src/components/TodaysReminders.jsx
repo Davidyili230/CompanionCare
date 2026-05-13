@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   completeReminder,
   deleteReminder,
@@ -7,6 +7,16 @@ import {
   subscribeToTodayLogs,
   uncompleteReminder,
 } from "../services/reminderService";
+import {
+  getNotificationPermission,
+  getNotificationsEnabled,
+  hasNotifiedToday,
+  isNotificationSupported,
+  markNotifiedToday,
+  requestNotificationPermission,
+  setNotificationsEnabled,
+  showReminderNotification,
+} from "../services/notificationService";
 import CreateReminderModal from "./CreateReminderModal";
 
 const CATEGORY_META = {
@@ -20,46 +30,65 @@ const CATEGORY_META = {
 };
 
 function timeToMinutes(timeStr) {
-  if (!timeStr) return Infinity;
-  if (/^\d{2}:\d{2}$/.test(timeStr)) {
-    const [h, m] = timeStr.split(":").map(Number);
+  if (!timeStr || typeof timeStr !== "string") return Infinity;
+  const trimmed = timeStr.trim();
+  if (!trimmed) return Infinity;
+
+  // Accept "8:00 AM", "08:00am", "12:30 PM", etc.
+  const ampm = trimmed.match(/^(\d{1,2}):(\d{1,2})\s*(AM|PM)$/i);
+  if (ampm) {
+    let h = parseInt(ampm[1], 10);
+    const m = parseInt(ampm[2], 10);
+    if (h < 1 || h > 12 || m < 0 || m > 59) return Infinity;
+    const isPM = ampm[3].toUpperCase() === "PM";
+    if (h === 12) h = isPM ? 12 : 0;
+    else if (isPM) h += 12;
     return h * 60 + m;
   }
-  const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
-  if (match) {
-    let h = parseInt(match[1]);
-    const m = parseInt(match[2]);
-    if (match[3].toUpperCase() === "PM" && h !== 12) h += 12;
-    if (match[3].toUpperCase() === "AM" && h === 12) h = 0;
+
+  // Accept 24-hour "8:00", "08:00", "23:45"
+  const h24 = trimmed.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (h24) {
+    const h = parseInt(h24[1], 10);
+    const m = parseInt(h24[2], 10);
+    if (h < 0 || h > 23 || m < 0 || m > 59) return Infinity;
     return h * 60 + m;
   }
+
   return Infinity;
 }
 
 function formatTime(timeOfDay) {
-  if (!timeOfDay) return null;
-  if (/^\d{2}:\d{2}$/.test(timeOfDay)) {
-    const [h, m] = timeOfDay.split(":").map(Number);
-    const suffix = h >= 12 ? "PM" : "AM";
-    const hour = h % 12 || 12;
-    return `${hour}:${String(m).padStart(2, "0")} ${suffix}`;
-  }
-  return timeOfDay;
+  if (!timeOfDay || typeof timeOfDay !== "string") return null;
+  const trimmed = timeOfDay.trim();
+  if (!trimmed) return null;
+
+  const mins = timeToMinutes(trimmed);
+  if (mins === Infinity) return trimmed; // fall back to raw user input
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${suffix}`;
 }
 
-function getTodayLabel() {
-  return new Date().toLocaleDateString("en-US", {
+function formatDateLabel(date) {
+  return date.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
 }
 
-function isOverdue(timeOfDay) {
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function isOverdue(timeOfDay, nowMinutes) {
   const mins = timeToMinutes(timeOfDay);
   if (mins === Infinity) return false;
-  const now = new Date();
-  return now.getHours() * 60 + now.getMinutes() > mins;
+  return nowMinutes > mins;
 }
 
 /* ── Skeleton ── */
@@ -124,7 +153,7 @@ function AllDoneState() {
 }
 
 /* ── Single reminder row ── */
-function ReminderItem({ item, isComplete, logId, onComplete, onUncomplete }) {
+function ReminderItem({ item, isComplete, logId, onComplete, onUncomplete, nowMinutes }) {
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -150,7 +179,7 @@ function ReminderItem({ item, isComplete, logId, onComplete, onUncomplete }) {
   }
 
   const timeLabel = formatTime(item.timeOfDay);
-  const overdue = !isComplete && isOverdue(item.timeOfDay);
+  const overdue = !isComplete && isOverdue(item.timeOfDay, nowMinutes);
   const meta = CATEGORY_META[item.category] ?? CATEGORY_META.other;
 
   return (
@@ -309,6 +338,58 @@ export default function TodaysReminders({ pets = [] }) {
   const [todayLogs, setTodayLogs] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
+  const [today, setToday] = useState(() => todayString());
+  const [nowMinutes, setNowMinutes] = useState(() => {
+    const n = new Date();
+    return n.getHours() * 60 + n.getMinutes();
+  });
+  const [notifPerm, setNotifPerm] = useState(() => getNotificationPermission());
+  const [notifEnabled, setNotifEnabled] = useState(() => getNotificationsEnabled());
+
+  async function handleToggleNotifications() {
+    // Already on → turn off (app-level mute; browser permission stays granted).
+    if (notifPerm === "granted" && notifEnabled) {
+      setNotificationsEnabled(false);
+      setNotifEnabled(false);
+      return;
+    }
+    // Permission already granted but app-level off → just flip on.
+    if (notifPerm === "granted") {
+      setNotificationsEnabled(true);
+      setNotifEnabled(true);
+      showReminderNotification({
+        title: "Notifications enabled",
+        body: "We'll remind you when reminders are due.",
+        tag: "companion-care-enabled",
+      });
+      return;
+    }
+    // Need to ask the browser.
+    const result = await requestNotificationPermission();
+    setNotifPerm(result);
+    if (result === "granted") {
+      setNotificationsEnabled(true);
+      setNotifEnabled(true);
+      showReminderNotification({
+        title: "Notifications enabled",
+        body: "We'll remind you when reminders are due.",
+        tag: "companion-care-enabled",
+      });
+    }
+  }
+
+  // Tick once per minute so the overdue badge stays accurate and so we
+  // detect midnight rollover (which forces today-logs to re-subscribe).
+  useEffect(() => {
+    const tick = () => {
+      const n = new Date();
+      setNowMinutes(n.getHours() * 60 + n.getMinutes());
+      const next = todayString();
+      setToday((prev) => (prev !== next ? next : prev));
+    };
+    const interval = setInterval(tick, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const firedRef = useRef([false, false, false]);
   function markLoaded(i) {
@@ -318,16 +399,28 @@ export default function TodaysReminders({ pets = [] }) {
     }
   }
 
+  // Long-lived subscriptions (supplements + custom reminders) — auth is
+  // guaranteed by ProtectedRoute / AuthProvider, so getCurrentUid won't throw.
   useEffect(() => {
-    try {
-      const u1 = subscribeToAllSupplements((d) => { setSupplements(d); markLoaded(0); });
-      const u2 = subscribeToCustomReminders((d) => { setCustomReminders(d); markLoaded(1); });
-      const u3 = subscribeToTodayLogs((d) => { setTodayLogs(d); markLoaded(2); });
-      return () => { u1(); u2(); u3(); };
-    } catch {
-      setLoadedCount(3);
-    }
+    const u1 = subscribeToAllSupplements((d) => {
+      setSupplements(d);
+      markLoaded(0);
+    });
+    const u2 = subscribeToCustomReminders((d) => {
+      setCustomReminders(d);
+      markLoaded(1);
+    });
+    return () => { u1?.(); u2?.(); };
   }, []);
+
+  // Today-logs subscription is re-keyed on `today` so it survives midnight.
+  useEffect(() => {
+    const unsub = subscribeToTodayLogs((d) => {
+      setTodayLogs(d);
+      markLoaded(2);
+    });
+    return () => unsub?.();
+  }, [today]);
 
   const isLoading = loadedCount < 3;
 
@@ -354,31 +447,85 @@ export default function TodaysReminders({ pets = [] }) {
       };
     });
 
-  const customItems = customReminders.map((r) => ({
-    id: r.id,
-    sourceType: "custom",
-    sourceId: r.id,
-    title: r.title,
-    category: r.category,
-    petId: r.petId,
-    petName: r.petName ?? "",
-    frequency: r.frequency,
-    timeOfDay: r.timeOfDay,
-    notes: r.notes,
-  }));
+  const customItems = customReminders
+    .filter((r) => {
+      if (!r.date) return true;
+      // One-time reminders only appear on their exact date.
+      if (r.frequency === "once") return r.date === today;
+      // Recurring reminders use date as a start date.
+      return r.date <= today;
+    })
+    .map((r) => ({
+      id: r.id,
+      sourceType: "custom",
+      sourceId: r.id,
+      title: r.title,
+      category: r.category,
+      petId: r.petId,
+      petName: r.petName ?? "",
+      frequency: r.frequency,
+      date: r.date ?? "",
+      timeOfDay: r.timeOfDay,
+      notes: r.notes,
+    }));
 
   const allItems = [...supplementItems, ...customItems].sort(
     (a, b) => timeToMinutes(a.timeOfDay) - timeToMinutes(b.timeOfDay)
   );
 
-  const completedMap = {};
-  todayLogs.forEach((log) => {
-    completedMap[log.sourceId] = log.id;
+  const completedSourceIds = useMemo(
+    () => new Set(todayLogs.map((l) => l.sourceId)),
+    [todayLogs]
+  );
+
+  const pending = allItems.filter((item) => !completedSourceIds.has(item.sourceId));
+
+  // Build completed rows directly from today's logs so that one-time custom
+  // reminders that were auto-deactivated on completion still appear here.
+  const itemBySourceId = new Map(allItems.map((i) => [i.sourceId, i]));
+  const completed = todayLogs.map((log) => {
+    const source = itemBySourceId.get(log.sourceId);
+    if (source) return { item: source, logId: log.id };
+    return {
+      item: {
+        id: `log-${log.id}`,
+        sourceType: log.sourceType ?? "other",
+        sourceId: log.sourceId,
+        title: log.title || "Reminder",
+        category: log.category ?? "other",
+        petId: log.petId ?? "",
+        petName: log.petName ?? "",
+        frequency: log.frequency ?? "",
+        timeOfDay: "",
+        notes: "",
+      },
+      logId: log.id,
+    };
   });
 
-  const pending = allItems.filter((item) => !completedMap[item.sourceId]);
-  const completed = allItems.filter((item) => !!completedMap[item.sourceId]);
-  const allDone = !isLoading && allItems.length > 0 && pending.length === 0;
+  const totalForToday = pending.length + completed.length;
+  const allDone = !isLoading && totalForToday > 0 && pending.length === 0;
+
+  // Fire a browser notification once per reminder per day when its scheduled
+  // time has arrived. Persists notified keys in localStorage so refreshing
+  // the page or re-mounting the component doesn't re-notify.
+  useEffect(() => {
+    if (notifPerm !== "granted" || !notifEnabled) return;
+    for (const item of pending) {
+      const mins = timeToMinutes(item.timeOfDay);
+      if (mins === Infinity || nowMinutes < mins) continue;
+      const key = `${today}:${item.sourceType}:${item.sourceId}`;
+      if (hasNotifiedToday(today, key)) continue;
+      showReminderNotification({
+        title: item.title || "Reminder",
+        body: item.petName
+          ? `${item.petName} · ${formatTime(item.timeOfDay) ?? ""}`.trim()
+          : (formatTime(item.timeOfDay) ?? "It's time."),
+        tag: key,
+      });
+      markNotifiedToday(today, key);
+    }
+  }, [pending, nowMinutes, today, notifPerm, notifEnabled]);
 
   async function handleComplete(item) {
     await completeReminder({
@@ -404,16 +551,67 @@ export default function TodaysReminders({ pets = [] }) {
               Today's Reminders
             </h2>
             <p className="mt-0.5 text-[12px] text-[#9a8a7e]">
-              {getTodayLabel()}
+              {formatDateLabel(new Date(`${today}T12:00:00`))}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowModal(true)}
-            className="shrink-0 rounded-full bg-[#de7e52] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#cf7045]"
-          >
-            + Add Reminder
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {isNotificationSupported() && (() => {
+              const isOn = notifPerm === "granted" && notifEnabled;
+              const isBlocked = notifPerm === "denied";
+              return (
+                <button
+                  type="button"
+                  onClick={handleToggleNotifications}
+                  disabled={isBlocked}
+                  title={
+                    isBlocked
+                      ? "Notifications blocked — enable them in your browser settings"
+                      : isOn
+                      ? "Notifications on — click to turn off"
+                      : "Click to turn on notifications"
+                  }
+                  aria-pressed={isOn}
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${
+                    isOn
+                      ? "border-[#de7e52] bg-[#fff3ed] text-[#de7e52]"
+                      : isBlocked
+                      ? "cursor-not-allowed border-[#e7e0d9] bg-[#f9f6f2] text-[#b0a49c]"
+                      : "border-[#ecdcc8] bg-white text-[#7b6e65] hover:border-[#de7e52]/40 hover:text-[#de7e52]"
+                  }`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M6 8a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10 18a2 2 0 0 0 4 0"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                    {(isBlocked || (!isOn && !isBlocked)) && (
+                      <path
+                        d="M3 3l18 18"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                    )}
+                  </svg>
+                </button>
+              );
+            })()}
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="rounded-full bg-[#de7e52] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#cf7045]"
+            >
+              + Add Reminder
+            </button>
+          </div>
         </div>
 
         {/* Loading */}
@@ -426,7 +624,7 @@ export default function TodaysReminders({ pets = [] }) {
         )}
 
         {/* Empty */}
-        {!isLoading && allItems.length === 0 && (
+        {!isLoading && totalForToday === 0 && (
           <div className="mt-5 flex min-h-[180px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#e7cdbd] bg-[#fffaf6] px-6 text-center">
             <span className="text-[36px]">🐾</span>
             <p className="mt-2 text-[15px] font-semibold text-[#1f1f1f]">
@@ -446,9 +644,9 @@ export default function TodaysReminders({ pets = [] }) {
         )}
 
         {/* List */}
-        {!isLoading && allItems.length > 0 && (
+        {!isLoading && totalForToday > 0 && (
           <>
-            <ProgressBar done={completed.length} total={allItems.length} />
+            <ProgressBar done={completed.length} total={totalForToday} />
 
             {allDone ? (
               <AllDoneState />
@@ -462,6 +660,7 @@ export default function TodaysReminders({ pets = [] }) {
                     logId={null}
                     onComplete={handleComplete}
                     onUncomplete={uncompleteReminder}
+                    nowMinutes={nowMinutes}
                   />
                 ))}
               </div>
@@ -478,14 +677,15 @@ export default function TodaysReminders({ pets = [] }) {
                   <div className="h-px flex-1 bg-[#f0e9e0]" />
                 </div>
                 <div className="space-y-2">
-                  {completed.map((item) => (
+                  {completed.map(({ item, logId }) => (
                     <ReminderItem
-                      key={item.id}
+                      key={logId}
                       item={item}
                       isComplete={true}
-                      logId={completedMap[item.sourceId]}
+                      logId={logId}
                       onComplete={handleComplete}
                       onUncomplete={uncompleteReminder}
+                      nowMinutes={nowMinutes}
                     />
                   ))}
                 </div>
