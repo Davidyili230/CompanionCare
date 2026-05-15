@@ -36,24 +36,25 @@ export async function fetchMyPosts() {
 
 //for Cloudinary
 async function uploadToCloudinary(file) {
+   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
    const formData = new FormData();
    formData.append("file", file);
-   formData.append("upload_preset", "CompanionCare");
-   //upload_preset is i setup in cloudinary, is called unsigned upload
+   formData.append("upload_preset", uploadPreset);
 
    const resourceType = file.type.startsWith("video/") ? "video" : "image";
 
    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/dap1qzjmi/${resourceType}/upload`,
-      //dap1qzjmi is the name in cloudnary
+      `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
       { method: "POST", body: formData },
    );
 
    if (!res.ok) throw new Error("failed to upload the media");
+
    const data = await res.json();
    return { type: resourceType, url: data.secure_url };
 }
-
 export async function createCommunityPost({
    title,
    content,
@@ -200,7 +201,7 @@ export async function deletePost(postId) {
    if (!postSnap.exists()) throw new Error("post not found");
    if (postSnap.data().authorId !== user.uid) throw new Error("not your post");
 
-   // 删 comments 子集合
+   // delete comments subset
    const commentsSnap = await getDocs(
       collection(db, "posts", postId, "comments"),
    );
@@ -208,12 +209,21 @@ export async function deletePost(postId) {
       await deleteDoc(c.ref);
    }
 
-   // 删 likes 子集合
+   // delete likes subset
    const likesSnap = await getDocs(collection(db, "posts", postId, "likes"));
    for (const l of likesSnap.docs) {
       await deleteDoc(l.ref);
    }
 
-   // 最后删帖子本身
+   // delete post
    await deleteDoc(postRef);
+}
+
+export async function fetchCommunityPostsSorted(sortBy = "createdAt") {
+   const q = query(collection(db, "posts"), orderBy(sortBy, "desc"));
+   const snapshot = await getDocs(q);
+   return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+   }));
 }
