@@ -1,8 +1,63 @@
-git add .
-git commit -m ""
-git push
+# CompanionCare
 
-In the terminal, type `cd ` (with a space after `cd`), then drag the `CompanionCare`
-folder from Finder/File Explorer into the terminal window. It should look like:
+A pet care companion application for tracking supplements, adoptable pets, lost pet reports, and community posts.
 
-don't do git push origin main
+## Prerequisites
+
+- Node.js (v16 or higher)
+- npm
+
+## Installation
+
+1. **Clone the repository:**
+```bash
+git clone <repository-url>
+cd CompanionCare
+```
+
+2. **Install dependencies:**
+```bash
+npm install
+cd server
+npm install
+cd ..
+```
+
+3. **Set up environment variables:**
+
+Create a `.env` file in the project root with the following variables:
+
+```
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+```
+
+## Running the Project
+
+1. **Start the backend server:**
+```bash
+cd server
+npm start
+```
+
+2. **In a new terminal, start the frontend:**
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`
+
+## Development Workflow
+
+1. Create a feature branch for your work
+2. Make your changes and test locally
+3. Commit and push your branch to GitHub
+4. Open a Pull Request against the `main` branch
+5. Request review and wait for approval before merging
