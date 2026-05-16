@@ -1,3 +1,5 @@
+
+
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import Community from "./pages/Community/Community";
 import HistoryTable from "./HistoryTable";
@@ -11,6 +13,14 @@ import Profile from "./pages/Profile/Profile";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import MyPet from "./pages/MyPet/MyPetPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+
+import LostPet from "./LostPet/LostPet"
+import AdoptPet from "./AdoptPet/AdoptPet"
+import AdoptionForm from "./AdoptPet/adoptionForm";
+
+import LostPetReport from "./LostPet/Report"
+
 
 function Layout() {
   return (
@@ -34,6 +44,11 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/adopt" element={<ProtectedRoute><Adopt /></ProtectedRoute>} />
         <Route path="/missing" element={<ProtectedRoute><Missing /></ProtectedRoute>} />
+        <Route path="/AdoptPet" element={<AdoptPet/>} />
+        <Route path="/AdoptionForm" element={<AdoptionForm/> } />
+        <Route path="/LostPet" element={<LostPet/>} /> 
+        <Route path="/LostPetReport" element={<LostPetReport/>} />
+
         <Route path="/history" element={
           <ProtectedRoute>
             <>

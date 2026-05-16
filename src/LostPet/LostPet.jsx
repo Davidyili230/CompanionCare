@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 
-import { getAllUserReports, getUserReport } from "./GetReport";
-import { deleteReport } from "./DeleteReport";
+import { getAllUserReports, getUserReport } from "./databaseAccess/GetReport";
+import { deleteReport } from "./databaseAccess/DeleteReport";
 
-import { fillerReports } from "./TempReports";
 import MissingPetCard from "./Components/MissingPetCard";
 import Pagination from "./Components/Pagination";
 import FilterButton from "./Components/FilterButtons";
@@ -37,7 +36,7 @@ function SearchBar({ searchQuery, setSearchQuery }) {
                 </span>
                 <input
                     type="text"
-                    placeholder="Search by Pet Name"
+                    placeholder="Search by Pet Name or Breed"
                     value={currentQuery}
                     onChange={handleQueryChange}
                     className="text-sm w-full outline-0" 
@@ -78,6 +77,14 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
         setIsFilterDisplayed(false)
     }
 
+    const handleSelectedSpeciesChange = (species) => {
+        if(selectedSpeciesFilter !== species && species != "All") {
+            setSelectedBreedFilter("All")
+        }
+
+        setSelectedSpeciesFilter(species);
+    }
+
     return (
         <div className="flex flex-col gap-4 border-t border-gray-300 mx-4 pb-4">
             <div className="pt-2">
@@ -86,7 +93,7 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
                 <div className="flex gap-1.5 mt-1.5">
                     {
                         ["All", "Dog", "Cat"].map((species, idx) => (
-                            <FilterButton key={idx} text={species} stateVar={selectedSpeciesFilter} action={() => setSelectedSpeciesFilter(species)}/>
+                            <FilterButton key={idx} text={species} stateVar={selectedSpeciesFilter} action={() => handleSelectedSpeciesChange(species)}/>
                         ))
                     }
                 </div>
@@ -109,8 +116,8 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
                     ["Reset All", "Apply Filters"].map((text, idx) => (
                         <button
                             key={idx}
-                            className="border rounded-xl px-2 py-1.25 text-sm flex-1 cursor-pointer
-                            transition-all duration-300 ease-in-out hover:shadow-md hover:scale-[1.03]"
+                            className="border rounded-xl px-3.5 py-1.5 text-sm transition-all duration-300 cursor-pointer
+                            hover:shadow-md border-[#7ce68c] hover:bg-green-100 hover:border-[#58da6c]"
                             onClick={text === "Apply Filters" ? handleApplyFilters : handleResetFilters}
                         >
                             {text}
@@ -176,7 +183,10 @@ function getFilteredReports(reportList, searchQuery, speciesFilter, breedFilter)
         const species = (speciesFilter || "All").toLowerCase();
         const breed = (breedFilter || "All").toLowerCase();
 
-        const matchesQuery = query === "" || report.petName.toLowerCase().includes(query);
+        const matchesQuery = 
+            query === "" || 
+            report.petName.toLowerCase().includes(query) ||
+            report.breed.toLowerCase().includes(query);
         const matchesSpecies = species === "all" || report.petType.toLowerCase() === species;
         const matchesBreed = breed === "all" || report.breed.toLowerCase() === breed;
         
@@ -185,7 +195,11 @@ function getFilteredReports(reportList, searchQuery, speciesFilter, breedFilter)
 }
 
 function UserView({ isCurrentTabAllReports }) {
-    const [reports, setReports] = useState([]);
+    // stores the report to prevent spam usuage of api
+    const [allUserReports, setAllUserReports] = useState([]);
+    const [onlyUserReports, setOnlyUserReports] = useState([]);
+
+    const [reports, setReports] = useState([]); // repots that will actually be displayed
     const [currentPage, setCurrentPage] = useState(1);
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -196,23 +210,44 @@ function UserView({ isCurrentTabAllReports }) {
     const handleNavigation = () => {
         navigate("/LostPetReport");
     }
-  
+
+    const hasActiveFilters = 
+        searchQuery !== ""
+        speciesFilter !== "All" ||  
+        breedFilter !== "All";
+
+    const resetFilters = () => {
+        setSearchQuery("");
+        setSpeciesFilter("All");
+        setBreedFilter("All");
+    }
+    
+    // initial api call to get all reports
+    // (All Reports view and User Reports View)
     useEffect(() => {
-        // async function loadReports() {
-        //     const data = isCurrentTabAllReports ? await getAllUserReport() : await getUserReport;
-        //     setReports(data);
-        // }
+        async function loadReports() {
+            const allData = await getAllUserReports();
+            setAllUserReports(allData);
 
-        // loadReports();
-
-        if (isCurrentTabAllReports) {
-            setReports(reports.concat(fillerReports));
-        } else {
-            setReports([]);
+            const userData = await getUserReport();
+            setOnlyUserReports(userData);
         }
 
+        loadReports();
         setCurrentPage(1);
-    }, [isCurrentTabAllReports]);
+    }, []);
+
+
+    useEffect(() => {
+        function setDisplayedReports() {
+            isCurrentTabAllReports ? setReports(allUserReports) : setReports(onlyUserReports);
+        }
+
+        setDisplayedReports();
+        setCurrentPage(1);
+        resetFilters();
+    }, [isCurrentTabAllReports, allUserReports, onlyUserReports])
+
     
     const filteredReports = getFilteredReports(reports, searchQuery, speciesFilter, breedFilter);
     const displayedReports = filteredReports.map((report, idx) => (
@@ -243,14 +278,7 @@ function UserView({ isCurrentTabAllReports }) {
                 <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
                 <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
 
-                {totalPages > 0 ? (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 lg:px-8">
-                            {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
-                        </div>
-                        <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
-                    </>
-                ) : (
+                {totalPages == 0 && !isCurrentTabAllReports ? (
                     <div className="flex flex-col items-center mt-45">
                         <p className="text-5xl mb-5">🐾</p>
                         <p>
@@ -264,6 +292,19 @@ function UserView({ isCurrentTabAllReports }) {
                         >
                             + Create a Report
                         </button>
+                    </div>
+                ) : totalPages > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 lg:px-8">
+                            {displayedReports.slice((currentPage - 1) * REPORTS_PER_PAGE, currentPage * REPORTS_PER_PAGE)}
+                        </div>
+                        <Pagination setCurrentPage={setCurrentPage} currentPage={currentPage} totalPages={totalPages}/>
+                    </>
+                ) : (
+                    <div className="flex flex-col justify-center items-center mt-30">
+                        <span className="text-5xl mb-5">🐾</span>
+                        <p className="font-bold">No Pets Found</p>
+                        <p className="text-sm">Try to adjust your search or filters</p>
                     </div>
                 )}
             </div>
