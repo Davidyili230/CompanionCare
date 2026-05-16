@@ -128,5 +128,3 @@ export default function PostCard({ post, onOpen }) {
       </>
    );
 }
-
-//done
