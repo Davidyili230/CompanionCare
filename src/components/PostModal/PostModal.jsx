@@ -9,6 +9,20 @@ import {
 } from "../../api/community.api";
 import { auth } from "../../firebase";
 
+function timeAgo(val) {
+   if (!val) return "";
+   const date = val?.toDate ? val.toDate() : new Date(val);
+   const diff = Date.now() - date.getTime();
+   const mins = Math.floor(diff / 60000);
+   if (mins < 1) return "just now";
+   if (mins < 60) return `${mins}m ago`;
+   const hrs = Math.floor(mins / 60);
+   if (hrs < 24) return `${hrs}h ago`;
+   const days = Math.floor(hrs / 24);
+   if (days < 30) return `${days}d ago`;
+   return date.toLocaleDateString();
+}
+
 export default function PostModal({ post, onClose }) {
    const images = post?.images || [];
    const video = post?.video || null;
@@ -19,6 +33,14 @@ export default function PostModal({ post, onClose }) {
    const [liked, setLiked] = useState(false);
    const [likeCount, setLikeCount] = useState(post?.likeCount ?? 0);
    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+   const [authorAvatar, setAuthorAvatar] = useState(post?.authorAvatar || null);
+
+   useEffect(() => {
+      if (post?.authorId === auth.currentUser?.uid) {
+         setAuthorAvatar(auth.currentUser?.photoURL || null);
+      }
+   }, [post?.authorId]);
+
    useEffect(() => {
       const handler = () => setIsMobile(window.innerWidth <= 768);
       window.addEventListener("resize", handler);
@@ -54,10 +76,6 @@ export default function PostModal({ post, onClose }) {
    }, [onClose, images.length]);
 
    if (!post) return null;
-
-   const createdAtStr = post.createdAt?.toDate
-      ? post.createdAt.toDate().toLocaleString()
-      : "";
 
    const currentUid = auth.currentUser?.uid; // check if delete should be show or not
 
@@ -201,9 +219,9 @@ export default function PostModal({ post, onClose }) {
                      <div className="p-4 pb-0">
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-2.5">
-                              {post.authorAvatar ? (
+                              {authorAvatar ? (
                                  <img
-                                    src={post.authorAvatar}
+                                    src={authorAvatar}
                                     alt=""
                                     className="w-8 h-8 rounded-full object-cover"
                                  />
@@ -250,7 +268,7 @@ export default function PostModal({ post, onClose }) {
                            {post.title}
                         </div>
                         <div className="text-[11px] text-[#999] mt-0.5">
-                           {createdAtStr}
+                           {timeAgo(post.createAt)}
                         </div>
                         <div className="text-[#444] leading-5 mt-1.5 text-sm">
                            {post.content || ""}
@@ -284,8 +302,13 @@ export default function PostModal({ post, onClose }) {
                               )}
                               <div className="min-w-0 flex-1">
                                  <div className="flex items-center justify-between">
-                                    <div className="font-black text-xs">
-                                       {c.username || "Anonymous"}
+                                    <div className="flex items-center gap-1.5">
+                                       <div className="font-black text-xs">
+                                          {c.username || "Anonymous"}
+                                       </div>
+                                       <div className="text-[10px] text-[#C0B0A0]">
+                                          {timeAgo(c.createdAt)}
+                                       </div>
                                     </div>
                                     {/* authentication for itself */}
                                     {currentUid === c.authorId && (
@@ -449,7 +472,7 @@ export default function PostModal({ post, onClose }) {
                      <div className="flex items-start gap-2.5">
                         {post.authorAvatar ? (
                            <img
-                              src={post.authorAvatar}
+                              src={authorAvatar}
                               alt=""
                               className="w-8 h-8 rounded-full object-cover shrink-0"
                            />
@@ -493,7 +516,7 @@ export default function PostModal({ post, onClose }) {
                         {post.title}
                      </div>
                      <div className="text-xs text-[#999] mt-1">
-                        {createdAtStr}
+                        {timeAgo(post.createAt)}
                      </div>
                      <div className="text-[#444] leading-5 mt-1.5">
                         {post.content || ""}
@@ -526,8 +549,13 @@ export default function PostModal({ post, onClose }) {
                            )}
                            <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between">
-                                 <div className="font-black text-xs">
-                                    {c.username || "Anonymous"}
+                                 <div className="flex items-center gap-1.5">
+                                    <div className="font-black text-xs">
+                                       {c.username || "Anonymous"}
+                                    </div>
+                                    <div className="text-[10px] text-[#C0B0A0]">
+                                       {timeAgo(c.createdAt)}
+                                    </div>
                                  </div>
                                  {currentUid === c.authorId && (
                                     <button
