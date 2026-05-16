@@ -1,15 +1,35 @@
-<<<<<<< Updated upstream
-git add .
-git commit -m ""
-git push
+# CompanionCare
 
-去push branch, github, compare and pull request 
-review - main
+A pet care management application built with React, Vite, Firebase, and Node.js.
 
-don't do git push origin main
+## Prerequisites
 
-Create a `.env` file in the project root as follow
+- Node.js (v14 or higher)
+- npm or yarn
+- Firebase account
+- Cloudinary account
 
+## Setup Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Davidyili230/CompanionCare.git
+cd CompanionCare
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+cd server && npm install && cd ..
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```env
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
@@ -19,13 +39,31 @@ VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
-=======
-git add .
-git commit -m ""
-git push
+```
 
-去push branch, github, compare and pull request 
-review - main
+Replace each value with your actual credentials from Firebase and Cloudinary. (Get it from contributors)
 
-don't do git push origin main
->>>>>>> Stashed changes
+## Running the Project
+
+### Development Mode
+
+```bash
+npm run dev
+```
+
+The application will start at `http://localhost:5173`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+## Features
+
+- Pet profile management
+- Health reminder system
+- Community forum
+- Pet adoption listings
+- Nutrition tracking
+- Supplement recommendations
