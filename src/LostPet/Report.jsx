@@ -315,7 +315,7 @@ export default function LostPetReport() {
                     rounded-xl px-10 py-3 text-sm font-bold`}
                     onClick={() => {
                         if (isUserInfoValid()) {
-                            submitAdoptionReport(formData)
+                            submitReport(formData)
                             handleNavigation()
                         }
                     }}
