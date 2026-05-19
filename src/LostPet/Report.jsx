@@ -5,188 +5,202 @@ import { useNavigate } from "react-router-dom"
 import { isValidEmail, isValidPhoneNumber } from "./ReportValidation"
 import { submitReport } from "./databaseAccess/SubmitReport"
 
+function FieldLabel({ text }) {
+    return (
+       <label className="font-bold mb-1.5 block">
+            {text}
+       </label>
+    )
+}
+
+function TextInput({ value, onChange, placeholder, inputType}) {
+    return (
+        <input
+            type={inputType}
+            placeholder={placeholder}
+            onChange={onChange}
+            value={value}
+            className="border rounded-xl px-4 py-2 text-sm outline-none w-full"
+            min={0}
+            max={50}
+        />
+    )
+}
+
+function TextAreaInput({ value, onChange, placeholder }) {
+    return (
+        <textarea
+            placeholder="Any additional information about the pet?"
+            value={value}
+            onChange={onChange}
+            className="border rounded-xl w-full px-4 py-2 text-sm outline-none resize-y"
+            rows={4}
+        />
+    )
+}
+
+function SelectionInput({ value, onChange, children }) {
+    return (
+        <select
+            value={value}
+            onChange={onChange}
+            className="border rounded-xl px-4 py-2 text-sm outline-none w-full"
+        >
+            {children}
+        </select>
+    );
+}
+
+function Section({ sectionTitle, children }) {
+    return (
+        <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 md:p-6 shadow-xl">
+            <div className="flex flex-row items-center gap-2 pb-4 border-b">
+                <h2 className="text-lg">{sectionTitle}</h2>
+            </div>
+            {children}
+        </div>
+    )
+}
+
+
 function PetInformation({ formData, setFormData }) {
-
-
     const breeds = {
-        dog: ["Golden-Retriever", "German Shepherd", "Pomeranian", "Husky", "Poodle", "Other"],
-        cat: ["Maine Coon", "Ragdoll", "British ShortHair", "Siamese", "Bengal", "Other"]
+        Dog: ["Golden-Retriever", "German Shepherd", "Pomeranian", "Husky", "Poodle", "Other"],
+        Cat: ["Maine Coon", "Ragdoll", "British ShortHair", "Siamese", "Bengal", "Other"]
     }
-
-    const handlePetInfoChange = (field, value) => {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [field]: value
-        }))
-    }
-
-    const selectedBreeds = breeds[formData.petType] || []
-
-    function handlePetTypeChange(e) {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            petType: e.target.value,
-            breed: "",
-            customBreed: ""
-        }))
-    }
-
-    function handleBreedChange(e) {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            breed: e.target.value,
-            customBreed: ""
-
-        }))
-    }
-
-    function handleCustomBreedChange(e) {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            customBreed: e.target.value
-        }))
-    }
+    const selectedBreeds = breeds[formData.petType] || [];
 
     return (
-        <div className="flex flex-col gap-2.5 bg-white p-3 rounded-xl">
-            <h2 className="text-center"> Pet Information </h2>
+        <Section sectionTitle={"Pet Information"}>
+            <div>
+                <FieldLabel text={"Pet's Name"}/>
+                <TextInput
+                    placeholder="Enter your pet's name"
+                    value={formData.petName}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, petName: e.target.value}))}
+                    inputType={"text"}
+                />
+            </div>
 
-            <label className="text-[14px] font-bold">Pet's Name</label>
-            <input 
-                type="text" 
-                placeholder="Enter your pet's name"
-                value={formData.petName}
-                onChange={(e) => handlePetInfoChange("petName", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
-            />
-
-            <label htmlFor="species" className="text-[14px] font-bold">Species</label>
-            <select
-                id="species"
-                value={formData.petType}
-                onChange={handlePetTypeChange}
-                className="p-2.5 rounded-[5px] text-sm border"
-            >
-                <option value="" disabled>Select the type of pet you have</option>
-                <option value="dog">Dog</option>
-                <option value="cat">Cat</option>
-            </select>
-
+            <div>
+                <FieldLabel text={"Species"}/>
+                <div className="flex flex-row gap-5">
+                    {["Dog", "Cat"].map((text, idx) => (
+                        <button 
+                            key={idx}
+                            type="button"
+                            className={`border rounded-xl text-sm font-semibold py-2.5 flex-1 cursor-pointer
+                            ${formData.petType === text ? "bg-green-400 border-green-300" : "bg-white border-gray-400"}`}
+                            onClick={() => setFormData(prevFormData => ({ ...prevFormData, petType: text, breed: "", customBreed: ""}))}
+                        >
+                            {text}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
             {formData.petType && (
-                <>
-                    <label htmlFor="breed" className="text-[14px] font-bold">Breed</label>
-                    <select
-                        id="breed"
+                <div>
+                    <FieldLabel text={"Breed"}/>
+                    <SelectionInput
                         value={formData.breed}
-                        onChange={handleBreedChange}
-                        className="p-2.5 rounded-[5px] text-sm border"
+                        onChange={(e) => setFormData(prevFormData => ({...prevFormData, breed: e.target.value, customBreed: ""}))}
                     >
                         <option value="" disabled>Select Your Pet's Breed</option>
-                        {
-                            selectedBreeds.map((petBreed, idx) => (
-                                <option
-                                    key={idx}
-                                    value={petBreed}
-                                >
-                                    {petBreed}
-                                </option>
-                            ))
-                        }
-                    </select>
-                </>
+                        {(breeds[formData.petType]).map((breed, idx) => (
+                            <option key={idx} value={breed}>{breed}</option>
+                        ))}
+                    </SelectionInput>
+                </div>
             )}
 
-            {formData.breed == "Other" && (
-                <>
-                    <label className="text-[14px] font-bold">Custom Breed</label>
-                    <input
-                        type="text"
-                        placeholder="Enter you pet's breed"
+            {formData.breed === "Other" && (
+                <div>
+                    <FieldLabel text="Custom Breed"/>
+                    <TextInput 
+                        placeholder="Enter Your Pet's Breed"
                         value={formData.customBreed}
-                        onChange={handleCustomBreedChange}
-                        className="p-2.5 rounded-[5px] text-sm border"
+                        onChange={(e) => setFormData(prevFormData => ({...prevFormData, customBreed: e.target.value}))}
                     />
-                </>
+                </div>
             )}
 
-            <label className="text-[14px] font-bold">Date Last Seen</label>
-            <input 
-                type="date" 
-                value={formData.dateLastSeen} 
-                onChange={(e) => handlePetInfoChange("dateLastSeen", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
-            />
+            <div>
+                <FieldLabel text={"Date Last Seen"}/>
+                <TextInput
+                    placeholder=""
+                    value={formData.dateLastSeen}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, dateLastSeen: e.target.value}))}
+                    inputType={"date"}
+                />
+            </div>
 
-            <label className="text-[14px] font-bold">Additional Information</label>
-            <textarea 
-                placeholder="Any additional information about your pet?"
-                value={formData.additionalInfo}
-                onChange={(e) => handlePetInfoChange("additionalInfo", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border resize-y min-h-25"
-            />
-        </div>
+            <div>
+                <FieldLabel text={"Additional information"}/>
+                <TextAreaInput
+                    value={formData.additionalInfo}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, additionalInfo: e.target.value}))}
+                    placeholder="Any additional information about the pet?"
+                />
+            </div>
+
+        </Section>
     )
 }
 
 function OwnerInformation({ formData, setFormData, checkUserInfo }) {
 
-    const handleOwnerInfoChange = (field, value) => {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            [field]: value
-        }))
-    }
-
     return (
-        <div className="flex flex-col gap-2.5 bg-white p-3 rounded-xl">
-            <h2 className="text-center">Owner Contact Information</h2>
+        <Section sectionTitle={"Owner Contact Information"}>
+            <div>
+                <FieldLabel text={"Name"}/>
+                <TextInput
+                    placeholder={"Enter your name"}
+                    value={formData.ownerName}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, ownerName: e.target.value}))}
+                    inputType={"text"}
+                />
+            </div>
 
-            <label className="text-sm font-bold">Name </label>
-            <input 
-                type="text" 
-                placeholder="Enter your name"
-                value={formData.ownerName}
-                onChange={(e) => handleOwnerInfoChange("ownerName", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
-            />
-            
-            <label className="text-sm font-bold">Email Address</label>
-            <input 
-                type="email" 
-                placeholder="Enter your email" 
-                value={formData.email}
-                onChange={(e) => handleOwnerInfoChange("email", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
-            />
+            <div>
+                <FieldLabel text={"Email Address"}/>
+                <TextInput
+                    placeholder={"Enter your email"}
+                    value={formData.email}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, email: e.target.value}))}
+                    inputType={"email"}
+                />
 
-            {checkUserInfo.isValidEmailFormat === false && 
-                <span className="text-red-500 font-bold text-[12px]">
-                    Please Enter a valid email
-                </span>
-            }
+                {checkUserInfo.isValidEmailFormat === false &&
+                    <p className="text-xs font-semibold text-red-500 mt-1">
+                        Please enter a valid email address
+                    </p>
+                }
+            </div>
 
-            <label className="text-sm font-bold">Phone Number</label>
-            <input 
-                type="tel" 
-                placeholder="Enter your phone number"
-                value={formData.phone}
-                onChange={(e) => handleOwnerInfoChange("phone", e.target.value)}
-                className="p-2.5 rounded-[5px] text-sm border"
-            />
+            <div>
+                <FieldLabel text={"Phone Number"}/>
+                <TextInput
+                    placeholder={"Enter your phone number"}
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prevFormData => ({...prevFormData, phone: e.target.value}))}
+                    inputType={"email"}
+                />
 
-            {checkUserInfo.isValidPhoneFormat === false && 
-                <span className="text-red-500 font-bold text-[12px]">
-                    Please Enter a valid phone number
-                </span>
-            }
-        </div>
-    )
+                {checkUserInfo.isValidPhoneFormat === false &&
+                    <p className="text-xs font-semibold text-red-500 mt-1">
+                        Please enter a valid phone number
+                    </p>
+                }
+            </div>
+        </Section>
+    );
 }
 
 function ImageUpload({ formData, setFormData }) {
     
-    const handleImageChange = (event) => {
-        const file = event.target.files[0]
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
 
         if (file) {
             setFormData(prevFormData => ({
@@ -198,12 +212,32 @@ function ImageUpload({ formData, setFormData }) {
     }
 
     return (
-        <label 
-            className="flex justify-center items-center flex-col border-2 border-dashed border-[rgb(151,145,145)],
-                        rounded-xl text-center w-full h-full overflow-hidden cursor-pointer hover:border-black"
-            htmlFor="imageUpload"
-        >
-            {formData.image == null && <h2>Upload Image</h2>}
+        <Section sectionTitle={"Pet Image"}>
+            <p className="text-xs">
+                Please submit a clear photo of your pet
+            </p>
+
+            <label
+                className="flex flex-col justify-center items-center border-2 rounded-2xl border-dashed cursor-pointer 
+                overflow-hidden min-h-70"
+                htmlFor="imageUpload"
+            >
+                {formData.image ? (
+                <>
+                    <img 
+                        src={formData.image}
+                        alt="image of a pet"
+                        className="w-full h-full object-cover max-h-80"
+                    />
+
+                 
+                </>
+            ) : (
+                <div className="flex flex-col justify-center items-center text-center">
+                    <span className="text-2xl">📷</span>
+                    <p className="text-sm font-semibold">Click to upload a image</p>
+                </div>
+            )}
 
             <input
                 type="file"
@@ -212,120 +246,84 @@ function ImageUpload({ formData, setFormData }) {
                 id="imageUpload"
                 className="hidden"
             />
-
-            <img 
-                src={formData.image || "./cameraIcon.png" }
-                alt="camera"
-                className={
-                    formData.image == null 
-                    ? "w-20 h-20 object-contain"
-                    : "w-full h-full object-cover"
-                }
-            />
-        </label>
-    )
+            </label>
+        </Section>
+    );
 }
 
-
 export default function LostPetReport() {
-    const navigate = useNavigate();
-
-    const handleNavigation = () => {
-        navigate("/LostPet")
-    }
-
     const [formData, setFormData] = useState({
-        petName: "",
-        petType: "",
-        breed: "",
-        customBreed: "",
-        dateLastSeen: "",
-        additionalInfo: "",
-        ownerName: "",
-        email: "",
-        phone: "",
-        imageFile: null,
-        image: null,
+        petName: "", petType: "", breed: "", customBreed: "",
+        dateLastSeen: "", additionalInfo: "",
+        ownerName: "", phone: "", email: "",
+        imageFile: null, image: null
     })
-
-    const isFormFilled = 
-        formData.petName &&
-        formData.petType &&
-        formData.breed && 
-        formData.dateLastSeen &&
-        formData.ownerName && 
-        formData.image &&
-        (formData.email || formData.phone) &&
-        (formData.breed !== "Other" || formData.customBreed)
 
     const [checkUserInfo, setCheckUserInfo] = useState({
-        isValidEmailFormat: null,
-        isValidNumberFormat: null
-    })
+        isValidEmailFormat: null, 
+        isValidPhoneFormat: null
+    });
+
+    const isFormFilled = 
+        formData.petName && formData.petType && formData.breed &&
+        formData.dateLastSeen && formData.ownerName && formData.image &&
+        (formData.email || formData.phone) &&
+        (formData.breed !== "Other" || formData.customBreed);
 
     const isUserInfoValid = () => {
-        
         const emailValid = formData.email ? isValidEmail(formData.email) : null;
         const phoneValid = formData.phone ? isValidPhoneNumber(formData.phone) : null;
+        setCheckUserInfo({isValidEmailFormat: emailValid, isValidPhoneFormat: phoneValid});
 
-        setCheckUserInfo({
-            isValidEmailFormat: emailValid,
-            isValidPhoneFormat: phoneValid
-        })
-        
-        if(emailValid === false && phoneValid === null) return false;
-        else if(emailValid === null && phoneValid === false) return false;
-        else if(emailValid === false && phoneValid === false) return false;
-        else if(emailValid && phoneValid === false) return false;
-        else if(emailValid === false && phoneValid) return false;
+        if (emailValid === false && phoneValid !== true) return false;
+        if (phoneValid === false && emailValid !== true) return false;
 
         return true;
     }
 
+    const navigate = useNavigate();
+    const handleNavigation = () => {
+        navigate("/LostPet");
+    };
+
     return (
-        <div className="m-7.5">
-            <h1 className="text-center">
-                Lost Pet Report
-            </h1>
+        <div className="px-6 py-8 min-h-screen space-y-5">
+            <div className="flex flex-col items-center justify-between rounded-3xl
+            bg-white shadow-md mt-5 py-5">
+                <h1 className="font-bold text-xl">
+                    Lost Pet Report
+                </h1>
+                <p className="text-xs md:text-sm mt-2 text-center">
+                    We are sorry that your pet is missing. We hope that you will be able to bring them back home soon.
+                </p>
+            </div>
 
-            <p className="text-center font-['Lucida Sans', Geneva, sans-serif], mb-12.5">
-                We are sorry that your pet is missing. We hope that you will be able to bring them back home soon
-            </p>
-
-            <div className="flex justify-between rounded-2xl shadow-[2px_5px_10px_black] p-[2.5] bg-[#f9f7f5] gap-12.5">
-                <div className="flex flex-col gap-10 flex-1">   
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-3">
                     <PetInformation formData={formData} setFormData={setFormData}/>
-                    <OwnerInformation 
-                        formData={formData} 
-                        setFormData={setFormData}
-                        checkUserInfo={checkUserInfo}
-                    />
+                    <OwnerInformation formData={formData} setFormData={setFormData} checkUserInfo={checkUserInfo}/>
                 </div>
-                <div className="flex m-auto justify-center items-start flex-1 h-125">
+                
+                <div>
                     <ImageUpload formData={formData} setFormData={setFormData}/>
                 </div>
             </div>
-            
-            <button 
-                className={
-                    `block m-auto border-0 rounded-xl text-white font-bold text-sm bg-[#E63737]
-                    px-7.5 py-3.75 mt-7.5 transition-all duration-300 ease-in-out
-                    ${isFormFilled 
-                        ? "bg-[#E63737] hover:bg-[#b32c2c] hover:scale-105 cursor-pointer" 
-                        : "bg-[#e28c8c] cursor-not-allowed"
-                    }
-                `}
-                onClick={() => {
-                    if(isUserInfoValid()) {
-                        submitReport(formData)
-                        handleNavigation()
-                    }
-                }}
-      
-                disabled={!isFormFilled}
-            >
-                Create Report
-            </button>   
+
+            <div className="flex flex-col items-center mt-10">
+                <button 
+                    className={`${isFormFilled ? "bg-green-500 cursor-pointer" : "bg-gray-300 cursor-not-allowed"} 
+                    rounded-xl px-10 py-3 text-sm font-bold`}
+                    onClick={() => {
+                        if (isUserInfoValid()) {
+                            submitAdoptionReport(formData)
+                            handleNavigation()
+                        }
+                    }}
+                    disabled={!isFormFilled}
+                >
+                    Submit Form
+                </button>
+            </div>
         </div>
-    )
+    );
 }
