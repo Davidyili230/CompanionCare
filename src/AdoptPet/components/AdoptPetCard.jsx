@@ -43,7 +43,7 @@ function CardFront({ reportData, flipCard, isCurrentTabAllReports }) {
             <div className="overflow-hidden h-52.5 relative shrink-0">
                 {/* the default report uses .img file the actual report uses .image */}
                 <img
-                    src={reportData.img || reportData.image}
+                    src={reportData.image || reportData.img}
                     alt="Pet Image"
                     className="w-full h-full object-cover"
                 />
