@@ -51,7 +51,7 @@ function FilterDisplay({ setIsFilterDisplayed, setSpeciesFilter, speciesFilter, 
     const [selectedBreedFilter, setSelectedBreedFilter] = useState(breedFilter);
 
     const dogBreedList = [
-        "All", "Labrador Retriever", "Golden-Retriever", "French Bulldog", "German Shepherd", "Poodle",
+        "All", "Labrador Retriever", "Golden Retriever", "French Bulldog", "German Shepherd", "Poodle",
         "Bulldog", "Beagle", "Rottweiler", "Dachshund","Yorkshire Terrier"
     ]
 
@@ -259,7 +259,7 @@ function UserView({ isCurrentTabAllReports }) {
         />
     ))
     const REPORTS_PER_PAGE = 15;
-    const totalPages = Math.ceil(reports.length / REPORTS_PER_PAGE);
+    const totalPages = Math.ceil(displayedReports.length / REPORTS_PER_PAGE);
 
     return (
         <div

@@ -1,13 +1,11 @@
-
-
-import { db } from "../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import { deleteDoc, doc} from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 
 
 export async function deleteReport(id, imageUrl) {
     try {
-        const report = doc(db, "lostPetReports", id);
+        const report = doc(db, "AdoptionPetReports", id);
         await deleteDoc(report)
 
         const imageRef = ref(storage, imageUrl);

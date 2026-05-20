@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { deleteReport } from "../databaseAccess/DeleteReport";
+import { getUserReport } from "../databaseAccess/GetReport";
 
 
 export default function MissingPetCard({ reportData, isUserDisplay, setReports }) {
@@ -36,7 +38,7 @@ function CardFront({ reportData, flipCard, isUserDisplay, setReports }) {
     async function handleDeleteReport(id, imageUrl) {
         try {
             await deleteReport(id, imageUrl);
-            const newReports = await getAllUserReports();
+            const newReports = await getUserReport();
             setReports(newReports);
         } catch (error) {
             console.log("Error deleting and getting new reports", error);

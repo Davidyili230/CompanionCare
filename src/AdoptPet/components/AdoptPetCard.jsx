@@ -1,6 +1,8 @@
 
 
 import { useState } from "react";
+import { deleteReport } from "../dbAdoptAccess/deleteReport";
+import { getUserAdoptionReport } from "../dbAdoptAccess/getAdoptionReports";
 
 
 export default function AdoptPetCard({ reportData, isCurrentTabAllReports, setReports }) {
@@ -36,14 +38,24 @@ export default function AdoptPetCard({ reportData, isCurrentTabAllReports, setRe
     )
 }
 
-function CardFront({ reportData, flipCard, isCurrentTabAllReports }) {
+function CardFront({ reportData, flipCard, isCurrentTabAllReports, setReports }) {
+    async function handleDeleteAdoptionReport(id, imageUrl) {
+        try {
+            await deleteReport(id, imageUrl);
+            const newReports = await getUserAdoptionReport();
+            setReports(newReports);
+        } catch (error) {
+            console.log("Error deleting and getting new reports", error);
+        }
+    }
+
     return (
         <div className="flex flex-col shadow-md rounded-2xl overflow-hidden bg-white
         transition-all duration-300 hover:translate-y-1.25 hover:shadow-xl">
             <div className="overflow-hidden h-52.5 relative shrink-0">
                 {/* the default report uses .img file the actual report uses .image */}
                 <img
-                    src={reportData.img || reportData.image}
+                    src={reportData.image || reportData.img}
                     alt="Pet Image"
                     className="w-full h-full object-cover"
                 />
@@ -59,7 +71,7 @@ function CardFront({ reportData, flipCard, isCurrentTabAllReports }) {
                     <button
                         className="absolute top-2 right-2 rounded-lg border-0 text-white font-bold bg-red-400 px-2.5 py-1.5 cursor-pointer 
                         transition-colors duration-300 ease-in-out mb-5 hover:bg-red-600"
-                        onClick={() => {}}
+                        onClick={() => handleDeleteAdoptionReport(reportData.id, reportData.image)}
                     >
                         Delete
                     </button>
@@ -106,7 +118,7 @@ function CardBack({ reportData, flipCard }) {
 
             <div className="flex flex-row items-center gap-5 border-b pb-5">
                 <img
-                    src={reportData.img}
+                    src={reportData.image || reportData.img}
                     alt={`${reportData.name}'s image`}
                     className="w-14 h-14 rounded-full object-cover"
                 />
